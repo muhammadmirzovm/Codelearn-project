@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Delete Task – CodeLearn{% endblock %}
+{% block content %}
+<div style="max-width:440px;margin:80px auto;text-align:center;">
+  <div class="card card-p">
+    <p style="font-size:3rem;margin-bottom:12px;">🗑️</p>
+    <h2 style="font-weight:800;margin-bottom:8px;">Delete "{{ task.title }}"?</h2>
+    <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:20px;">This action cannot be undone. All test cases will be permanently deleted.</p>
+    <form method="post" style="display:flex;gap:10px;justify-content:center;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, delete</button>
+      <a href="{% url 'tasks:task_list' %}" class="btn btn-ghost">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

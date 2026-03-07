@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} – CodeLearn{% endblock %}
+{% block content %}
+<div style="max-width:560px;margin:0 auto;">
+  <div style="margin-bottom:24px;" class="fade-up">
+    <h1 class="section-title">{{ title }}</h1>
+    <p class="section-sub">Students can also join later using the invite key</p>
+  </div>
+  <div class="card card-p fade-up-2">
+    <form method="post">
+      {% csrf_token %}
+      <div class="inp-group">
+        <label class="inp-label">Group Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}<p style="color:var(--red);font-size:.78rem;margin-top:4px;">{{ form.name.errors|join:" " }}</p>{% endif %}
+      </div>
+      <div class="inp-group">
+        <label class="inp-label">Add Students (optional)</label>
+        <p class="inp-hint" style="margin-bottom:8px;">💡 You can skip this — share the invite key instead and students join themselves</p>
+        <div style="max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:5px;background:var(--bg);">
+          {% for s in form.students %}
+          <label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:.83rem;transition:background .12s;" onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background=''">
+            {{ s.tag }}<span>{{ s.choice_label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button type="submit" class="btn btn-primary" style="flex:1;">💾 Save Group</button>
+        <a href="{% url 'users:group_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<style>input[type=checkbox]{accent-color:var(--brand);width:14px;height:14px;}</style>
+{% endblock %}

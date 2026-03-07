@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard – CodeLearn{% endblock %}
+{% block content %}
+
+<div class="page-hero fade-up">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;z-index:1;">
+    <div>
+      <h1 class="section-title">🏆 Leaderboard</h1>
+      <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      {% if session.is_active %}<span class="badge badge-active"><span class="live-dot pulse" style="width:6px;height:6px;margin-right:2px;"></span> Live</span>{% endif %}
+      {% if user.is_student and session.is_active %}<a href="{% url 'sessions:join' session.pk %}" class="btn btn-success btn-sm">▶ Back to coding</a>{% endif %}
+    </div>
+  </div>
+</div>
+
+{% if board %}
+<!-- Top 3 podium -->
+<div style="display:flex;justify-content:center;gap:12px;margin-bottom:28px;align-items:flex-end;flex-wrap:wrap;" class="fade-up-2">
+  {% for e in board|slice:":3" %}
+  {% if e.passed %}
+  <div style="text-align:center;{% if forloop.counter == 1 %}order:-1;{% endif %}">
+    <div style="font-size:{% if forloop.counter == 1 %}2.5{% else %}1.8{% endif %}rem;margin-bottom:6px;">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}</div>
+    <div style="background:white;border:{% if forloop.counter == 1 %}2.5px solid #fbbf24{% elif forloop.counter == 2 %}2px solid #94a3b8{% else %}2px solid #cd7c2f{% endif %};border-radius:14px;padding:12px 20px;min-width:120px;box-shadow:0 4px 14px rgba(0,0,0,.1);">
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:white;margin:0 auto 8px;">{{ e.student.username|first|upper }}</div>
+      <p style="font-weight:800;font-size:.85rem;">{{ e.student.get_full_name|default:e.student.username }}</p>
+      {% if e.submitted_at %}<p style="font-size:.72rem;color:var(--text-muted);margin-top:2px;font-family:'Fira Code',monospace;">{{ e.submitted_at|date:"H:i:s" }}</p>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card fade-up-3" style="overflow:hidden;">
+  <table class="tbl" id="lb-table">
+    <thead>
+      <tr>
+        <th style="width:52px;text-align:center;">#</th>
+        <th>Student</th>
+        <th>Status</th>
+        <th class="hide-sm">Attempts</th>
+        <th class="hide-sm">Time</th>
+      </tr>
+    </thead>
+    <tbody id="lb-body">
+      {% for e in board %}
+      <tr style="{% if e.passed %}background:var(--green-bg);{% endif %}">
+        <td style="text-align:center;font-weight:800;color:{% if forloop.counter == 1 and e.passed %}#d97706{% elif forloop.counter == 2 and e.passed %}#64748b{% elif forloop.counter == 3 and e.passed %}#b45309{% else %}var(--text-muted){% endif %};">
+          {% if forloop.counter == 1 and e.passed %}🥇{% elif forloop.counter == 2 and e.passed %}🥈{% elif forloop.counter == 3 and e.passed %}🥉{% else %}{{ forloop.counter }}{% endif %}
+        </td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;">{{ e.student.username|first|upper }}</div>
+            <span style="font-weight:700;">{{ e.student.get_full_name|default:e.student.username }}</span>
+          </div>
+        </td>
+        <td>
+          {% if e.passed %}<span class="badge badge-passed">✓ Passed</span>
+          {% elif e.attempts %}<span class="badge badge-running">Working…</span>
+          {% else %}<span class="badge badge-notstarted">Not started</span>{% endif %}
+        </td>
+        <td class="hide-sm" style="color:var(--text-muted);">{{ e.attempts }}</td>
+        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:'Fira Code',monospace;">
+          {% if e.submitted_at %}{{ e.submitted_at|date:"H:i:s" }}{% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if not board %}
+  <div style="text-align:center;padding:60px;color:var(--text-muted);">
+    <p style="font-size:2.5rem;margin-bottom:8px;">👀</p>
+    <p style="font-weight:600;">No submissions yet</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if session.is_active %}
+<script>
+async function refresh() {
+  try {
+    const r = await fetch('/api/leaderboard/{{ session.pk }}/');
+    if (!r.ok) return;
+    const d = await r.json();
+    const medals = ['🥇','🥈','🥉'];
+    const mColors = ['#d97706','#64748b','#b45309'];
+    document.getElementById('lb-body').innerHTML = d.board.map((e,i) => {
+      const medal = (i<3&&e.passed) ? medals[i] : (i+1);
+      const mColor = (i<3&&e.passed) ? mColors[i] : 'var(--text-muted)';
+      const rowBg = e.passed ? 'background:var(--green-bg);' : '';
+      const badge = e.passed
+        ? '<span class="badge badge-passed">✓ Passed</span>'
+        : e.attempts ? '<span class="badge badge-running">Working…</span>'
+        : '<span class="badge badge-notstarted">Not started</span>';
+      const time = e.submitted_at ? new Date(e.submitted_at).toTimeString().slice(0,8) : '—';
+      return `<tr style="${rowBg}">
+        <td style="text-align:center;font-weight:800;color:${mColor};">${medal}</td>
+        <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;">${e.username[0].toUpperCase()}</div><span style="font-weight:700;">${e.username}</span></div></td>
+        <td>${badge}</td>
+        <td class="hide-sm" style="color:var(--text-muted);">${e.attempts}</td>
+        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:'Fira Code',monospace;">${time}</td>
+      </tr>`;
+    }).join('');
+  } catch(e){}
+}
+setInterval(refresh, 4000);
+</script>
+{% endif %}
+{% endblock %}

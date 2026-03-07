@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+  # ── PostgreSQL database ────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: codelearn
+      POSTGRES_USER: codelearn
+      POSTGRES_PASSWORD: codelearn
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U codelearn"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis (Celery broker + Django Channels) ────────────────────────
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Django web server (via Daphne for ASGI/WebSocket support) ──────
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 codelearn.asgi:application"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=codelearn.settings.production
+      - DATABASE_URL=postgres://codelearn:codelearn@db:5432/codelearn
+      - REDIS_URL=redis://redis:6379/0
+      - USE_DOCKER_SANDBOX=false   # Set to true only if Docker-in-Docker is configured
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Celery worker (background task queue) ─────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A codelearn worker --loglevel=info --concurrency=2
+    volumes:
+      - .:/app
+    env_file: .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=codelearn.settings.production
+      - DATABASE_URL=postgres://codelearn:codelearn@db:5432/codelearn
+      - REDIS_URL=redis://redis:6379/0
+      - USE_DOCKER_SANDBOX=false
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  static_volume:

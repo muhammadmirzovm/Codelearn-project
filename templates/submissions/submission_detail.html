@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Submission #{{ submission.pk }} – CodeLearn{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Submission #{{ submission.pk }}</h1>
+    <span class="badge badge-{{ submission.status }} text-sm px-3 py-1">{{ submission.get_status_display }}</span>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-3 mb-6">
+    <div class="bg-white rounded-xl border p-4 text-center">
+      <p class="text-xs text-gray-500 uppercase mb-1">Task</p>
+      <p class="font-semibold text-gray-800">{{ submission.task.title }}</p>
+    </div>
+    <div class="bg-white rounded-xl border p-4 text-center">
+      <p class="text-xs text-gray-500 uppercase mb-1">Tests Passed</p>
+      <p class="font-bold text-xl {% if submission.is_correct %}text-green-600{% else %}text-red-600{% endif %}">
+        {{ submission.passed_count }}/{{ submission.total_count }}
+      </p>
+    </div>
+    <div class="bg-white rounded-xl border p-4 text-center">
+      <p class="text-xs text-gray-500 uppercase mb-1">Submitted At</p>
+      <p class="font-semibold text-gray-800">{{ submission.created_at|date:"M j H:i:s" }}</p>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="bg-white rounded-xl border shadow-sm p-5 mb-4">
+    <h2 class="font-semibold text-gray-800 mb-3">Your Code</h2>
+    <textarea id="code-view">{{ submission.code }}</textarea>
+  </div>
+
+  <!-- Test results -->
+  {% if submission.results %}
+  <div class="bg-white rounded-xl border shadow-sm p-5">
+    <h2 class="font-semibold text-gray-800 mb-3">Test Case Results</h2>
+    {% for r in submission.results %}
+    <div class="border-l-4 {% if r.passed %}border-green-400{% else %}border-red-400{% endif %} pl-4 mb-4">
+      <p class="font-medium text-gray-700">
+        {% if r.passed %}✅{% else %}❌{% endif %} Test {{ forloop.counter }}
+      </p>
+      {% if r.stdout %}
+      <pre class="text-xs bg-gray-50 rounded p-2 mt-1 overflow-x-auto">{{ r.stdout }}</pre>
+      {% endif %}
+      {% if r.stderr %}
+      <pre class="text-xs bg-red-50 text-red-600 rounded p-2 mt-1 overflow-x-auto">{{ r.stderr }}</pre>
+      {% endif %}
+      <p class="text-xs text-gray-400 mt-1">Time: {{ r.time_used }}s</p>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+CodeMirror.fromTextArea(document.getElementById('code-view'), {
+  mode: 'python', theme: 'dracula', lineNumbers: true, readOnly: true
+});
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Sign In – CodeLearn{% endblock %}
+{% block content %}
+<div style="min-height:72vh;display:flex;align-items:center;justify-content:center;">
+  <div style="width:100%;max-width:420px;" class="fade-up">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:60px;height:60px;background:linear-gradient(135deg,#6366f1,#4338ca);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(99,102,241,.35);">⚡</div>
+      <h1 style="font-size:1.75rem;font-weight:800;color:var(--text);">Welcome back!</h1>
+      <p style="color:var(--text-muted);margin-top:4px;">Sign in to your CodeLearn account</p>
+    </div>
+    <div class="card card-p">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="inp-group">
+          <label class="inp-label">{{ field.label }}</label>
+          <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}"
+            {% if field.value %}value="{{ field.value }}"{% endif %}
+            class="inp" {% if field.field.required %}required{% endif %}
+            placeholder="Enter your {{ field.label|lower }}" autocomplete="on"/>
+          {% if field.errors %}<p style="color:var(--red);font-size:.78rem;margin-top:4px;font-weight:500;">⚠ {{ field.errors|join:" " }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:4px;">Sign In →</button>
+      </form>
+    </div>
+    <p style="text-align:center;margin-top:18px;font-size:.875rem;color:var(--text-muted);">
+      No account? <a href="{% url 'users:register' %}" style="color:var(--brand);font-weight:700;">Create one free →</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

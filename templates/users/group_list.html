@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Groups – CodeLearn{% endblock %}
+{% block content %}
+<div class="page-hero fade-up">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1;">
+    <div>
+      <h1 class="section-title">👥 {% if user.is_teacher %}My Groups{% else %}My Groups{% endif %}</h1>
+      <p class="section-sub">{% if user.is_teacher %}Share the invite key — students join instantly{% else %}Groups you're a member of{% endif %}</p>
+    </div>
+    {% if user.is_teacher %}
+    <a href="{% url 'users:group_create' %}" class="btn btn-primary">＋ Create Group</a>
+    {% else %}
+    <a href="{% url 'users:join_group' %}" class="btn btn-primary">🔑 Join Group</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if groups %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;" class="fade-up-2">
+  {% for g in groups %}
+  <div class="card" style="overflow:hidden;">
+    <!-- Card header -->
+    <div style="background:linear-gradient(135deg,var(--brand-bg),var(--brand-bgd));padding:18px 20px;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <h2 style="font-weight:800;font-size:1.05rem;color:var(--text);">{{ g.name }}</h2>
+          {% if user.is_teacher %}
+          <p style="font-size:.8rem;color:var(--brand);margin-top:2px;font-weight:600;">{{ g.students.count }} student{{ g.students.count|pluralize }}</p>
+          {% else %}
+          <p style="font-size:.8rem;color:var(--text-muted);margin-top:2px;">Teacher: {{ g.teacher.get_full_name|default:g.teacher.username }}</p>
+          {% endif %}
+        </div>
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#4338ca);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(99,102,241,.3);">👥</div>
+      </div>
+    </div>
+
+    <div style="padding:16px 20px;">
+      <!-- Member avatars -->
+      {% if g.students.all %}
+      <div style="margin-bottom:14px;">
+        <p style="font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Members</p>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+          {% for s in g.students.all|slice:":10" %}
+          <div title="{{ s.get_full_name|default:s.username }}" style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,.1);">{{ s.username|first|upper }}</div>
+          {% endfor %}
+          {% if g.students.count > 10 %}<div style="width:30px;height:30px;border-radius:50%;background:var(--bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--text-muted);">+{{ g.students.count|add:"-10" }}</div>{% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if user.is_teacher %}
+      <!-- Invite key section -->
+      <div style="background:var(--bg);border:1.5px dashed var(--border2);border-radius:10px;padding:12px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:.7rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.07em;">🔑 Invite Key</span>
+          <div style="display:flex;gap:6px;">
+            <button onclick="copyText('{{ g.invite_key }}',this)" class="btn btn-brand-soft btn-sm" style="font-size:.72rem;">📋 Copy</button>
+            <form method="post" action="{% url 'users:group_regenerate_key' g.pk %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-ghost btn-sm" style="font-size:.72rem;" onclick="return confirm('Regenerate? Old key stops working.')">🔄</button>
+            </form>
+          </div>
+        </div>
+        <div class="key-box">{{ g.invite_key }}</div>
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <a href="{% url 'users:group_edit' g.pk %}" class="btn btn-brand-soft btn-sm">✏️ Edit</a>
+        <a href="{% url 'users:group_delete' g.pk %}" class="btn btn-red-soft btn-sm">🗑 Delete</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card card-p" style="text-align:center;padding:64px;" class="fade-up">
+  <p style="font-size:4rem;margin-bottom:12px;">{% if user.is_teacher %}📁{% else %}🎒{% endif %}</p>
+  <p style="font-size:1.2rem;font-weight:800;margin-bottom:6px;">No groups yet</p>
+  {% if user.is_teacher %}
+  <p style="color:var(--text-muted);margin-bottom:20px;">Create a group, share the invite key with your students</p>
+  <a href="{% url 'users:group_create' %}" class="btn btn-primary btn-lg">Create first group</a>
+  {% else %}
+  <p style="color:var(--text-muted);margin-bottom:20px;">Ask your teacher for an invite key to join a group</p>
+  <a href="{% url 'users:join_group' %}" class="btn btn-primary btn-lg">🔑 Join with invite key</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

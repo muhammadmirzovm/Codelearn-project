@@ -1,0 +1,19 @@
+# ── CodeLearn sandbox runner image ─────────────────────────────────────
+# This minimal image is used to run untrusted student code in isolation.
+# It has NO network access when launched with --network=none.
+# Only Python 3 is available – no pip, no external packages.
+FROM python:3.11-slim
+
+# Remove pip and unnecessary tools to minimise attack surface
+RUN pip uninstall -y pip setuptools wheel 2>/dev/null || true \
+    && apt-get purge -y --auto-remove \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root sandbox user
+RUN adduser --disabled-password --no-create-home --gecos '' sandbox
+USER sandbox
+
+WORKDIR /sandbox
+
+# The entrypoint is provided at container runtime
+CMD ["python3"]

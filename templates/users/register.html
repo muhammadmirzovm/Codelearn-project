@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Register – CodeLearn{% endblock %}
+{% block content %}
+<div style="min-height:72vh;display:flex;align-items:center;justify-content:center;">
+  <div style="width:100%;max-width:500px;" class="fade-up">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:60px;height:60px;background:linear-gradient(135deg,#10b981,#047857);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(16,185,129,.35);">🎓</div>
+      <h1 style="font-size:1.75rem;font-weight:800;color:var(--text);">Create your account</h1>
+      <p style="color:var(--text-muted);margin-top:4px;">Join CodeLearn as a teacher or student</p>
+    </div>
+    <div class="card card-p">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="inp-group">
+          <label class="inp-label">{{ field.label }}</label>
+          {% if field.field.widget.input_type == 'radio' %}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+            {% for choice in field %}
+            <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;background:var(--white);" class="role-opt">
+              {{ choice.tag }}
+              <div>
+                <p style="font-weight:700;font-size:.9rem;">{{ choice.choice_label }}</p>
+                <p style="font-size:.72rem;color:var(--text-muted);">{% if choice.choice_label == 'Teacher' %}Create & manage groups{% else %}Join & solve tasks{% endif %}</p>
+              </div>
+            </label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}"
+            {% if field.value %}value="{{ field.value }}"{% endif %}
+            class="inp" {% if field.field.required %}required{% endif %}
+            placeholder="{{ field.label }}"/>
+          {% endif %}
+          {% if field.help_text %}<p class="inp-hint">{{ field.help_text }}</p>{% endif %}
+          {% if field.errors %}<p style="color:var(--red);font-size:.78rem;margin-top:4px;font-weight:500;">⚠ {{ field.errors|join:" " }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:4px;">Create Account →</button>
+      </form>
+    </div>
+    <p style="text-align:center;margin-top:18px;font-size:.875rem;color:var(--text-muted);">
+      Already have an account? <a href="{% url 'users:login' %}" style="color:var(--brand);font-weight:700;">Sign in →</a>
+    </p>
+  </div>
+</div>
+<style>
+.role-opt:has(input:checked){border-color:var(--brand)!important;background:var(--brand-bg)!important;}
+input[type=radio]{accent-color:var(--brand);width:15px;height:15px;}
+</style>
+{% endblock %}

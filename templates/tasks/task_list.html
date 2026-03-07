@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Tasks – CodeLearn{% endblock %}
+{% block content %}
+<div class="page-hero fade-up">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1;">
+    <div>
+      <h1 class="section-title">📋 Tasks</h1>
+      <p class="section-sub">Your coding challenges and problems</p>
+    </div>
+    <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">＋ Create Task</a>
+  </div>
+</div>
+
+{% if tasks %}
+<div class="card fade-up-2" style="overflow:hidden;">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th class="hide-sm">Test Cases</th>
+        <th class="hide-sm">Limits</th>
+        <th class="hide-sm">Created</th>
+        <th style="text-align:right;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tasks %}
+      <tr>
+        <td>
+          <p style="font-weight:700;font-size:.95rem;">{{ t.title }}</p>
+          <p style="font-size:.75rem;color:var(--text-muted);margin-top:1px;">{{ t.description|truncatechars:60 }}</p>
+        </td>
+        <td class="hide-sm">
+          <span style="background:var(--brand-bg);color:var(--brand);padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:700;">{{ t.example_cases.count }} example</span>
+          <span style="background:#f3f4f6;color:#6b7280;padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:700;margin-left:4px;">{{ t.hidden_cases.count }} hidden</span>
+        </td>
+        <td class="hide-sm" style="font-size:.82rem;color:var(--text-muted);">{{ t.time_limit }}s · {{ t.memory_limit }}</td>
+        <td class="hide-sm" style="font-size:.82rem;color:var(--text-muted);">{{ t.created_at|date:"M j, Y" }}</td>
+        <td style="text-align:right;">
+          <a href="{% url 'tasks:task_edit' t.pk %}" class="btn btn-brand-soft btn-sm">✏️ Edit</a>
+          <a href="{% url 'tasks:task_delete' t.pk %}" class="btn btn-red-soft btn-sm" style="margin-left:6px;">🗑</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card card-p" style="text-align:center;padding:64px;" class="fade-up">
+  <p style="font-size:3.5rem;margin-bottom:12px;">📝</p>
+  <p style="font-size:1.1rem;font-weight:800;margin-bottom:6px;">No tasks yet</p>
+  <p style="color:var(--text-muted);margin-bottom:20px;">Create coding problems with hidden test cases for your sessions</p>
+  <a href="{% url 'tasks:task_create' %}" class="btn btn-primary btn-lg">Create first task</a>
+</div>
+{% endif %}
+{% endblock %}

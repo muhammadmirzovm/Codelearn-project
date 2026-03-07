@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Join Group – CodeLearn{% endblock %}
+{% block content %}
+<div style="min-height:68vh;display:flex;align-items:center;justify-content:center;">
+  <div style="width:100%;max-width:460px;" class="fade-up">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:64px;height:64px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(245,158,11,.35);">🔑</div>
+      <h1 style="font-size:1.75rem;font-weight:800;">Join a Group</h1>
+      <p style="color:var(--text-muted);margin-top:5px;">Paste the invite key your teacher shared</p>
+    </div>
+    <div class="card card-p">
+      <form method="post">
+        {% csrf_token %}
+        <div class="inp-group">
+          <label class="inp-label">Invite Key</label>
+          <input type="text" name="invite_key" class="inp mono"
+            style="font-size:.88rem;letter-spacing:.04em;"
+            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            required autofocus autocomplete="off"/>
+          <p class="inp-hint">Ask your teacher to copy the invite key from their Groups page</p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Join Group →</button>
+      </form>
+    </div>
+    <p style="text-align:center;margin-top:18px;font-size:.875rem;color:var(--text-muted);">
+      <a href="{% url 'dashboard:home' %}" style="color:var(--brand);font-weight:600;">← Back to dashboard</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

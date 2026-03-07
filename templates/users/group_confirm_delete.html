@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Delete Group – CodeLearn{% endblock %}
+{% block content %}
+<div style="max-width:440px;margin:80px auto;text-align:center;">
+  <div class="card card-p">
+    <p style="font-size:3rem;margin-bottom:12px;">🗑️</p>
+    <h2 style="font-weight:800;margin-bottom:8px;">Delete "{{ group.name }}"?</h2>
+    <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:20px;">All students will be removed from this group. Sessions using this group may be affected.</p>
+    <form method="post" style="display:flex;gap:10px;justify-content:center;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Yes, delete</button>
+      <a href="{% url 'users:group_list' %}" class="btn btn-ghost">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }} – CodeLearn{% endblock %}
+{% block extra_head %}
+<style>
+  body { background: #f0f4ff; }
+  .CodeMirror { height: 100%; min-height: 340px; border-radius: 0 0 12px 12px; }
+  .CodeMirror-gutters { background: #2e3440 !important; border-right: 1px solid #3b4252 !important; }
+
+  /* Tab buttons */
+  .tab-btn { padding:9px 18px; font-size:.82rem; font-weight:700; color:var(--text-muted); border-bottom:2.5px solid transparent; cursor:pointer; transition:all .15s; white-space:nowrap; }
+  .tab-btn.active { color:var(--brand); border-bottom-color:var(--brand); }
+
+  /* Result items */
+  .ri { border-left:4px solid var(--border2); padding:12px 14px; border-radius:0 10px 10px 0; margin-bottom:8px; }
+  .ri.pass { border-left-color:var(--green-l); background:var(--green-bg); }
+  .ri.fail { border-left-color:var(--red-l); background:var(--red-bg); }
+  .ri.warn { border-left-color:var(--yellow); background:var(--yellow-bg); }
+  pre.out { font-family:'Fira Code',monospace; font-size:.78rem; white-space:pre-wrap; word-break:break-all; margin:4px 0; color:var(--text-muted); }
+  pre.err { color:var(--red); background:var(--red-bg); padding:6px 10px; border-radius:6px; margin:4px 0; font-size:.76rem; }
+
+  /* Countdown ring */
+  .cd-wrap { display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:12px; font-weight:700; }
+  .cd-ok   { background:var(--green-bg); border:1.5px solid var(--green-brd); color:var(--green); }
+  .cd-warn { background:var(--yellow-bg); border:1.5px solid var(--yellow-brd); color:var(--yellow); }
+  .cd-crit { background:var(--red-bg); border:1.5px solid var(--red-brd); color:var(--red-l); animation:blink .65s infinite; }
+
+  @media(min-width:1100px){ .room-grid { display:grid; grid-template-columns:420px 1fr; gap:18px; align-items:start; } }
+  @media(max-width:1099px){ .room-grid { display:flex; flex-direction:column; gap:14px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Top bar -->
+<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <h1 style="font-size:1.15rem;font-weight:800;color:var(--text);">{{ task.title }}</h1>
+    <span class="badge badge-active"><span class="live-dot pulse" style="width:6px;height:6px;"></span> {{ session.group.name }}</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    {% if session.duration_minutes %}
+    <div class="cd-wrap cd-ok" id="cd-wrap">
+      <span style="font-size:.75rem;font-weight:600;">⏱</span>
+      <span class="mono" id="countdown" style="font-size:1rem;">--:--</span>
+    </div>
+    {% endif %}
+    <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-yellow btn-sm">🏆 Leaderboard</a>
+  </div>
+</div>
+
+<!-- Already passed banner -->
+{% if my_submission and my_submission.is_correct %}
+<div style="background:var(--green-bg);border:2px solid var(--green-brd);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+  <span style="font-size:1.8rem;">🎉</span>
+  <div>
+    <p style="font-weight:800;color:var(--green);font-size:.95rem;">You already solved this task!</p>
+    <p style="font-size:.8rem;color:var(--text-muted);">Submitted at {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.passed_count }}/{{ my_submission.total_count }} tests passed</p>
+  </div>
+</div>
+{% endif %}
+
+<div class="room-grid">
+
+  <!-- ── LEFT COLUMN ── -->
+  <div style="display:flex;flex-direction:column;gap:14px;">
+
+    <!-- Problem statement -->
+    <div class="card" style="overflow:hidden;">
+      <div style="background:linear-gradient(135deg,var(--brand-bg),var(--brand-bgd));padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleProblem()">
+        <span style="font-weight:800;font-size:.9rem;color:var(--brand);">📋 Problem Statement</span>
+        <span id="prob-arrow" style="color:var(--brand);font-size:.75rem;">▼ Hide</span>
+      </div>
+      <div id="prob-body" style="padding:16px 18px;">
+        <pre style="white-space:pre-wrap;font-family:'Outfit',sans-serif;font-size:.875rem;color:var(--text);line-height:1.75;">{{ task.description }}</pre>
+        {% if task.example_input %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
+          <div>
+            <p style="font-size:.7rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Sample Input</p>
+            <pre style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'Fira Code',monospace;font-size:.78rem;color:#4338ca;">{{ task.example_input }}</pre>
+          </div>
+          <div>
+            <p style="font-size:.7rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Sample Output</p>
+            <pre style="background:var(--green-bg);border:1.5px solid var(--green-brd);border-radius:8px;padding:10px;font-family:'Fira Code',monospace;font-size:.78rem;color:var(--green);">{{ task.example_output }}</pre>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <div class="card" style="overflow:hidden;" id="editor-card">
+      <div style="background:#2e3440;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;border-radius:12px 12px 0 0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;gap:5px;"><div style="width:11px;height:11px;border-radius:50%;background:#ff5f56;"></div><div style="width:11px;height:11px;border-radius:50%;background:#ffbd2e;"></div><div style="width:11px;height:11px;border-radius:50%;background:#27c93f;"></div></div>
+          <span style="font-size:.75rem;color:#81a1c1;font-family:'Fira Code',monospace;font-weight:500;">solution.py</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <span style="font-size:.72rem;color:#616e88;">{{ task.time_limit }}s · {{ task.memory_limit }}</span>
+          <button onclick="clearEditor()" style="background:transparent;border:none;color:#616e88;cursor:pointer;font-size:.72rem;padding:0 4px;" title="Clear">✕ Clear</button>
+        </div>
+      </div>
+      <textarea id="code-editor">{% if my_submission %}{{ my_submission.code }}{% else %}# Write your solution here
+# Input:  input()  or  int(input())
+# Output: print(...)
+
+{% endif %}</textarea>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px;" id="action-btns">
+      <button id="btn-run" class="btn btn-blue" style="flex:1;" onclick="runCode()">
+        ▶ <span id="run-label">Run Code</span>
+      </button>
+      <button id="btn-submit" class="btn btn-success" style="flex:1;" onclick="submitCode()"
+        {% if my_submission and my_submission.is_correct %}disabled{% endif %}>
+        ✓ <span id="sub-label">{% if my_submission and my_submission.is_correct %}Already Passed!{% else %}Submit{% endif %}</span>
+      </button>
+    </div>
+
+    <div id="time-up-banner" style="display:none;background:var(--red-bg);border:2px solid var(--red-brd);border-radius:12px;padding:14px 18px;text-align:center;">
+      <p style="font-weight:800;color:var(--red);">⏰ Time's up! The session is now closed.</p>
+    </div>
+  </div>
+
+  <!-- ── RIGHT COLUMN ── -->
+  <div>
+    <div class="card" style="overflow:hidden;min-height:420px;">
+      <div style="display:flex;border-bottom:2px solid var(--border);padding:0 6px;gap:2px;">
+        <button class="tab-btn active" id="tab-r" onclick="switchTab('r')">Results</button>
+        <button class="tab-btn" id="tab-h" onclick="switchTab('h')">History</button>
+      </div>
+
+      <div id="panel-r" style="padding:18px;">
+        <div id="results-body" style="text-align:center;padding:40px 10px;color:var(--text-muted);">
+          <p style="font-size:2.5rem;margin-bottom:10px;">💻</p>
+          <p style="font-weight:600;margin-bottom:4px;">Ready to code!</p>
+          <p style="font-size:.82rem;">Click <strong>Run Code</strong> to test with examples<br>or <strong>Submit</strong> to evaluate hidden tests</p>
+        </div>
+      </div>
+
+      <div id="panel-h" style="display:none;padding:18px;">
+        {% if my_submission %}
+        <div class="ri {% if my_submission.is_correct %}pass{% else %}fail{% endif %}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-weight:700;font-size:.875rem;">Last Submission</span>
+            <span class="badge badge-{{ my_submission.status }}">{{ my_submission.get_status_display }}</span>
+          </div>
+          <p style="font-size:.78rem;color:var(--text-muted);">{{ my_submission.passed_count }}/{{ my_submission.total_count }} tests · {{ my_submission.created_at|date:"H:i:s" }}</p>
+        </div>
+        {% else %}
+        <p style="text-align:center;color:var(--text-muted);padding:24px 0;font-size:.875rem;">No submissions yet</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const TASK_ID    = {{ task.pk }};
+const SESSION_ID = {{ session.pk }};
+const CSRF       = '{{ csrf_token }}';
+// Timer: duration in seconds, activated_at from server (ISO string)
+const DURATION_SECS  = {{ session.duration_minutes|default:0 }} * 60;
+const ACTIVATED_AT   = '{{ activated_at_iso }}';  // e.g. "2025-03-07T09:30:00+05:00"
+const ALREADY_PASSED = {% if my_submission and my_submission.is_correct %}true{% else %}false{% endif %};
+
+// ── CodeMirror ──
+const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
+  mode:'python', theme:'nord', lineNumbers:true,
+  autoCloseBrackets:true, matchBrackets:true,
+  indentUnit:4, tabSize:4, indentWithTabs:false,
+  extraKeys:{Tab: cm => cm.execCommand('indentMore')},
+});
+
+function clearEditor() {
+  if (confirm('Clear the editor? This cannot be undone.'))
+    editor.setValue('# Write your solution here\n');
+}
+
+function toggleProblem() {
+  const b = document.getElementById('prob-body');
+  const a = document.getElementById('prob-arrow');
+  const show = b.style.display === 'none';
+  b.style.display = show ? 'block' : 'none';
+  a.textContent = show ? '▼ Hide' : '▶ Show';
+}
+
+function switchTab(t) {
+  document.getElementById('panel-r').style.display = t==='r' ? 'block' : 'none';
+  document.getElementById('panel-h').style.display = t==='h' ? 'block' : 'none';
+  document.getElementById('tab-r').className = 'tab-btn' + (t==='r'?' active':'');
+  document.getElementById('tab-h').className = 'tab-btn' + (t==='h'?' active':'');
+}
+
+// ── Countdown timer ──
+// Calculates remaining time based on exact server activation timestamp.
+let timeExpired = false;
+
+function updateCountdown() {
+  if (!DURATION_SECS || !ACTIVATED_AT) return;
+  const activatedMs = new Date(ACTIVATED_AT).getTime();
+  const elapsedSecs = (Date.now() - activatedMs) / 1000;
+  const remaining   = Math.max(0, DURATION_SECS - elapsedSecs);
+  const m = Math.floor(remaining / 60);
+  const s = Math.floor(remaining % 60);
+  const display = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+  const cdEl   = document.getElementById('countdown');
+  const wrapEl = document.getElementById('cd-wrap');
+  if (!cdEl) return;
+
+  cdEl.textContent = display;
+
+  // Color state
+  wrapEl.className = 'cd-wrap ' + (remaining > 120 ? 'cd-ok' : remaining > 30 ? 'cd-warn' : 'cd-crit');
+
+  if (remaining <= 0 && !timeExpired) {
+    timeExpired = true;
+    lockEditor();
+  }
+}
+
+if (DURATION_SECS && ACTIVATED_AT) {
+  updateCountdown();
+  setInterval(updateCountdown, 500);
+}
+
+function lockEditor() {
+  editor.setOption('readOnly', 'nocursor');
+  document.getElementById('editor-card').style.opacity = '.55';
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('time-up-banner').style.display = 'block';
+  _toast('⏰ Time is up! Submissions are now closed.', 'w');
+}
+
+// ── Loading helpers ──
+function setRunLoading(on) {
+  const b = document.getElementById('btn-run');
+  const l = document.getElementById('run-label');
+  b.disabled = on || timeExpired;
+  l.textContent = on ? 'Running…' : 'Run Code';
+}
+function setSubLoading(on) {
+  const b = document.getElementById('btn-submit');
+  const l = document.getElementById('sub-label');
+  b.disabled = on || timeExpired || ALREADY_PASSED;
+  l.textContent = on ? 'Evaluating…' : (ALREADY_PASSED ? 'Already Passed!' : 'Submit');
+}
+
+// ── Render results ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderResults(results, title, isSubmit) {
+  switchTab('r');
+  let html = '';
+  if (title) html += `<p style="font-weight:800;color:var(--text);margin-bottom:12px;font-size:.9rem;">${title}</p>`;
+
+  results.forEach((r, i) => {
+    const cls = r.passed ? 'pass' : (r.error ? 'warn' : 'fail');
+    const icon = r.passed ? '✅' : (r.error ? '⚠️' : '❌');
+    html += `<div class="ri ${cls}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-weight:700;font-size:.85rem;">${icon} Test ${i+1}</span>
+        <span style="font-size:.72rem;color:var(--text-muted);font-family:'Fira Code',monospace;">${r.time_used||''}s</span>
+      </div>`;
+    if (r.input && r.input !== '(hidden)') html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Input:</span> <code style="font-family:'Fira Code',monospace;color:#4338ca;">${esc(r.input.trim())}</code></p>`;
+    if (!r.passed && r.expected && r.expected !== '(hidden)') html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Expected:</span> <code style="font-family:'Fira Code',monospace;color:var(--green);">${esc(r.expected.trim())}</code></p>`;
+    if (r.stdout) html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Got:</span> <code style="font-family:'Fira Code',monospace;color:${r.passed?'var(--green)':'var(--red)'};">${esc(r.stdout.trim())}</code></p>`;
+    if (r.stderr) html += `<pre class="err">${esc(r.stderr)}</pre>`;
+    html += `</div>`;
+  });
+
+  if (isSubmit) {
+    const passed = results.filter(x=>x.passed).length;
+    const total  = results.length;
+    if (passed === total) {
+      html += `<div style="background:var(--green-bg);border:2px solid var(--green-brd);border-radius:12px;padding:20px;text-align:center;margin-top:8px;">
+        <p style="font-size:2rem;margin-bottom:6px;">🎉</p>
+        <p style="font-weight:800;color:var(--green);font-size:1rem;">All ${total} tests passed!</p>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:3px;">Outstanding work!</p>
+      </div>`;
+      // Lock submit permanently on success
+      document.getElementById('btn-submit').disabled = true;
+      document.getElementById('sub-label').textContent = '✓ Passed!';
+    } else {
+      html += `<div style="background:var(--yellow-bg);border:2px solid var(--yellow-brd);border-radius:12px;padding:16px;text-align:center;margin-top:8px;">
+        <p style="font-weight:800;color:var(--yellow);">${passed}/${total} tests passed</p>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:3px;">Fix the issues and try again!</p>
+      </div>`;
+    }
+  }
+
+  document.getElementById('results-body').innerHTML = html;
+}
+
+function renderError(msg) {
+  switchTab('r');
+  document.getElementById('results-body').innerHTML =
+    `<div style="background:var(--red-bg);border:2px solid var(--red-brd);border-radius:10px;padding:16px;color:var(--red);font-size:.875rem;font-weight:500;">❌ ${esc(msg)}</div>`;
+}
+
+function renderLoading(msg) {
+  switchTab('r');
+  document.getElementById('results-body').innerHTML =
+    `<div style="text-align:center;padding:48px;color:var(--text-muted);">
+      <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div>
+      <p style="font-weight:600;">${msg}</p>
+    </div>`;
+}
+
+// ── Run Code ──
+async function runCode() {
+  if (timeExpired) return;
+  setRunLoading(true);
+  renderLoading('Running example tests…');
+  try {
+    const res = await fetch('/api/run/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+      body: JSON.stringify({task_id:TASK_ID, session_id:SESSION_ID, code:editor.getValue()}),
+    });
+    const d = await res.json();
+    if (!res.ok) { renderError(d.error||'Server error'); return; }
+    renderResults(d.results, '▶ Example Test Results', false);
+  } catch(e) { renderError('Network error: ' + e.message); }
+  finally { setRunLoading(false); }
+}
+
+// ── Submit ──
+async function submitCode() {
+  if (timeExpired || ALREADY_PASSED) return;
+  setSubLoading(true);
+  renderLoading('Evaluating against hidden tests…');
+  try {
+    const res = await fetch('/api/submit/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+      body: JSON.stringify({task_id:TASK_ID, session_id:SESSION_ID, code:editor.getValue()}),
+    });
+    const d = await res.json();
+    if (!res.ok) { renderError(d.error||'Server error'); return; }
+    if (d.sync) {
+      renderResults(d.results, '✓ Submit Results', true);
+      _toast(d.is_correct ? '🎉 All tests passed!' : `${d.passed_count}/${d.total_count} tests passed`, d.is_correct?'s':'w');
+    } else {
+      pollStatus(d.submission_id);
+    }
+  } catch(e) { renderError('Network error: ' + e.message); }
+  finally { setSubLoading(false); }
+}
+
+async function pollStatus(id) {
+  let tries = 0;
+  const iv = setInterval(async()=>{
+    if(++tries>60){clearInterval(iv);return;}
+    const r = await fetch(`/api/status/${id}/`);
+    const d = await r.json();
+    if(d.status==='pending'||d.status==='running')return;
+    clearInterval(iv);
+    setSubLoading(false);
+    renderResults(d.results,'✓ Submit Results',true);
+    _toast(d.is_correct?'🎉 All tests passed!':`${d.passed_count}/${d.total_count} tests passed`,d.is_correct?'s':'w');
+  },1500);
+}
+
+// ── WebSocket ──
+(()=>{
+  const proto = location.protocol==='https:'?'wss':'ws';
+  const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_ID}/`);
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if(msg.event==='session_ended') {
+      _toast('The session has been closed by the teacher.','w');
+      setTimeout(()=>location.href='/sessions/',3000);
+    }
+  };
+})();
+
+// Spinner CSS
+const st = document.createElement('style');
+st.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+document.head.appendChild(st);
+</script>
+{% endblock %}
