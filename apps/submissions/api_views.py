@@ -20,7 +20,7 @@ from apps.tasks.models import Task, TestCase
 from apps.sessions_app.models import Session
 from apps.sessions_app.views import _broadcast_session_event
 from .models import Submission
-from apps.runner.services import run_code_sync, evaluate_submission_async
+from apps.runner.services import run_code_sync, _evaluate_submission_sync
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ def run_code(request):
     Always returns results immediately — no queue, no polling.
     """
     if not request.user.is_student:
-        return JsonResponse({'error': 'Students only'}, status=403)
+        return JsonResponse({'error': f'Students only (your role: {request.user.role})'}, status=403)
 
     if not _check_rate_limit(request, 'run', settings.RUN_RATE_LIMIT):
         return JsonResponse({'error': 'Rate limit exceeded. Please wait a moment.'}, status=429)
@@ -57,6 +57,7 @@ def run_code(request):
     task_pk = body.get('task_id')
     session_pk = body.get('session_id')
     code = body.get('code', '')
+    language = body.get('language', 'python')
 
     if not code.strip():
         return JsonResponse({'error': 'Code cannot be empty'}, status=400)
@@ -67,12 +68,10 @@ def run_code(request):
     session = get_object_or_404(Session, pk=session_pk)
 
     if not session.can_student_participate(request.user):
-        return JsonResponse({'error': 'Session not active or you are not enrolled'}, status=403)
+        return JsonResponse({'error': f'Cannot participate: is_active={session.is_active}, in_group={session.group.students.filter(pk=request.user.pk).exists()}, time_up={session.is_time_up}'}, status=403)
 
     example_cases = list(task.example_cases)
     if not example_cases:
-        # No example cases — run against an empty test so student still gets feedback
-        from apps.tasks.models import TestCase as TC
         class EmptyCase:
             pk = 0
             input_data = task.example_input or ''
@@ -80,7 +79,7 @@ def run_code(request):
             is_example = True
         example_cases = [EmptyCase()]
 
-    results = run_code_sync(code, example_cases, task.time_limit, task.memory_limit)
+    results = run_code_sync(code, example_cases, task.time_limit, task.memory_limit, language=language)
 
     _broadcast_session_event(session.pk, 'ran_example', {
         'student': request.user.username,
@@ -98,7 +97,7 @@ def submit_code(request):
     Returns submission ID for polling.
     """
     if not request.user.is_student:
-        return JsonResponse({'error': 'Students only'}, status=403)
+        return JsonResponse({'error': f'Students only (your role: {request.user.role})'}, status=403)
 
     if not _check_rate_limit(request, 'submit', settings.SUBMIT_RATE_LIMIT):
         return JsonResponse({'error': 'Rate limit exceeded. Please wait a moment.'}, status=429)
@@ -111,6 +110,7 @@ def submit_code(request):
     task_pk = body.get('task_id')
     session_pk = body.get('session_id')
     code = body.get('code', '')
+    language = body.get('language', 'python')
 
     if not code.strip():
         return JsonResponse({'error': 'Code cannot be empty'}, status=400)
@@ -123,24 +123,21 @@ def submit_code(request):
     if not session.can_student_participate(request.user):
         return JsonResponse({'error': 'Session not active'}, status=403)
 
-    # Create submission record
     submission = Submission.objects.create(
         student=request.user,
         task=task,
         session=session,
         code=code,
+        language=language,
         status=Submission.STATUS_PENDING,
     )
 
-    # Broadcast to teacher
     _broadcast_session_event(session.pk, 'submitted', {
         'student': request.user.username,
         'student_id': request.user.pk,
         'submission_id': submission.pk,
     })
 
-    # In dev mode (no Celery), evaluate synchronously right here and
-    # return the full result so the browser doesn't need to poll.
     use_celery = _try_celery(submission.pk)
     if not use_celery:
         submission.refresh_from_db()
@@ -151,7 +148,7 @@ def submit_code(request):
             'results': submission.results,
             'passed_count': submission.passed_count,
             'total_count': submission.total_count,
-            'sync': True,   # tells the browser to skip polling
+            'sync': True,
         })
 
     return JsonResponse({'submission_id': submission.pk, 'status': submission.status, 'sync': False})

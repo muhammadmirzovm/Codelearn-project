@@ -6,6 +6,19 @@
   .CodeMirror { height: 100%; min-height: 340px; border-radius: 0 0 12px 12px; }
   .CodeMirror-gutters { background: #2e3440 !important; border-right: 1px solid #3b4252 !important; }
 
+  /* Language selector */
+  .lang-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 99px;
+    font-size: .82rem; font-weight: 700; cursor: pointer;
+    border: 2px solid transparent; transition: all .17s;
+    background: var(--white); color: var(--text-muted);
+    border-color: var(--border);
+  }
+  .lang-pill:hover { border-color: var(--brand-ll); color: var(--brand); }
+  .lang-pill.active { border-color: var(--brand); background: var(--brand-bg); color: var(--brand); }
+  .lang-pill .lang-icon { font-size: 1rem; }
+
   /* Tab buttons */
   .tab-btn { padding:9px 18px; font-size:.82rem; font-weight:700; color:var(--text-muted); border-bottom:2.5px solid transparent; cursor:pointer; transition:all .15s; white-space:nowrap; }
   .tab-btn.active { color:var(--brand); border-bottom-color:var(--brand); }
@@ -15,10 +28,9 @@
   .ri.pass { border-left-color:var(--green-l); background:var(--green-bg); }
   .ri.fail { border-left-color:var(--red-l); background:var(--red-bg); }
   .ri.warn { border-left-color:var(--yellow); background:var(--yellow-bg); }
-  pre.out { font-family:'Fira Code',monospace; font-size:.78rem; white-space:pre-wrap; word-break:break-all; margin:4px 0; color:var(--text-muted); }
-  pre.err { color:var(--red); background:var(--red-bg); padding:6px 10px; border-radius:6px; margin:4px 0; font-size:.76rem; }
+  pre.err { color:var(--red); background:var(--red-bg); padding:6px 10px; border-radius:6px; margin:4px 0; font-size:.76rem; font-family:'Fira Code',monospace; }
 
-  /* Countdown ring */
+  /* Countdown */
   .cd-wrap { display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:12px; font-weight:700; }
   .cd-ok   { background:var(--green-bg); border:1.5px solid var(--green-brd); color:var(--green); }
   .cd-warn { background:var(--yellow-bg); border:1.5px solid var(--yellow-brd); color:var(--yellow); }
@@ -27,6 +39,10 @@
   @media(min-width:1100px){ .room-grid { display:grid; grid-template-columns:420px 1fr; gap:18px; align-items:start; } }
   @media(max-width:1099px){ .room-grid { display:flex; flex-direction:column; gap:14px; } }
 </style>
+
+<!-- CodeMirror modes for all languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -39,7 +55,7 @@
   <div style="display:flex;align-items:center;gap:10px;">
     {% if session.duration_minutes %}
     <div class="cd-wrap cd-ok" id="cd-wrap">
-      <span style="font-size:.75rem;font-weight:600;">⏱</span>
+      <span style="font-size:.75rem;">⏱</span>
       <span class="mono" id="countdown" style="font-size:1rem;">--:--</span>
     </div>
     {% endif %}
@@ -53,7 +69,7 @@
   <span style="font-size:1.8rem;">🎉</span>
   <div>
     <p style="font-weight:800;color:var(--green);font-size:.95rem;">You already solved this task!</p>
-    <p style="font-size:.8rem;color:var(--text-muted);">Submitted at {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.passed_count }}/{{ my_submission.total_count }} tests passed</p>
+    <p style="font-size:.8rem;color:var(--text-muted);">Submitted at {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.passed_count }}/{{ my_submission.total_count }} tests passed · {{ my_submission.get_language_display }}</p>
   </div>
 </div>
 {% endif %}
@@ -86,19 +102,42 @@
       </div>
     </div>
 
+    <!-- Language selector -->
+    <div class="card card-p" style="padding:14px 18px;">
+      <p style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">🌐 Select Language</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="lang-selector">
+        <button class="lang-pill active" data-lang="python" data-mode="python" onclick="switchLang(this)">
+          <span class="lang-icon">🐍</span> Python
+        </button>
+        <button class="lang-pill" data-lang="javascript" data-mode="javascript" onclick="switchLang(this)">
+          <span class="lang-icon">🟨</span> JavaScript
+        </button>
+        <button class="lang-pill" data-lang="cpp" data-mode="text/x-c++src" onclick="switchLang(this)">
+          <span class="lang-icon">⚡</span> C++
+        </button>
+        <button class="lang-pill" data-lang="c" data-mode="text/x-csrc" onclick="switchLang(this)">
+          <span class="lang-icon">🔵</span> C
+        </button>
+      </div>
+    </div>
+
     <!-- Editor -->
     <div class="card" style="overflow:hidden;" id="editor-card">
       <div style="background:#2e3440;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;border-radius:12px 12px 0 0;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="display:flex;gap:5px;"><div style="width:11px;height:11px;border-radius:50%;background:#ff5f56;"></div><div style="width:11px;height:11px;border-radius:50%;background:#ffbd2e;"></div><div style="width:11px;height:11px;border-radius:50%;background:#27c93f;"></div></div>
-          <span style="font-size:.75rem;color:#81a1c1;font-family:'Fira Code',monospace;font-weight:500;">solution.py</span>
+          <div style="display:flex;gap:5px;">
+            <div style="width:11px;height:11px;border-radius:50%;background:#ff5f56;"></div>
+            <div style="width:11px;height:11px;border-radius:50%;background:#ffbd2e;"></div>
+            <div style="width:11px;height:11px;border-radius:50%;background:#27c93f;"></div>
+          </div>
+          <span id="editor-filename" style="font-size:.75rem;color:#81a1c1;font-family:'Fira Code',monospace;font-weight:500;">solution.py</span>
         </div>
         <div style="display:flex;gap:6px;">
           <span style="font-size:.72rem;color:#616e88;">{{ task.time_limit }}s · {{ task.memory_limit }}</span>
-          <button onclick="clearEditor()" style="background:transparent;border:none;color:#616e88;cursor:pointer;font-size:.72rem;padding:0 4px;" title="Clear">✕ Clear</button>
+          <button onclick="clearEditor()" style="background:transparent;border:none;color:#616e88;cursor:pointer;font-size:.72rem;padding:0 4px;">✕ Clear</button>
         </div>
       </div>
-      <textarea id="code-editor">{% if my_submission %}{{ my_submission.code }}{% else %}# Write your solution here
+      <textarea id="code-editor">{% if my_submission %}{{ my_submission.code }}{% else %}# Write your Python solution here
 # Input:  input()  or  int(input())
 # Output: print(...)
 
@@ -133,7 +172,7 @@
         <div id="results-body" style="text-align:center;padding:40px 10px;color:var(--text-muted);">
           <p style="font-size:2.5rem;margin-bottom:10px;">💻</p>
           <p style="font-weight:600;margin-bottom:4px;">Ready to code!</p>
-          <p style="font-size:.82rem;">Click <strong>Run Code</strong> to test with examples<br>or <strong>Submit</strong> to evaluate hidden tests</p>
+          <p style="font-size:.82rem;">Select a language, write your code<br>then click <strong>Run Code</strong> to test</p>
         </div>
       </div>
 
@@ -144,7 +183,7 @@
             <span style="font-weight:700;font-size:.875rem;">Last Submission</span>
             <span class="badge badge-{{ my_submission.status }}">{{ my_submission.get_status_display }}</span>
           </div>
-          <p style="font-size:.78rem;color:var(--text-muted);">{{ my_submission.passed_count }}/{{ my_submission.total_count }} tests · {{ my_submission.created_at|date:"H:i:s" }}</p>
+          <p style="font-size:.78rem;color:var(--text-muted);">{{ my_submission.passed_count }}/{{ my_submission.total_count }} tests · {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.get_language_display }}</p>
         </div>
         {% else %}
         <p style="text-align:center;color:var(--text-muted);padding:24px 0;font-size:.875rem;">No submissions yet</p>
@@ -161,22 +200,57 @@
 const TASK_ID    = {{ task.pk }};
 const SESSION_ID = {{ session.pk }};
 const CSRF       = '{{ csrf_token }}';
-// Timer: duration in seconds, activated_at from server (ISO string)
-const DURATION_SECS  = {{ session.duration_minutes|default:0 }} * 60;
-const ACTIVATED_AT   = '{{ activated_at_iso }}';  // e.g. "2025-03-07T09:30:00+05:00"
+const DURATION_SECS = {{ session.duration_minutes|default:0 }} * 60;
+const ACTIVATED_AT  = '{{ activated_at_iso }}';
 const ALREADY_PASSED = {% if my_submission and my_submission.is_correct %}true{% else %}false{% endif %};
+
+// ── Language config ──
+const LANG_CONFIG = {
+  python:     { filename: 'solution.py',  mode: 'python',         starter: '# Write your Python solution here\n# Input:  input()  or  int(input())\n# Output: print(...)\n\n' },
+  javascript: { filename: 'solution.js',  mode: 'javascript',     starter: '// Write your JavaScript solution here\n// Input:  const lines = require("fs").readFileSync("/dev/stdin","utf8").trim().split("\\n");\n// Output: console.log(...)\n\n' },
+  cpp:        { filename: 'solution.cpp', mode: 'text/x-c++src',  starter: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // Write your C++ solution here\n    // Input:  cin >> x;\n    // Output: cout << x << endl;\n    return 0;\n}\n' },
+  c:          { filename: 'solution.c',   mode: 'text/x-csrc',    starter: '#include <stdio.h>\n\nint main() {\n    // Write your C solution here\n    // Input:  scanf("%d", &x);\n    // Output: printf("%d\\n", x);\n    return 0;\n}\n' },
+};
+
+let currentLang = 'python';
 
 // ── CodeMirror ──
 const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
-  mode:'python', theme:'nord', lineNumbers:true,
-  autoCloseBrackets:true, matchBrackets:true,
-  indentUnit:4, tabSize:4, indentWithTabs:false,
-  extraKeys:{Tab: cm => cm.execCommand('indentMore')},
+  mode: 'python', theme: 'nord', lineNumbers: true,
+  autoCloseBrackets: true, matchBrackets: true,
+  indentUnit: 4, tabSize: 4, indentWithTabs: false,
+  extraKeys: { Tab: cm => cm.execCommand('indentMore') },
 });
 
+// ── Switch language ──
+function switchLang(btn) {
+  const lang = btn.dataset.lang;
+  const cfg  = LANG_CONFIG[lang];
+  if (!cfg) return;
+
+  // Update active pill
+  document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+
+  // Update editor mode and filename
+  editor.setOption('mode', cfg.mode);
+  document.getElementById('editor-filename').textContent = cfg.filename;
+
+  // If editor is empty or has default starter → replace with new starter
+  const val = editor.getValue().trim();
+  const isStarter = Object.values(LANG_CONFIG).some(c => val === c.starter.trim() || val === '');
+  if (isStarter || val === '') {
+    editor.setValue(cfg.starter);
+    setTimeout(() => editor.refresh(), 50);
+  }
+
+  currentLang = lang;
+}
+
 function clearEditor() {
-  if (confirm('Clear the editor? This cannot be undone.'))
-    editor.setValue('# Write your solution here\n');
+  if (confirm('Clear the editor?')) {
+    editor.setValue(LANG_CONFIG[currentLang].starter);
+  }
 }
 
 function toggleProblem() {
@@ -188,44 +262,26 @@ function toggleProblem() {
 }
 
 function switchTab(t) {
-  document.getElementById('panel-r').style.display = t==='r' ? 'block' : 'none';
-  document.getElementById('panel-h').style.display = t==='h' ? 'block' : 'none';
-  document.getElementById('tab-r').className = 'tab-btn' + (t==='r'?' active':'');
-  document.getElementById('tab-h').className = 'tab-btn' + (t==='h'?' active':'');
+  document.getElementById('panel-r').style.display = t==='r'?'block':'none';
+  document.getElementById('panel-h').style.display = t==='h'?'block':'none';
+  document.getElementById('tab-r').className = 'tab-btn'+(t==='r'?' active':'');
+  document.getElementById('tab-h').className = 'tab-btn'+(t==='h'?' active':'');
 }
 
-// ── Countdown timer ──
-// Calculates remaining time based on exact server activation timestamp.
+// ── Countdown ──
 let timeExpired = false;
-
 function updateCountdown() {
   if (!DURATION_SECS || !ACTIVATED_AT) return;
-  const activatedMs = new Date(ACTIVATED_AT).getTime();
-  const elapsedSecs = (Date.now() - activatedMs) / 1000;
-  const remaining   = Math.max(0, DURATION_SECS - elapsedSecs);
-  const m = Math.floor(remaining / 60);
-  const s = Math.floor(remaining % 60);
-  const display = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-
-  const cdEl   = document.getElementById('countdown');
-  const wrapEl = document.getElementById('cd-wrap');
-  if (!cdEl) return;
-
-  cdEl.textContent = display;
-
-  // Color state
-  wrapEl.className = 'cd-wrap ' + (remaining > 120 ? 'cd-ok' : remaining > 30 ? 'cd-warn' : 'cd-crit');
-
-  if (remaining <= 0 && !timeExpired) {
-    timeExpired = true;
-    lockEditor();
-  }
+  const elapsed = (Date.now() - new Date(ACTIVATED_AT).getTime()) / 1000;
+  const remaining = Math.max(0, DURATION_SECS - elapsed);
+  const m = Math.floor(remaining/60), s = Math.floor(remaining%60);
+  const cdEl = document.getElementById('countdown');
+  const wrap  = document.getElementById('cd-wrap');
+  if (cdEl) cdEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (wrap) wrap.className = 'cd-wrap ' + (remaining>120?'cd-ok':remaining>30?'cd-warn':'cd-crit');
+  if (remaining <= 0 && !timeExpired) { timeExpired = true; lockEditor(); }
 }
-
-if (DURATION_SECS && ACTIVATED_AT) {
-  updateCountdown();
-  setInterval(updateCountdown, 500);
-}
+if (DURATION_SECS && ACTIVATED_AT) { updateCountdown(); setInterval(updateCountdown, 500); }
 
 function lockEditor() {
   editor.setOption('readOnly', 'nocursor');
@@ -236,30 +292,44 @@ function lockEditor() {
   _toast('⏰ Time is up! Submissions are now closed.', 'w');
 }
 
-// ── Loading helpers ──
+// ── Helpers ──
 function setRunLoading(on) {
-  const b = document.getElementById('btn-run');
-  const l = document.getElementById('run-label');
-  b.disabled = on || timeExpired;
-  l.textContent = on ? 'Running…' : 'Run Code';
+  document.getElementById('btn-run').disabled = on || timeExpired;
+  document.getElementById('run-label').textContent = on ? 'Running…' : 'Run Code';
 }
 function setSubLoading(on) {
-  const b = document.getElementById('btn-submit');
-  const l = document.getElementById('sub-label');
-  b.disabled = on || timeExpired || ALREADY_PASSED;
-  l.textContent = on ? 'Evaluating…' : (ALREADY_PASSED ? 'Already Passed!' : 'Submit');
+  document.getElementById('btn-submit').disabled = on || timeExpired || ALREADY_PASSED;
+  document.getElementById('sub-label').textContent = on ? 'Evaluating…' : (ALREADY_PASSED ? 'Already Passed!' : 'Submit');
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderLoading(msg) {
+  switchTab('r');
+  document.getElementById('results-body').innerHTML =
+    `<div style="text-align:center;padding:48px;color:var(--text-muted);">
+      <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div>
+      <p style="font-weight:600;">${msg}</p>
+    </div>`;
 }
 
-// ── Render results ──
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function renderError(msg) {
+  switchTab('r');
+  document.getElementById('results-body').innerHTML =
+    `<div style="background:var(--red-bg);border:2px solid var(--red-brd);border-radius:10px;padding:16px;color:var(--red);font-size:.875rem;font-weight:500;">❌ ${esc(msg)}</div>`;
+}
+
+function getLangLabel(lang) {
+  return { python:'🐍 Python', javascript:'🟨 JavaScript', cpp:'⚡ C++', c:'🔵 C' }[lang] || lang;
+}
 
 function renderResults(results, title, isSubmit) {
   switchTab('r');
   let html = '';
   if (title) html += `<p style="font-weight:800;color:var(--text);margin-bottom:12px;font-size:.9rem;">${title}</p>`;
+  html += `<div style="margin-bottom:10px;"><span style="background:var(--brand-bg);color:var(--brand);padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:700;">${getLangLabel(currentLang)}</span></div>`;
 
   results.forEach((r, i) => {
-    const cls = r.passed ? 'pass' : (r.error ? 'warn' : 'fail');
+    const cls  = r.passed ? 'pass' : (r.error ? 'warn' : 'fail');
     const icon = r.passed ? '✅' : (r.error ? '⚠️' : '❌');
     html += `<div class="ri ${cls}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -282,7 +352,6 @@ function renderResults(results, title, isSubmit) {
         <p style="font-weight:800;color:var(--green);font-size:1rem;">All ${total} tests passed!</p>
         <p style="font-size:.8rem;color:var(--text-muted);margin-top:3px;">Outstanding work!</p>
       </div>`;
-      // Lock submit permanently on success
       document.getElementById('btn-submit').disabled = true;
       document.getElementById('sub-label').textContent = '✓ Passed!';
     } else {
@@ -292,35 +361,19 @@ function renderResults(results, title, isSubmit) {
       </div>`;
     }
   }
-
   document.getElementById('results-body').innerHTML = html;
-}
-
-function renderError(msg) {
-  switchTab('r');
-  document.getElementById('results-body').innerHTML =
-    `<div style="background:var(--red-bg);border:2px solid var(--red-brd);border-radius:10px;padding:16px;color:var(--red);font-size:.875rem;font-weight:500;">❌ ${esc(msg)}</div>`;
-}
-
-function renderLoading(msg) {
-  switchTab('r');
-  document.getElementById('results-body').innerHTML =
-    `<div style="text-align:center;padding:48px;color:var(--text-muted);">
-      <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div>
-      <p style="font-weight:600;">${msg}</p>
-    </div>`;
 }
 
 // ── Run Code ──
 async function runCode() {
   if (timeExpired) return;
   setRunLoading(true);
-  renderLoading('Running example tests…');
+  renderLoading(`Running ${getLangLabel(currentLang)} tests…`);
   try {
     const res = await fetch('/api/run/', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
-      body: JSON.stringify({task_id:TASK_ID, session_id:SESSION_ID, code:editor.getValue()}),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ task_id: TASK_ID, session_id: SESSION_ID, code: editor.getValue(), language: currentLang }),
     });
     const d = await res.json();
     if (!res.ok) { renderError(d.error||'Server error'); return; }
@@ -333,37 +386,19 @@ async function runCode() {
 async function submitCode() {
   if (timeExpired || ALREADY_PASSED) return;
   setSubLoading(true);
-  renderLoading('Evaluating against hidden tests…');
+  renderLoading(`Evaluating ${getLangLabel(currentLang)} against hidden tests…`);
   try {
     const res = await fetch('/api/submit/', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
-      body: JSON.stringify({task_id:TASK_ID, session_id:SESSION_ID, code:editor.getValue()}),
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ task_id: TASK_ID, session_id: SESSION_ID, code: editor.getValue(), language: currentLang }),
     });
     const d = await res.json();
     if (!res.ok) { renderError(d.error||'Server error'); return; }
-    if (d.sync) {
-      renderResults(d.results, '✓ Submit Results', true);
-      _toast(d.is_correct ? '🎉 All tests passed!' : `${d.passed_count}/${d.total_count} tests passed`, d.is_correct?'s':'w');
-    } else {
-      pollStatus(d.submission_id);
-    }
+    renderResults(d.results, '✓ Submit Results', true);
+    _toast(d.is_correct ? '🎉 All tests passed!' : `${d.passed_count}/${d.total_count} tests passed`, d.is_correct?'s':'w');
   } catch(e) { renderError('Network error: ' + e.message); }
   finally { setSubLoading(false); }
-}
-
-async function pollStatus(id) {
-  let tries = 0;
-  const iv = setInterval(async()=>{
-    if(++tries>60){clearInterval(iv);return;}
-    const r = await fetch(`/api/status/${id}/`);
-    const d = await r.json();
-    if(d.status==='pending'||d.status==='running')return;
-    clearInterval(iv);
-    setSubLoading(false);
-    renderResults(d.results,'✓ Submit Results',true);
-    _toast(d.is_correct?'🎉 All tests passed!':`${d.passed_count}/${d.total_count} tests passed`,d.is_correct?'s':'w');
-  },1500);
 }
 
 // ── WebSocket ──
@@ -372,14 +407,13 @@ async function pollStatus(id) {
   const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_ID}/`);
   ws.onmessage = e => {
     const msg = JSON.parse(e.data);
-    if(msg.event==='session_ended') {
+    if (msg.event==='session_ended') {
       _toast('The session has been closed by the teacher.','w');
       setTimeout(()=>location.href='/sessions/',3000);
     }
   };
 })();
 
-// Spinner CSS
 const st = document.createElement('style');
 st.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(st);

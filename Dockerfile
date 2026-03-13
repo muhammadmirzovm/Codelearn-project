@@ -1,8 +1,13 @@
 FROM python:3.12-slim
 
+# Install system deps + language runtimes
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    gcc \
+    g++ \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
@@ -12,6 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Collect static files at build time
 RUN mkdir -p /code/static && \
     DJANGO_SETTINGS_MODULE=codelearn.settings.production \
     SECRET_KEY=build-time-dummy-key \
