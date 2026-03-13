@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import RegisterForm, GroupForm
 from .models import User, Group
+from apps.users.models import ChatMessage
 
 
 def register(request):
@@ -123,3 +124,12 @@ def join_group(request):
         return redirect('dashboard:home')
 
     return render(request, 'users/join_group.html')
+
+
+def group_detail(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    previous_messages = ChatMessage.objects.filter(group=group).select_related('sender').order_by('created_at')[:100]
+    return render(request, 'users/group_detail.html', {
+        'group': group,
+        'previous_messages': previous_messages,
+    })

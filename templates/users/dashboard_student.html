@@ -51,11 +51,16 @@
     {% with groups=user.student_groups.all %}
     {% if groups %}
       {% for g in groups %}
-      <div style="padding:14px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
-          <p style="font-weight:700;font-size:.9rem;">{{ g.name }}</p>
-          <span style="font-size:.72rem;padding:2px 8px;background:var(--brand-bg);color:var(--brand);border-radius:99px;font-weight:600;">{{ g.students.count }} members</span>
-        </div>
+      <div style="padding:14px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border); {% endif %}">
+       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+  <div>
+    <p style="font-weight:700;font-size:.9rem;">{{ g.name }}</p>
+    <span style="font-size:.72rem;padding:2px 8px;background:var(--brand-bg);color:var(--brand);border-radius:99px;font-weight:600;">{{ g.students.count }} members</span>
+  </div>
+  <a href="{% url 'users:group_detail' g.id %}" class="btn btn-brand-soft btn-sm">
+    <i class="bi bi-chat-fill"></i> Chat
+  </a>
+</div>
         <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:8px;">Teacher: {{ g.teacher.get_full_name|default:g.teacher.username }}</p>
         <!-- Member avatars -->
         <div style="display:flex;flex-wrap:wrap;gap:4px;">

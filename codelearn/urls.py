@@ -16,4 +16,4 @@ urlpatterns = [
     path('sessions/', include('apps.sessions_app.urls', namespace='sessions')),
     path('submissions/', include('apps.submissions.urls', namespace='submissions')),
     path('api/', include('apps.submissions.api_urls', namespace='api')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

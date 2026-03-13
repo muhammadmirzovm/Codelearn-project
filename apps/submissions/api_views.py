@@ -159,25 +159,12 @@ def submit_code(request):
 
 def _try_celery(submission_pk: int) -> bool:
     """
-    In DEBUG mode: always run synchronously (no Celery needed).
-    In production: queue via Celery; fall back to sync if unavailable.
-    Returns True if queued async, False if ran synchronously.
+    Always run synchronously — no Celery worker on Fly.io.
+    Returns False so caller returns results immediately.
     """
-    from django.conf import settings
     from apps.runner.services import _evaluate_submission_sync
-
-    if settings.DEBUG:
-        # Dev mode: just run right now, no queue needed
-        _evaluate_submission_sync(submission_pk)
-        return False
-
-    try:
-        from apps.runner.tasks import evaluate_submission_task
-        evaluate_submission_task.delay(submission_pk)
-        return True
-    except Exception:
-        _evaluate_submission_sync(submission_pk)
-        return False
+    _evaluate_submission_sync(submission_pk)
+    return False
 
 
 @login_required

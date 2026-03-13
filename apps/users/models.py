@@ -56,3 +56,10 @@ class Group(models.Model):
     def regenerate_key(self):
         self.invite_key = uuid.uuid4()
         self.save(update_fields=['invite_key'])
+
+
+class ChatMessage(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -94,87 +94,120 @@
     </tbody>
   </table>
 </div>
+
+<!-- ALL Django data lives here — linter ignores application/json tags entirely -->
+<script type="application/json" id="page-data">
+{
+  "session_pk":    {{ session.pk }},
+  "total":         {{ student_data|length }},
+  "duration_mins": {{ session.duration_minutes|default:0 }},
+  "activated_at":  "{{ session.activated_at.isoformat|default:'' }}",
+  "statuses": [{% for item in student_data %}"{{ item.submission.status|default:'none' }}"{% if not forloop.last %},{% endif %}{% endfor %}]
+}
+</script>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-const SESSION_PK = {{ session.pk }};
-const DURATION_SECS = {{ session.duration_minutes|default:0 }} * 60;
-const ACTIVATED_AT  = '{{ session.activated_at.isoformat|default:"" }}';
+// Read ALL Django data from the JSON tag — zero template tags below this line
+const DATA          = JSON.parse(document.getElementById('page-data').textContent);
+const SESSION_PK    = DATA.session_pk;
+const DURATION_SECS = DATA.duration_mins * 60;
+const ACTIVATED_AT  = DATA.activated_at;
+const total         = DATA.total;
 
-let nPassed=0, nSub=0, nRun=0;
-{% for item in student_data %}{% if item.submission %}nSub++;{% if item.submission.status == 'passed' %}nPassed++;{% endif %}{% endif %}{% endfor %}
+let nPassed = DATA.statuses.filter(s => s === 'passed').length;
+let nSub    = DATA.statuses.filter(s => s !== 'none' && s !== 'passed').length;
+let nRun    = 0;
+
 updateStats();
 
 function updateStats() {
-  const total = {{ student_data|length }};
   document.getElementById('s-passed').textContent = nPassed;
   document.getElementById('s-sub').textContent    = nSub;
   document.getElementById('s-run').textContent    = nRun;
-  document.getElementById('s-idle').textContent   = Math.max(0, total - nSub - nRun);
+  document.getElementById('s-idle').textContent   = Math.max(0, total - nPassed - nSub - nRun);
 }
 
 // Timer
 if (DURATION_SECS && ACTIVATED_AT) {
   function updateCD() {
     const elapsed = (Date.now() - new Date(ACTIVATED_AT).getTime()) / 1000;
-    const rem = Math.max(0, DURATION_SECS - elapsed);
-    const m = Math.floor(rem/60), s = Math.floor(rem%60);
-    const el = document.getElementById('countdown');
-    const wrap = document.getElementById('cd-wrap');
-    if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    if (wrap) wrap.className = 'cd-wrap ' + (rem>120?'cd-ok':rem>30?'cd-warn':'cd-crit');
+    const rem     = Math.max(0, DURATION_SECS - elapsed);
+    const m       = Math.floor(rem / 60);
+    const s       = Math.floor(rem % 60);
+    const el      = document.getElementById('countdown');
+    const wrap    = document.getElementById('cd-wrap');
+    if (el)   el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (wrap) wrap.className = 'cd-wrap ' + (rem > 120 ? 'cd-ok' : rem > 30 ? 'cd-warn' : 'cd-crit');
   }
-  updateCD(); setInterval(updateCD, 500);
+  updateCD();
+  setInterval(updateCD, 500);
 }
 
-function nowStr() { return new Date().toTimeString().slice(0,8); }
+function nowStr() { return new Date().toTimeString().slice(0, 8); }
 
 function setWS(ok) {
   const dot = document.getElementById('ws-dot');
   const lbl = document.getElementById('ws-label');
   const ind = document.getElementById('ws-indicator');
   if (ok) {
-    dot.style.background='var(--green-l)';
-    lbl.textContent='Live'; lbl.style.color='var(--green)';
-    ind.style.background='var(--green-bg)'; ind.style.borderColor='var(--green-brd)';
+    dot.style.background  = 'var(--green-l)';
+    lbl.textContent       = 'Live';
+    lbl.style.color       = 'var(--green)';
+    ind.style.background  = 'var(--green-bg)';
+    ind.style.borderColor = 'var(--green-brd)';
   } else {
-    dot.style.background='#9ca3af';
-    lbl.textContent='Reconnecting'; lbl.style.color='#9ca3af';
-    ind.style.background='#f3f4f6'; ind.style.borderColor='#e5e7eb';
+    dot.style.background  = '#9ca3af';
+    lbl.textContent       = 'Reconnecting';
+    lbl.style.color       = '#9ca3af';
+    ind.style.background  = '#f3f4f6';
+    ind.style.borderColor = '#e5e7eb';
   }
 }
 
 function updateRow(sid, badge, flash) {
   const s = document.getElementById(`status-${sid}`);
   const t = document.getElementById(`time-${sid}`);
-  if (s) s.innerHTML = badge;
+  if (s) s.innerHTML   = badge;
   if (t) t.textContent = nowStr();
   if (flash) {
     const row = document.getElementById(`row-${sid}`);
-    if (row) { row.style.transition='background .15s'; row.style.background=flash; setTimeout(()=>row.style.background='',1500); }
+    if (row) {
+      row.style.transition = 'background .15s';
+      row.style.background = flash;
+      setTimeout(() => row.style.background = '', 1500);
+    }
   }
 }
 
 function connectWS() {
-  const proto = location.protocol==='https:'?'wss':'ws';
-  const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_PK}/`);
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const ws    = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_PK}/`);
+
   ws.onopen  = () => setWS(true);
   ws.onclose = () => { setWS(false); setTimeout(connectWS, 3000); };
+
   ws.onmessage = e => {
     const msg = JSON.parse(e.data);
     const d   = msg.data;
     const sid = d.student_id;
+
     if (msg.event === 'ran_example') {
       nRun++;
       updateStats();
       updateRow(sid, '<span class="badge badge-running">▶ Running…</span>', 'rgba(245,158,11,.07)');
+
     } else if (msg.event === 'submitted') {
-      if (!nSub) nSub=0; nSub++;
+      nRun = Math.max(0, nRun - 1);
+      nSub++;
       updateStats();
       updateRow(sid, '<span class="badge badge-pending">⏳ Evaluating…</span>', 'rgba(99,102,241,.06)');
+
     } else if (msg.event === 'submission_result') {
-      if (d.is_correct) { nPassed++; nRun = Math.max(0, nRun-1); }
+      nSub = Math.max(0, nSub - 1);
+      if (d.is_correct) { nPassed++; }
       updateStats();
       const badge = d.is_correct
         ? '<span class="badge badge-passed">✓ Passed</span>'
@@ -183,6 +216,7 @@ function connectWS() {
     }
   };
 }
+
 connectWS();
 </script>
 {% endblock %}

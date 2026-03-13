@@ -1,24 +1,21 @@
-# ── CodeLearn application image ────────────────────────────────────────
-FROM python:3.11-slim
+FROM python:3.12-slim
 
-# System dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /code
 
-# Install Python dependencies first (cached layer)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project source
 COPY . .
 
-# Create non-root user for security
-RUN adduser --disabled-password --gecos '' appuser \
-    && chown -R appuser:appuser /app
-USER appuser
+RUN mkdir -p /code/static && \
+    DJANGO_SETTINGS_MODULE=codelearn.settings.production \
+    SECRET_KEY=build-time-dummy-key \
+    DATABASE_URL=sqlite:///tmp/dummy.db \
+    python manage.py collectstatic --no-input
 
 EXPOSE 8000
