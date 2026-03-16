@@ -19,7 +19,9 @@ class JournalDetailView(LoginRequiredMixin, DetailView):
         user = self.request.user
         if user != group.teacher and user not in group.students.all():
             raise PermissionDenied
-        return group.journal
+        # Auto-create journal if it doesn't exist
+        journal, _ = Journal.objects.get_or_create(group=group)
+        return journal
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
