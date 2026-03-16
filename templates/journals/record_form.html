@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Оценить — {{ lesson.title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.grade-row { display: flex; gap: .35rem; }
+.grade-btn { width: 36px; height: 36px; border: 1.5px solid var(--border); background: transparent; font-family: var(--font-display); font-size: 1rem; font-weight: 700; cursor: pointer; color: var(--text-muted); transition: all .15s; border-radius: var(--radius-sm); }
+.grade-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.grade-btn.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+.attend-label { display: flex; align-items: center; gap: .5rem; cursor: pointer; font-size: .85rem; user-select: none; }
+.attend-check { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.comment-input { width: 100%; border: none; border-bottom: 1.5px solid var(--border); background: transparent; font-family: var(--font-body); font-size: .85rem; padding: .25rem 0 .4rem; outline: none; color: var(--text); min-width: 150px; transition: border-color .15s; }
+.comment-input:focus { border-bottom-color: var(--accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:860px;margin:0 auto;">
+
+  <div class="page-hero fade-up" style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost btn-sm">← Журнал</a>
+      <span style="color:var(--text-muted);font-size:.85rem;font-family:var(--font-mono);">/ Оценки</span>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem;">{{ lesson.date|date:"d M Y" }}</p>
+    <h1 class="section-title">{{ lesson.title }}</h1>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="card fade-up-2" style="overflow:hidden;margin-bottom:20px;">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Студент</th>
+            <th>Оценка (0–5)</th>
+            <th>Присутствие</th>
+            <th>Комментарий</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in records %}
+          <tr>
+            <td style="font-weight:600;">{{ record.student.get_full_name|default:record.student.username }}</td>
+            <td>
+              <input type="hidden" name="grade_{{ record.pk }}" id="grade-hidden-{{ record.pk }}" value="{{ record.grade|default:'0' }}">
+              <div class="grade-row">
+                {% for g in "012345" %}
+                  <button type="button"
+                    class="grade-btn {% if record.grade|stringformat:'s' == g %}selected{% endif %}"
+                    onclick="setGrade({{ record.pk }}, '{{ g }}', this)">{{ g }}</button>
+                {% endfor %}
+              </div>
+            </td>
+            <td>
+              <label class="attend-label">
+                <input class="attend-check" type="checkbox" name="attended_{{ record.pk }}" {% if record.attended %}checked{% endif %}>
+                Был на уроке
+              </label>
+            </td>
+            <td>
+              <input class="comment-input" type="text" name="comment_{{ record.pk }}" value="{{ record.comment }}" placeholder="Заметка...">
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" style="padding:2rem;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:.83rem;">В группе нет студентов</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost">← Отмена</a>
+      <button type="submit" class="btn btn-primary btn-lg">Сохранить оценки →</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setGrade(recordPk, grade, btn) {
+  btn.closest('.grade-row').querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('grade-hidden-' + recordPk).value = grade;
+}
+</script>
+{% endblock %}

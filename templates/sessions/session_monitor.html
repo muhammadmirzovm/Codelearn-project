@@ -3,25 +3,25 @@
 {% block content %}
 
 <div class="page-hero fade-up">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;z-index:1;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div style="display:flex;align-items:center;gap:12px;">
       <div>
         <h1 class="section-title">📡 Live Monitor</h1>
         <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
       </div>
-      <div id="ws-indicator" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:#f3f4f6;border:1px solid #e5e7eb;">
-        <span id="ws-dot" style="width:7px;height:7px;border-radius:50%;background:#9ca3af;"></span>
-        <span id="ws-label" style="font-size:.72rem;font-weight:600;color:#9ca3af;">Connecting</span>
+      <div id="ws-indicator" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:var(--bg2);border:1px solid var(--border);">
+        <span id="ws-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-sub);"></span>
+        <span id="ws-label" style="font-size:.72rem;font-weight:600;color:var(--text-sub);font-family:var(--font-mono);">Connecting</span>
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       {% if session.duration_minutes and session.activated_at %}
-      <div class="cd-wrap cd-ok" id="cd-wrap" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;font-weight:700;">
+      <div class="cd-wrap cd-ok" id="cd-wrap" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius);font-weight:700;">
         <span style="font-size:.75rem;">⏱</span>
         <span class="mono" id="countdown">--:--</span>
       </div>
       {% endif %}
-      <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-yellow btn-sm">🏆 Leaderboard</a>
+      <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm">🏆 Leaderboard</a>
       <form method="post" action="{% url 'sessions:deactivate' session.pk %}" style="display:inline;">
         {% csrf_token %}
         <button class="btn btn-danger btn-sm" onclick="return confirm('Close this session?')">■ Close Session</button>
@@ -30,26 +30,25 @@
   </div>
 </div>
 
-<!-- Stats -->
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px;" class="fade-up-2">
   <div class="stat-card" style="text-align:center;">
-    <p style="font-size:1.8rem;font-weight:800;color:var(--brand);" id="s-total">{{ student_data|length }}</p>
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-total">{{ student_data|length }}</p>
     <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Students</p>
   </div>
-  <div class="stat-card" style="text-align:center;border-left:3px solid var(--green-l);">
-    <p style="font-size:1.8rem;font-weight:800;color:var(--green);" id="s-passed">0</p>
+  <div class="stat-card" style="text-align:center;border-left:3px solid var(--success);">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--success);" id="s-passed">0</p>
     <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Passed ✓</p>
   </div>
-  <div class="stat-card" style="text-align:center;border-left:3px solid var(--brand-l);">
-    <p style="font-size:1.8rem;font-weight:800;color:var(--brand);" id="s-sub">0</p>
+  <div class="stat-card" style="text-align:center;border-left:3px solid var(--accent);">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-sub">0</p>
     <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Submitted</p>
   </div>
-  <div class="stat-card" style="text-align:center;border-left:3px solid var(--yellow);">
-    <p style="font-size:1.8rem;font-weight:800;color:var(--yellow);" id="s-run">0</p>
+  <div class="stat-card" style="text-align:center;border-left:3px solid var(--warning);">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--warning);" id="s-run">0</p>
     <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Working</p>
   </div>
-  <div class="stat-card" style="text-align:center;border-left:3px solid #9ca3af;">
-    <p style="font-size:1.8rem;font-weight:800;color:#9ca3af;" id="s-idle">{{ student_data|length }}</p>
+  <div class="stat-card" style="text-align:center;border-left:3px solid var(--border2);">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--text-muted);" id="s-idle">{{ student_data|length }}</p>
     <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Idle</p>
   </div>
 </div>
@@ -69,10 +68,10 @@
       <tr id="row-{{ item.student.pk }}">
         <td>
           <div style="display:flex;align-items:center;gap:9px;">
-            <div style="width:32px;height:32px;background:linear-gradient(135deg,#6366f1,#4338ca);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:white;flex-shrink:0;">{{ item.student.username|first|upper }}</div>
+            <div class="ac-{{ forloop.counter0 }}" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;font-family:var(--font-mono);">{{ item.student.username|first|upper }}</div>
             <div>
-              <p style="font-weight:700;font-size:.9rem;">{{ item.student.get_full_name|default:item.student.username }}</p>
-              <p style="font-size:.73rem;color:var(--text-muted);">@{{ item.student.username }}</p>
+              <p style="font-weight:600;font-size:.9rem;">{{ item.student.get_full_name|default:item.student.username }}</p>
+              <p style="font-size:.73rem;color:var(--text-muted);font-family:var(--font-mono);">@{{ item.student.username }}</p>
             </div>
           </div>
         </td>
@@ -83,10 +82,10 @@
             <span class="badge badge-notstarted">Not started</span>
           {% endif %}
         </td>
-        <td class="hide-sm" id="score-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.875rem;">
+        <td class="hide-sm" id="score-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.875rem;font-family:var(--font-mono);">
           {% if item.submission %}{{ item.submission.passed_count }}/{{ item.submission.total_count }}{% else %}—{% endif %}
         </td>
-        <td class="hide-sm" id="time-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.78rem;font-family:'Fira Code',monospace;">
+        <td class="hide-sm" id="time-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.78rem;font-family:var(--font-mono);">
           {% if item.submission %}{{ item.submission.created_at|date:"H:i:s" }}{% else %}—{% endif %}
         </td>
       </tr>
@@ -95,7 +94,6 @@
   </table>
 </div>
 
-<!-- ALL Django data lives here — linter ignores application/json tags entirely -->
 <script type="application/json" id="page-data">
 {
   "session_pk":    {{ session.pk }},
@@ -105,12 +103,10 @@
   "statuses": [{% for item in student_data %}"{{ item.submission.status|default:'none' }}"{% if not forloop.last %},{% endif %}{% endfor %}]
 }
 </script>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Read ALL Django data from the JSON tag — zero template tags below this line
 const DATA          = JSON.parse(document.getElementById('page-data').textContent);
 const SESSION_PK    = DATA.session_pk;
 const DURATION_SECS = DATA.duration_mins * 60;
@@ -120,7 +116,6 @@ const total         = DATA.total;
 let nPassed = DATA.statuses.filter(s => s === 'passed').length;
 let nSub    = DATA.statuses.filter(s => s !== 'none' && s !== 'passed').length;
 let nRun    = 0;
-
 updateStats();
 
 function updateStats() {
@@ -130,20 +125,17 @@ function updateStats() {
   document.getElementById('s-idle').textContent   = Math.max(0, total - nPassed - nSub - nRun);
 }
 
-// Timer
 if (DURATION_SECS && ACTIVATED_AT) {
   function updateCD() {
     const elapsed = (Date.now() - new Date(ACTIVATED_AT).getTime()) / 1000;
-    const rem     = Math.max(0, DURATION_SECS - elapsed);
-    const m       = Math.floor(rem / 60);
-    const s       = Math.floor(rem % 60);
-    const el      = document.getElementById('countdown');
-    const wrap    = document.getElementById('cd-wrap');
-    if (el)   el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    if (wrap) wrap.className = 'cd-wrap ' + (rem > 120 ? 'cd-ok' : rem > 30 ? 'cd-warn' : 'cd-crit');
+    const rem = Math.max(0, DURATION_SECS - elapsed);
+    const m = Math.floor(rem/60), s = Math.floor(rem%60);
+    const el = document.getElementById('countdown');
+    const wrap = document.getElementById('cd-wrap');
+    if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (wrap) wrap.className = 'cd-wrap ' + (rem>120?'cd-ok':rem>30?'cd-warn':'cd-crit');
   }
-  updateCD();
-  setInterval(updateCD, 500);
+  updateCD(); setInterval(updateCD, 500);
 }
 
 function nowStr() { return new Date().toTimeString().slice(0, 8); }
@@ -153,70 +145,43 @@ function setWS(ok) {
   const lbl = document.getElementById('ws-label');
   const ind = document.getElementById('ws-indicator');
   if (ok) {
-    dot.style.background  = 'var(--green-l)';
-    lbl.textContent       = 'Live';
-    lbl.style.color       = 'var(--green)';
-    ind.style.background  = 'var(--green-bg)';
-    ind.style.borderColor = 'var(--green-brd)';
+    dot.style.background = 'var(--success)'; lbl.textContent = 'Live'; lbl.style.color = 'var(--success)';
+    ind.style.background = 'var(--success-bg)'; ind.style.borderColor = 'var(--success-brd)';
   } else {
-    dot.style.background  = '#9ca3af';
-    lbl.textContent       = 'Reconnecting';
-    lbl.style.color       = '#9ca3af';
-    ind.style.background  = '#f3f4f6';
-    ind.style.borderColor = '#e5e7eb';
+    dot.style.background = 'var(--text-sub)'; lbl.textContent = 'Reconnecting'; lbl.style.color = 'var(--text-sub)';
+    ind.style.background = 'var(--bg2)'; ind.style.borderColor = 'var(--border)';
   }
 }
 
 function updateRow(sid, badge, flash) {
   const s = document.getElementById(`status-${sid}`);
   const t = document.getElementById(`time-${sid}`);
-  if (s) s.innerHTML   = badge;
+  if (s) s.innerHTML = badge;
   if (t) t.textContent = nowStr();
   if (flash) {
     const row = document.getElementById(`row-${sid}`);
-    if (row) {
-      row.style.transition = 'background .15s';
-      row.style.background = flash;
-      setTimeout(() => row.style.background = '', 1500);
-    }
+    if (row) { row.style.transition='background .15s'; row.style.background=flash; setTimeout(()=>row.style.background='',1500); }
   }
 }
 
 function connectWS() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const ws    = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_PK}/`);
-
+  const proto = location.protocol==='https:'?'wss':'ws';
+  const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_PK}/`);
   ws.onopen  = () => setWS(true);
   ws.onclose = () => { setWS(false); setTimeout(connectWS, 3000); };
-
   ws.onmessage = e => {
-    const msg = JSON.parse(e.data);
-    const d   = msg.data;
-    const sid = d.student_id;
-
-    if (msg.event === 'ran_example') {
-      nRun++;
+    const msg = JSON.parse(e.data); const d = msg.data; const sid = d.student_id;
+    if (msg.event==='ran_example') { nRun++; updateStats(); updateRow(sid,'<span class="badge badge-running">▶ Running…</span>','rgba(13,148,136,.07)'); }
+    else if (msg.event==='submitted') { nRun=Math.max(0,nRun-1); nSub++; updateStats(); updateRow(sid,'<span class="badge badge-pending">⏳ Evaluating…</span>','rgba(13,148,136,.05)'); }
+    else if (msg.event==='submission_result') {
+      nSub=Math.max(0,nSub-1);
+      if (d.is_correct) nPassed++;
       updateStats();
-      updateRow(sid, '<span class="badge badge-running">▶ Running…</span>', 'rgba(245,158,11,.07)');
-
-    } else if (msg.event === 'submitted') {
-      nRun = Math.max(0, nRun - 1);
-      nSub++;
-      updateStats();
-      updateRow(sid, '<span class="badge badge-pending">⏳ Evaluating…</span>', 'rgba(99,102,241,.06)');
-
-    } else if (msg.event === 'submission_result') {
-      nSub = Math.max(0, nSub - 1);
-      if (d.is_correct) { nPassed++; }
-      updateStats();
-      const badge = d.is_correct
-        ? '<span class="badge badge-passed">✓ Passed</span>'
-        : '<span class="badge badge-failed">✗ Failed</span>';
-      updateRow(sid, badge, d.is_correct ? 'rgba(16,185,129,.07)' : 'rgba(239,68,68,.06)');
+      const badge = d.is_correct ? '<span class="badge badge-passed">✓ Passed</span>' : '<span class="badge badge-failed">✗ Failed</span>';
+      updateRow(sid, badge, d.is_correct?'rgba(5,150,105,.07)':'rgba(220,38,38,.06)');
     }
   };
 }
-
 connectWS();
 </script>
 {% endblock %}

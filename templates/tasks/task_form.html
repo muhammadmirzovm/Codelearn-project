@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% block title %}{{ title }} – CodeLearn{% endblock %}
+
 {% block extra_head %}
 <style>
-  .tc-card { background:var(--bg); border:1.5px solid var(--border); border-radius:12px; padding:16px; transition:border-color .2s; position:relative; }
-  .tc-card:hover { border-color:var(--brand-ll); }
-  .tc-card .tc-num { position:absolute; top:12px; left:16px; font-size:.7rem; font-weight:800; color:var(--brand); text-transform:uppercase; letter-spacing:.06em; }
-  .tc-del { position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:7px; background:var(--red-bg); border:1px solid var(--red-brd); color:var(--red); font-size:.8rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
-  .tc-del:hover { background:var(--red); color:white; }
-  .type-toggle { display:flex; gap:0; border:1.5px solid var(--border); border-radius:9px; overflow:hidden; }
-  .type-toggle label { flex:1; text-align:center; padding:7px 10px; font-size:.78rem; font-weight:700; cursor:pointer; transition:all .15s; color:var(--text-muted); background:var(--white); }
-  .type-toggle input[type=radio] { display:none; }
-  .type-toggle input:checked + label { background:var(--brand); color:white; }
+.tc-card { background:var(--bg2); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:16px; transition:border-color .2s; position:relative; }
+.tc-card:hover { border-color:var(--accent-ll); }
+.tc-card .tc-num { position:absolute; top:12px; left:16px; font-size:.68rem; font-weight:500; color:var(--accent); text-transform:uppercase; letter-spacing:.08em; font-family:var(--font-mono); }
+.tc-del { position:absolute; top:10px; right:10px; width:28px; height:28px; border-radius:var(--radius-sm); background:var(--danger-bg); border:1px solid var(--danger-brd); color:var(--danger); font-size:.8rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.tc-del:hover { background:var(--danger); color:white; }
+.type-toggle { display:flex; border:1.5px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.type-toggle label { flex:1; text-align:center; padding:7px 10px; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; color:var(--text-muted); background:var(--surface); font-family:var(--font-mono); }
+.type-toggle input[type=radio] { display:none; }
+.type-toggle input:checked + label { background:var(--accent); color:white; }
 </style>
 {% endblock %}
 
@@ -25,13 +26,12 @@
     {% csrf_token %}
     {{ formset.management_form }}
 
-    <!-- ── Task details ── -->
     <div class="card card-p fade-up-2" style="margin-bottom:20px;">
-      <h2 style="font-weight:800;font-size:1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">📄 Task Details</h2>
+      <h2 style="font-weight:600;font-size:1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">📄 Task Details</h2>
       <div class="inp-group">
         <label class="inp-label">Title *</label>
         {{ form.title }}
-        {% if form.title.errors %}<p style="color:var(--red);font-size:.78rem;margin-top:4px;">{{ form.title.errors.0 }}</p>{% endif %}
+        {% if form.title.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.title.errors.0 }}</p>{% endif %}
       </div>
       <div class="inp-group">
         <label class="inp-label">Problem Statement *</label>
@@ -59,27 +59,24 @@
       </div>
     </div>
 
-    <!-- ── Test cases ── -->
     <div class="card card-p fade-up-3" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:10px;">
         <div>
-          <h2 style="font-weight:800;font-size:1rem;">🧪 Test Cases</h2>
+          <h2 style="font-weight:600;font-size:1rem;">🧪 Test Cases</h2>
           <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px;">
-            <span style="background:var(--green-bg);color:var(--green);padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;">Example</span> = visible to students during Run Code &nbsp;·&nbsp;
-            <span style="background:#f3f4f6;color:#6b7280;padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;">Hidden</span> = only used for Submit evaluation
+            <span style="background:var(--success-bg);color:var(--success);padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;font-family:var(--font-mono);">Example</span> = visible to students during Run Code &nbsp;·&nbsp;
+            <span style="background:var(--bg2);color:var(--text-muted);padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;font-family:var(--font-mono);">Hidden</span> = only used for Submit evaluation
           </p>
         </div>
         <button type="button" id="add-tc" class="btn btn-primary">＋ Add Test Case</button>
       </div>
 
-      <!-- Hidden test cases (to be deleted) -->
       <div id="delete-forms" style="display:none;">
         {% for f in formset %}
           {% if f.instance.pk %}{{ f.id }}{{ f.DELETE }}{% endif %}
         {% endfor %}
       </div>
 
-      <!-- Live test case list -->
       <div id="tc-list" style="display:flex;flex-direction:column;gap:12px;">
         {% for f in formset %}{% if not f.instance.pk or not f.DELETE.value %}
         <div class="tc-card" data-idx="{{ forloop.counter0 }}">
@@ -96,7 +93,7 @@
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-            <label style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;">Type</label>
+            <label style="font-size:.78rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);">Type</label>
             <div class="type-toggle">
               <input type="radio" name="{{ f.is_example.html_name }}" value="true" id="ex_true_{{ forloop.counter0 }}" {% if f.is_example.value %}checked{% endif %}>
               <label for="ex_true_{{ forloop.counter0 }}">✅ Example</label>
@@ -122,14 +119,12 @@
     </div>
   </form>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Management form counters
 let totalForms = parseInt(document.querySelector('[name$="TOTAL_FORMS"]').value) || 0;
-let formIdx = totalForms; // next index for new forms
+let formIdx = totalForms;
 
 function renumberCards() {
   document.querySelectorAll('#tc-list .tc-card').forEach((card, i) => {
@@ -143,7 +138,6 @@ function renumberCards() {
 
 function deleteTC(btn) {
   const card = btn.closest('.tc-card');
-  // If the hidden id input has a value → mark DELETE (existing DB row)
   const idInput = card.querySelector('input[name$="-id"]');
   if (idInput && idInput.value) {
     const delName = idInput.name.replace('-id', '-DELETE');
@@ -160,7 +154,6 @@ document.getElementById('add-tc').addEventListener('click', () => {
   const idx = formIdx++;
   totalForms++;
   document.querySelector('[name$="TOTAL_FORMS"]').value = totalForms;
-
   const html = `
     <div class="tc-card" data-idx="${idx}" style="animation:fadeUp .25s ease both;">
       <span class="tc-num">Test #<span class="tc-index">${document.querySelectorAll('#tc-list .tc-card').length + 1}</span></span>
@@ -177,7 +170,7 @@ document.getElementById('add-tc').addEventListener('click', () => {
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-        <label style="font-size:.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;">Type</label>
+        <label style="font-size:.78rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);">Type</label>
         <div class="type-toggle">
           <input type="radio" name="testcase_set-${idx}-is_example" value="true" id="ex_true_${idx}" checked>
           <label for="ex_true_${idx}">✅ Example</label>
@@ -188,14 +181,12 @@ document.getElementById('add-tc').addEventListener('click', () => {
       </div>
       <button type="button" class="tc-del" onclick="deleteTC(this)" title="Remove">✕</button>
     </div>`;
-
   const list = document.getElementById('tc-list');
   list.insertAdjacentHTML('beforeend', html);
   renumberCards();
   list.lastElementChild.querySelector('textarea').focus();
 });
 
-// Init
 renumberCards();
 </script>
 {% endblock %}

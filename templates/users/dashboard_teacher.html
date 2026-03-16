@@ -3,33 +3,32 @@
 {% block content %}
 
 <div class="page-hero fade-up">
-  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1;">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <h1 style="font-size:1.9rem;font-weight:800;color:var(--text);">Good day, {{ user.get_full_name|default:user.username }}! 👋</h1>
-      <p style="color:var(--text-muted);margin-top:4px;font-size:.95rem;">Teacher Dashboard — run your live coding sessions</p>
+      <h1 class="section-title">Good day, {{ user.get_full_name|default:user.username }}! 👋</h1>
+      <p class="section-sub">Teacher Dashboard — run your live coding sessions</p>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">＋ New Task</a>
-      <a href="{% url 'sessions:session_create' %}" class="btn btn-success">▶ Schedule Session</a>
+      <a href="{% url 'tasks:task_create' %}" class="btn btn-ghost">＋ New Task</a>
+      <a href="{% url 'sessions:session_create' %}" class="btn btn-primary">▶ Schedule Session</a>
     </div>
   </div>
 </div>
 
-<!-- Active sessions banner -->
 {% if active_sessions %}
-<div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid var(--green-brd);border-radius:16px;padding:20px 24px;margin-bottom:24px;" class="fade-up-2">
+<div style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:24px;" class="fade-up-2">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
     <span class="live-dot pulse"></span>
-    <span style="font-weight:800;color:var(--green);font-size:1rem;">Live Sessions Running</span>
+    <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">Live Sessions Running</span>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
     {% for s in active_sessions %}
-    <div style="background:white;border:1.5px solid var(--green-brd);border-radius:12px;padding:16px 18px;">
-      <p style="font-weight:700;font-size:.95rem;color:var(--text);">{{ s.task.title }}</p>
-      <p style="font-size:.8rem;color:var(--text-muted);margin:4px 0 12px;">{{ s.group.name }} · {{ s.group.students.count }} students{% if s.duration_minutes %} · ⏱ {{ s.duration_minutes }}min{% endif %}</p>
+    <div style="background:var(--surface);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:16px 18px;">
+      <p style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px;">{{ s.task.title }}</p>
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">{{ s.group.name }} · {{ s.group.students.count }} students{% if s.duration_minutes %} · ⏱ {{ s.duration_minutes }}min{% endif %}</p>
       <div style="display:flex;gap:8px;">
         <a href="{% url 'sessions:monitor' s.pk %}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">📡 Monitor</a>
-        <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-yellow btn-sm">🏆</a>
+        <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
       </div>
     </div>
     {% endfor %}
@@ -39,28 +38,25 @@
 
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;" class="fade-up-3">
 
-  <!-- Groups -->
   <div class="card">
     <div class="card-header">
-      <div style="font-weight:800;font-size:.95rem;">👥 My Groups</div>
-      <a href="{% url 'users:group_create' %}" class="btn btn-brand-soft btn-sm">＋ New</a>
+      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">My Groups</span>
+      <a href="{% url 'users:group_create' %}" class="btn btn-accent-soft btn-sm">＋ New</a>
     </div>
     {% if groups %}
       {% for g in groups %}
       <div style="padding:14px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-    <div>
-      <p style="font-weight:700;font-size:.9rem;">{{ g.name }}</p>
-      <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px;">{{ g.students.count }} student{{ g.students.count|pluralize }}</p>
-    </div>
-    <div style="display:flex;gap:6px;">
-      <a href="{% url 'users:group_detail' g.id %}" class="btn btn-brand-soft btn-sm">
-        <i class="bi bi-chat-fill"></i> Chat
-      </a>
-      <a href="{% url 'users:group_edit' g.pk %}" class="btn btn-ghost btn-sm">Edit</a>
-    </div>
-  </div>
-</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <p style="font-weight:600;font-size:.9rem;">{{ g.name }}</p>
+            <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">{{ g.students.count }} student{{ g.students.count|pluralize }}</p>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm">Chat</a>
+            <a href="{% url 'users:group_edit' g.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+          </div>
+        </div>
+      </div>
       {% endfor %}
     {% else %}
     <div style="padding:36px 20px;text-align:center;">
@@ -71,17 +67,16 @@
     {% endif %}
   </div>
 
-  <!-- Upcoming sessions -->
   <div class="card">
     <div class="card-header">
-      <div style="font-weight:800;font-size:.95rem;">📅 Upcoming Sessions</div>
-      <a href="{% url 'sessions:session_create' %}" class="btn btn-brand-soft btn-sm">＋ Schedule</a>
+      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">Upcoming Sessions</span>
+      <a href="{% url 'sessions:session_create' %}" class="btn btn-accent-soft btn-sm">＋ Schedule</a>
     </div>
     {% if upcoming_sessions %}
       {% for s in upcoming_sessions %}
       <div style="padding:14px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
-        <p style="font-weight:700;font-size:.9rem;">{{ s.task.title }}</p>
-        <p style="font-size:.78rem;color:var(--text-muted);margin:3px 0 8px;">{{ s.group.name }} · {{ s.start_time|date:"M j, H:i" }}</p>
+        <p style="font-weight:600;font-size:.9rem;">{{ s.task.title }}</p>
+        <p style="font-size:.78rem;color:var(--text-muted);margin:3px 0 8px;font-family:var(--font-mono);">{{ s.group.name }} · {{ s.start_time|date:"M j, H:i" }}</p>
         <a href="{% url 'sessions:activate' s.pk %}" class="btn btn-success btn-sm">▶ Start Now</a>
       </div>
       {% endfor %}

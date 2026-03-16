@@ -1,55 +1,31 @@
 {% extends "base.html" %}
 {% block title %}{{ task.title }} – CodeLearn{% endblock %}
+
 {% block extra_head %}
 <style>
-  body { background: #f0f4ff; }
-  .CodeMirror { height: 100%; min-height: 340px; border-radius: 0 0 12px 12px; }
-  .CodeMirror-gutters { background: #2e3440 !important; border-right: 1px solid #3b4252 !important; }
-
-  /* Language selector */
-  .lang-pill {
-    display: flex; align-items: center; gap: 6px;
-    padding: 7px 14px; border-radius: 99px;
-    font-size: .82rem; font-weight: 700; cursor: pointer;
-    border: 2px solid transparent; transition: all .17s;
-    background: var(--white); color: var(--text-muted);
-    border-color: var(--border);
-  }
-  .lang-pill:hover { border-color: var(--brand-ll); color: var(--brand); }
-  .lang-pill.active { border-color: var(--brand); background: var(--brand-bg); color: var(--brand); }
-  .lang-pill .lang-icon { font-size: 1rem; }
-
-  /* Tab buttons */
-  .tab-btn { padding:9px 18px; font-size:.82rem; font-weight:700; color:var(--text-muted); border-bottom:2.5px solid transparent; cursor:pointer; transition:all .15s; white-space:nowrap; }
-  .tab-btn.active { color:var(--brand); border-bottom-color:var(--brand); }
-
-  /* Result items */
-  .ri { border-left:4px solid var(--border2); padding:12px 14px; border-radius:0 10px 10px 0; margin-bottom:8px; }
-  .ri.pass { border-left-color:var(--green-l); background:var(--green-bg); }
-  .ri.fail { border-left-color:var(--red-l); background:var(--red-bg); }
-  .ri.warn { border-left-color:var(--yellow); background:var(--yellow-bg); }
-  pre.err { color:var(--red); background:var(--red-bg); padding:6px 10px; border-radius:6px; margin:4px 0; font-size:.76rem; font-family:'Fira Code',monospace; }
-
-  /* Countdown */
-  .cd-wrap { display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:12px; font-weight:700; }
-  .cd-ok   { background:var(--green-bg); border:1.5px solid var(--green-brd); color:var(--green); }
-  .cd-warn { background:var(--yellow-bg); border:1.5px solid var(--yellow-brd); color:var(--yellow); }
-  .cd-crit { background:var(--red-bg); border:1.5px solid var(--red-brd); color:var(--red-l); animation:blink .65s infinite; }
-
-  @media(min-width:1100px){ .room-grid { display:grid; grid-template-columns:420px 1fr; gap:18px; align-items:start; } }
-  @media(max-width:1099px){ .room-grid { display:flex; flex-direction:column; gap:14px; } }
+.CodeMirror { height: 100%; min-height: 340px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.CodeMirror-gutters { background: #2e3440 !important; border-right: 1px solid #3b4252 !important; }
+.lang-pill { display:flex; align-items:center; gap:6px; padding:7px 14px; border-radius:99px; font-size:.82rem; font-weight:600; cursor:pointer; border:2px solid var(--border); transition:all .17s; background:var(--surface); color:var(--text-muted); }
+.lang-pill:hover { border-color:var(--accent-ll); color:var(--accent); }
+.lang-pill.active { border-color:var(--accent); background:var(--accent-bg); color:var(--accent); }
+.tab-btn { padding:9px 18px; font-size:.82rem; font-weight:600; color:var(--text-muted); border-bottom:2.5px solid transparent; cursor:pointer; transition:all .15s; white-space:nowrap; background:transparent; border-top:none; border-left:none; border-right:none; }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; border-radius:var(--radius-sm); margin:4px 0; font-size:.76rem; font-family:var(--font-mono); }
+.cd-wrap { display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:var(--radius); font-weight:700; }
+.cd-ok   { background:var(--success-bg); border:1.5px solid var(--success-brd); color:var(--success); }
+.cd-warn { background:var(--warning-bg); border:1.5px solid var(--warning-brd); color:var(--warning); }
+.cd-crit { background:var(--danger-bg);  border:1.5px solid var(--danger-brd);  color:var(--danger); animation:blink .65s infinite; }
+@media(min-width:1100px){ .room-grid { display:grid; grid-template-columns:420px 1fr; gap:18px; align-items:start; } }
+@media(max-width:1099px){ .room-grid { display:flex; flex-direction:column; gap:14px; } }
 </style>
-
-<!-- CodeMirror modes for all languages -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
 {% endblock %}
 
 {% block content %}
-<!-- Top bar -->
 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-    <h1 style="font-size:1.15rem;font-weight:800;color:var(--text);">{{ task.title }}</h1>
+    <h1 style="font-family:var(--font-display);font-size:1.3rem;font-weight:700;">{{ task.title }}</h1>
     <span class="badge badge-active"><span class="live-dot pulse" style="width:6px;height:6px;"></span> {{ session.group.name }}</span>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
@@ -59,81 +35,67 @@
       <span class="mono" id="countdown" style="font-size:1rem;">--:--</span>
     </div>
     {% endif %}
-    <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-yellow btn-sm">🏆 Leaderboard</a>
+    <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm">🏆 Leaderboard</a>
   </div>
 </div>
 
-<!-- Already passed banner -->
 {% if my_submission and my_submission.is_correct %}
-<div style="background:var(--green-bg);border:2px solid var(--green-brd);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+<div style="background:var(--success-bg);border:2px solid var(--success-brd);border-radius:var(--radius-lg);padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;">
   <span style="font-size:1.8rem;">🎉</span>
   <div>
-    <p style="font-weight:800;color:var(--green);font-size:.95rem;">You already solved this task!</p>
-    <p style="font-size:.8rem;color:var(--text-muted);">Submitted at {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.passed_count }}/{{ my_submission.total_count }} tests passed · {{ my_submission.get_language_display }}</p>
+    <p style="font-weight:700;color:var(--success);font-size:.95rem;">You already solved this task!</p>
+    <p style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">Submitted at {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.passed_count }}/{{ my_submission.total_count }} tests passed</p>
   </div>
 </div>
 {% endif %}
 
 <div class="room-grid">
-
-  <!-- ── LEFT COLUMN ── -->
   <div style="display:flex;flex-direction:column;gap:14px;">
 
-    <!-- Problem statement -->
     <div class="card" style="overflow:hidden;">
-      <div style="background:linear-gradient(135deg,var(--brand-bg),var(--brand-bgd));padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleProblem()">
-        <span style="font-weight:800;font-size:.9rem;color:var(--brand);">📋 Problem Statement</span>
-        <span id="prob-arrow" style="color:var(--brand);font-size:.75rem;">▼ Hide</span>
+      <div style="background:var(--accent-bg);padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleProblem()">
+        <span style="font-weight:600;font-size:.9rem;color:var(--accent);">📋 Problem Statement</span>
+        <span id="prob-arrow" style="color:var(--accent);font-size:.75rem;font-family:var(--font-mono);">▼ Hide</span>
       </div>
       <div id="prob-body" style="padding:16px 18px;">
-        <pre style="white-space:pre-wrap;font-family:'Outfit',sans-serif;font-size:.875rem;color:var(--text);line-height:1.75;">{{ task.description }}</pre>
+        <pre style="white-space:pre-wrap;font-family:var(--font-body);font-size:.875rem;color:var(--text);line-height:1.75;">{{ task.description }}</pre>
         {% if task.example_input %}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
           <div>
-            <p style="font-size:.7rem;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Sample Input</p>
-            <pre style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px;font-family:'Fira Code',monospace;font-size:.78rem;color:#4338ca;">{{ task.example_input }}</pre>
+            <p style="font-size:.68rem;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;font-family:var(--font-mono);">Sample Input</p>
+            <pre style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px;font-family:var(--font-mono);font-size:.78rem;color:var(--accent);">{{ task.example_input }}</pre>
           </div>
           <div>
-            <p style="font-size:.7rem;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;">Sample Output</p>
-            <pre style="background:var(--green-bg);border:1.5px solid var(--green-brd);border-radius:8px;padding:10px;font-family:'Fira Code',monospace;font-size:.78rem;color:var(--green);">{{ task.example_output }}</pre>
+            <p style="font-size:.68rem;font-weight:500;color:var(--success);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;font-family:var(--font-mono);">Sample Output</p>
+            <pre style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius);padding:10px;font-family:var(--font-mono);font-size:.78rem;color:var(--success);">{{ task.example_output }}</pre>
           </div>
         </div>
         {% endif %}
       </div>
     </div>
 
-    <!-- Language selector -->
     <div class="card card-p" style="padding:14px 18px;">
-      <p style="font-size:.72rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">🌐 Select Language</p>
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:var(--font-mono);">🌐 Select Language</p>
       <div style="display:flex;flex-wrap:wrap;gap:8px;" id="lang-selector">
-        <button class="lang-pill active" data-lang="python" data-mode="python" onclick="switchLang(this)">
-          <span class="lang-icon">🐍</span> Python
-        </button>
-        <button class="lang-pill" data-lang="javascript" data-mode="javascript" onclick="switchLang(this)">
-          <span class="lang-icon">🟨</span> JavaScript
-        </button>
-        <button class="lang-pill" data-lang="cpp" data-mode="text/x-c++src" onclick="switchLang(this)">
-          <span class="lang-icon">⚡</span> C++
-        </button>
-        <button class="lang-pill" data-lang="c" data-mode="text/x-csrc" onclick="switchLang(this)">
-          <span class="lang-icon">🔵</span> C
-        </button>
+        <button class="lang-pill active" data-lang="python" onclick="switchLang(this)">🐍 Python</button>
+        <button class="lang-pill" data-lang="javascript" onclick="switchLang(this)">🟨 JavaScript</button>
+        <button class="lang-pill" data-lang="cpp" onclick="switchLang(this)">⚡ C++</button>
+        <button class="lang-pill" data-lang="c" onclick="switchLang(this)">🔵 C</button>
       </div>
     </div>
 
-    <!-- Editor -->
     <div class="card" style="overflow:hidden;" id="editor-card">
-      <div style="background:#2e3440;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;border-radius:12px 12px 0 0;">
+      <div style="background:#2e3440;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;">
         <div style="display:flex;align-items:center;gap:10px;">
           <div style="display:flex;gap:5px;">
             <div style="width:11px;height:11px;border-radius:50%;background:#ff5f56;"></div>
             <div style="width:11px;height:11px;border-radius:50%;background:#ffbd2e;"></div>
             <div style="width:11px;height:11px;border-radius:50%;background:#27c93f;"></div>
           </div>
-          <span id="editor-filename" style="font-size:.75rem;color:#81a1c1;font-family:'Fira Code',monospace;font-weight:500;">solution.py</span>
+          <span id="editor-filename" style="font-size:.75rem;color:#81a1c1;font-family:var(--font-mono);">solution.py</span>
         </div>
         <div style="display:flex;gap:6px;">
-          <span style="font-size:.72rem;color:#616e88;">{{ task.time_limit }}s · {{ task.memory_limit }}</span>
+          <span style="font-size:.72rem;color:#616e88;font-family:var(--font-mono);">{{ task.time_limit }}s · {{ task.memory_limit }}</span>
           <button onclick="clearEditor()" style="background:transparent;border:none;color:#616e88;cursor:pointer;font-size:.72rem;padding:0 4px;">✕ Clear</button>
         </div>
       </div>
@@ -144,30 +106,24 @@
 {% endif %}</textarea>
     </div>
 
-    <!-- Action buttons -->
     <div style="display:flex;gap:10px;" id="action-btns">
-      <button id="btn-run" class="btn btn-blue" style="flex:1;" onclick="runCode()">
-        ▶ <span id="run-label">Run Code</span>
-      </button>
-      <button id="btn-submit" class="btn btn-success" style="flex:1;" onclick="submitCode()"
-        {% if my_submission and my_submission.is_correct %}disabled{% endif %}>
+      <button id="btn-run" class="btn btn-ghost" style="flex:1;" onclick="runCode()">▶ <span id="run-label">Run Code</span></button>
+      <button id="btn-submit" class="btn btn-primary" style="flex:1;" onclick="submitCode()" {% if my_submission and my_submission.is_correct %}disabled{% endif %}>
         ✓ <span id="sub-label">{% if my_submission and my_submission.is_correct %}Already Passed!{% else %}Submit{% endif %}</span>
       </button>
     </div>
 
-    <div id="time-up-banner" style="display:none;background:var(--red-bg);border:2px solid var(--red-brd);border-radius:12px;padding:14px 18px;text-align:center;">
-      <p style="font-weight:800;color:var(--red);">⏰ Time's up! The session is now closed.</p>
+    <div id="time-up-banner" style="display:none;background:var(--danger-bg);border:2px solid var(--danger-brd);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
+      <p style="font-weight:700;color:var(--danger);">⏰ Time's up! The session is now closed.</p>
     </div>
   </div>
 
-  <!-- ── RIGHT COLUMN ── -->
   <div>
     <div class="card" style="overflow:hidden;min-height:420px;">
       <div style="display:flex;border-bottom:2px solid var(--border);padding:0 6px;gap:2px;">
         <button class="tab-btn active" id="tab-r" onclick="switchTab('r')">Results</button>
         <button class="tab-btn" id="tab-h" onclick="switchTab('h')">History</button>
       </div>
-
       <div id="panel-r" style="padding:18px;">
         <div id="results-body" style="text-align:center;padding:40px 10px;color:var(--text-muted);">
           <p style="font-size:2.5rem;margin-bottom:10px;">💻</p>
@@ -175,15 +131,14 @@
           <p style="font-size:.82rem;">Select a language, write your code<br>then click <strong>Run Code</strong> to test</p>
         </div>
       </div>
-
       <div id="panel-h" style="display:none;padding:18px;">
         {% if my_submission %}
         <div class="ri {% if my_submission.is_correct %}pass{% else %}fail{% endif %}">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <span style="font-weight:700;font-size:.875rem;">Last Submission</span>
+            <span style="font-weight:600;font-size:.875rem;">Last Submission</span>
             <span class="badge badge-{{ my_submission.status }}">{{ my_submission.get_status_display }}</span>
           </div>
-          <p style="font-size:.78rem;color:var(--text-muted);">{{ my_submission.passed_count }}/{{ my_submission.total_count }} tests · {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.get_language_display }}</p>
+          <p style="font-size:.78rem;color:var(--text-muted);font-family:var(--font-mono);">{{ my_submission.passed_count }}/{{ my_submission.total_count }} tests · {{ my_submission.created_at|date:"H:i:s" }}</p>
         </div>
         {% else %}
         <p style="text-align:center;color:var(--text-muted);padding:24px 0;font-size:.875rem;">No submissions yet</p>
@@ -191,7 +146,6 @@
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}
 
@@ -204,218 +158,141 @@ const DURATION_SECS = {{ session.duration_minutes|default:0 }} * 60;
 const ACTIVATED_AT  = '{{ activated_at_iso }}';
 const ALREADY_PASSED = {% if my_submission and my_submission.is_correct %}true{% else %}false{% endif %};
 
-// ── Language config ──
 const LANG_CONFIG = {
-  python:     { filename: 'solution.py',  mode: 'python',         starter: '# Write your Python solution here\n# Input:  input()  or  int(input())\n# Output: print(...)\n\n' },
-  javascript: { filename: 'solution.js',  mode: 'javascript',     starter: '// Write your JavaScript solution here\n// Input:  const lines = require("fs").readFileSync("/dev/stdin","utf8").trim().split("\\n");\n// Output: console.log(...)\n\n' },
-  cpp:        { filename: 'solution.cpp', mode: 'text/x-c++src',  starter: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // Write your C++ solution here\n    // Input:  cin >> x;\n    // Output: cout << x << endl;\n    return 0;\n}\n' },
-  c:          { filename: 'solution.c',   mode: 'text/x-csrc',    starter: '#include <stdio.h>\n\nint main() {\n    // Write your C solution here\n    // Input:  scanf("%d", &x);\n    // Output: printf("%d\\n", x);\n    return 0;\n}\n' },
+  python:     { filename:'solution.py',  mode:'python',        starter:'# Write your Python solution here\n# Input:  input()  or  int(input())\n# Output: print(...)\n\n' },
+  javascript: { filename:'solution.js',  mode:'javascript',    starter:'// JavaScript solution\n// Input: const lines = require("fs").readFileSync("/dev/stdin","utf8").trim().split("\\n");\n\n' },
+  cpp:        { filename:'solution.cpp', mode:'text/x-c++src', starter:'#include <bits/stdc++.h>\nusing namespace std;\nint main() {\n    \n    return 0;\n}\n' },
+  c:          { filename:'solution.c',   mode:'text/x-csrc',   starter:'#include <stdio.h>\nint main() {\n    \n    return 0;\n}\n' },
 };
-
 let currentLang = 'python';
 
-// ── CodeMirror ──
 const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
-  mode: 'python', theme: 'nord', lineNumbers: true,
-  autoCloseBrackets: true, matchBrackets: true,
-  indentUnit: 4, tabSize: 4, indentWithTabs: false,
-  extraKeys: { Tab: cm => cm.execCommand('indentMore') },
+  mode:'python', theme:'nord', lineNumbers:true,
+  autoCloseBrackets:true, matchBrackets:true,
+  indentUnit:4, tabSize:4, indentWithTabs:false,
+  extraKeys:{ Tab: cm => cm.execCommand('indentMore') },
 });
 
-// ── Switch language ──
 function switchLang(btn) {
-  const lang = btn.dataset.lang;
-  const cfg  = LANG_CONFIG[lang];
-  if (!cfg) return;
-
-  // Update active pill
+  const lang = btn.dataset.lang; const cfg = LANG_CONFIG[lang]; if (!cfg) return;
   document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
-
-  // Update editor mode and filename
   editor.setOption('mode', cfg.mode);
   document.getElementById('editor-filename').textContent = cfg.filename;
-
-  // If editor is empty or has default starter → replace with new starter
   const val = editor.getValue().trim();
   const isStarter = Object.values(LANG_CONFIG).some(c => val === c.starter.trim() || val === '');
-  if (isStarter || val === '') {
-    editor.setValue(cfg.starter);
-    setTimeout(() => editor.refresh(), 50);
-  }
-
+  if (isStarter) { editor.setValue(cfg.starter); setTimeout(()=>editor.refresh(),50); }
   currentLang = lang;
 }
 
-function clearEditor() {
-  if (confirm('Clear the editor?')) {
-    editor.setValue(LANG_CONFIG[currentLang].starter);
-  }
-}
-
+function clearEditor() { if (confirm('Clear the editor?')) editor.setValue(LANG_CONFIG[currentLang].starter); }
 function toggleProblem() {
-  const b = document.getElementById('prob-body');
-  const a = document.getElementById('prob-arrow');
-  const show = b.style.display === 'none';
-  b.style.display = show ? 'block' : 'none';
-  a.textContent = show ? '▼ Hide' : '▶ Show';
+  const b=document.getElementById('prob-body'); const a=document.getElementById('prob-arrow');
+  const show=b.style.display==='none'; b.style.display=show?'block':'none'; a.textContent=show?'▼ Hide':'▶ Show';
 }
-
 function switchTab(t) {
-  document.getElementById('panel-r').style.display = t==='r'?'block':'none';
-  document.getElementById('panel-h').style.display = t==='h'?'block':'none';
-  document.getElementById('tab-r').className = 'tab-btn'+(t==='r'?' active':'');
-  document.getElementById('tab-h').className = 'tab-btn'+(t==='h'?' active':'');
+  document.getElementById('panel-r').style.display=t==='r'?'block':'none';
+  document.getElementById('panel-h').style.display=t==='h'?'block':'none';
+  document.getElementById('tab-r').className='tab-btn'+(t==='r'?' active':'');
+  document.getElementById('tab-h').className='tab-btn'+(t==='h'?' active':'');
 }
 
-// ── Countdown ──
 let timeExpired = false;
 function updateCountdown() {
   if (!DURATION_SECS || !ACTIVATED_AT) return;
   const elapsed = (Date.now() - new Date(ACTIVATED_AT).getTime()) / 1000;
   const remaining = Math.max(0, DURATION_SECS - elapsed);
-  const m = Math.floor(remaining/60), s = Math.floor(remaining%60);
-  const cdEl = document.getElementById('countdown');
-  const wrap  = document.getElementById('cd-wrap');
-  if (cdEl) cdEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  if (wrap) wrap.className = 'cd-wrap ' + (remaining>120?'cd-ok':remaining>30?'cd-warn':'cd-crit');
-  if (remaining <= 0 && !timeExpired) { timeExpired = true; lockEditor(); }
+  const m=Math.floor(remaining/60), s=Math.floor(remaining%60);
+  const cdEl=document.getElementById('countdown'); const wrap=document.getElementById('cd-wrap');
+  if (cdEl) cdEl.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (wrap) wrap.className='cd-wrap '+(remaining>120?'cd-ok':remaining>30?'cd-warn':'cd-crit');
+  if (remaining<=0&&!timeExpired){timeExpired=true;lockEditor();}
 }
-if (DURATION_SECS && ACTIVATED_AT) { updateCountdown(); setInterval(updateCountdown, 500); }
+if (DURATION_SECS&&ACTIVATED_AT){updateCountdown();setInterval(updateCountdown,500);}
 
 function lockEditor() {
-  editor.setOption('readOnly', 'nocursor');
-  document.getElementById('editor-card').style.opacity = '.55';
-  document.getElementById('btn-submit').disabled = true;
-  document.getElementById('btn-run').disabled = true;
-  document.getElementById('time-up-banner').style.display = 'block';
-  _toast('⏰ Time is up! Submissions are now closed.', 'w');
+  editor.setOption('readOnly','nocursor');
+  document.getElementById('editor-card').style.opacity='.55';
+  document.getElementById('btn-submit').disabled=true;
+  document.getElementById('btn-run').disabled=true;
+  document.getElementById('time-up-banner').style.display='block';
+  _toast('⏰ Time is up! Submissions are now closed.','w');
 }
 
-// ── Helpers ──
-function setRunLoading(on) {
-  document.getElementById('btn-run').disabled = on || timeExpired;
-  document.getElementById('run-label').textContent = on ? 'Running…' : 'Run Code';
-}
-function setSubLoading(on) {
-  document.getElementById('btn-submit').disabled = on || timeExpired || ALREADY_PASSED;
-  document.getElementById('sub-label').textContent = on ? 'Evaluating…' : (ALREADY_PASSED ? 'Already Passed!' : 'Submit');
-}
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setRunLoading(on){document.getElementById('btn-run').disabled=on||timeExpired;document.getElementById('run-label').textContent=on?'Running…':'Run Code';}
+function setSubLoading(on){document.getElementById('btn-submit').disabled=on||timeExpired||ALREADY_PASSED;document.getElementById('sub-label').textContent=on?'Evaluating…':(ALREADY_PASSED?'Already Passed!':'Submit');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function renderLoading(msg) {
   switchTab('r');
-  document.getElementById('results-body').innerHTML =
-    `<div style="text-align:center;padding:48px;color:var(--text-muted);">
-      <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div>
-      <p style="font-weight:600;">${msg}</p>
-    </div>`;
+  document.getElementById('results-body').innerHTML=`<div style="text-align:center;padding:48px;color:var(--text-muted);"><div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><p style="font-weight:600;">${msg}</p></div>`;
 }
-
 function renderError(msg) {
   switchTab('r');
-  document.getElementById('results-body').innerHTML =
-    `<div style="background:var(--red-bg);border:2px solid var(--red-brd);border-radius:10px;padding:16px;color:var(--red);font-size:.875rem;font-weight:500;">❌ ${esc(msg)}</div>`;
-}
-
-function getLangLabel(lang) {
-  return { python:'🐍 Python', javascript:'🟨 JavaScript', cpp:'⚡ C++', c:'🔵 C' }[lang] || lang;
+  document.getElementById('results-body').innerHTML=`<div style="background:var(--danger-bg);border:2px solid var(--danger-brd);border-radius:var(--radius);padding:16px;color:var(--danger);font-size:.875rem;font-weight:500;">❌ ${esc(msg)}</div>`;
 }
 
 function renderResults(results, title, isSubmit) {
   switchTab('r');
-  let html = '';
-  if (title) html += `<p style="font-weight:800;color:var(--text);margin-bottom:12px;font-size:.9rem;">${title}</p>`;
-  html += `<div style="margin-bottom:10px;"><span style="background:var(--brand-bg);color:var(--brand);padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:700;">${getLangLabel(currentLang)}</span></div>`;
-
-  results.forEach((r, i) => {
-    const cls  = r.passed ? 'pass' : (r.error ? 'warn' : 'fail');
-    const icon = r.passed ? '✅' : (r.error ? '⚠️' : '❌');
-    html += `<div class="ri ${cls}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-weight:700;font-size:.85rem;">${icon} Test ${i+1}</span>
-        <span style="font-size:.72rem;color:var(--text-muted);font-family:'Fira Code',monospace;">${r.time_used||''}s</span>
-      </div>`;
-    if (r.input && r.input !== '(hidden)') html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Input:</span> <code style="font-family:'Fira Code',monospace;color:#4338ca;">${esc(r.input.trim())}</code></p>`;
-    if (!r.passed && r.expected && r.expected !== '(hidden)') html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Expected:</span> <code style="font-family:'Fira Code',monospace;color:var(--green);">${esc(r.expected.trim())}</code></p>`;
-    if (r.stdout) html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Got:</span> <code style="font-family:'Fira Code',monospace;color:${r.passed?'var(--green)':'var(--red)'};">${esc(r.stdout.trim())}</code></p>`;
-    if (r.stderr) html += `<pre class="err">${esc(r.stderr)}</pre>`;
-    html += `</div>`;
+  let html = title ? `<p style="font-weight:700;color:var(--text);margin-bottom:12px;font-size:.9rem;">${title}</p>` : '';
+  results.forEach((r,i) => {
+    const cls=r.passed?'pass':(r.error?'warn':'fail'); const icon=r.passed?'✅':(r.error?'⚠️':'❌');
+    html+=`<div class="ri ${cls}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-weight:700;font-size:.85rem;">${icon} Test ${i+1}</span><span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">${r.time_used||''}s</span></div>`;
+    if (r.input&&r.input!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Input:</span> <code style="font-family:var(--font-mono);color:var(--accent);">${esc(r.input.trim())}</code></p>`;
+    if (!r.passed&&r.expected&&r.expected!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Expected:</span> <code style="font-family:var(--font-mono);color:var(--success);">${esc(r.expected.trim())}</code></p>`;
+    if (r.stdout) html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Got:</span> <code style="font-family:var(--font-mono);color:${r.passed?'var(--success)':'var(--danger)'};">${esc(r.stdout.trim())}</code></p>`;
+    if (r.stderr) html+=`<pre class="err">${esc(r.stderr)}</pre>`;
+    html+=`</div>`;
   });
-
   if (isSubmit) {
-    const passed = results.filter(x=>x.passed).length;
-    const total  = results.length;
-    if (passed === total) {
-      html += `<div style="background:var(--green-bg);border:2px solid var(--green-brd);border-radius:12px;padding:20px;text-align:center;margin-top:8px;">
-        <p style="font-size:2rem;margin-bottom:6px;">🎉</p>
-        <p style="font-weight:800;color:var(--green);font-size:1rem;">All ${total} tests passed!</p>
-        <p style="font-size:.8rem;color:var(--text-muted);margin-top:3px;">Outstanding work!</p>
-      </div>`;
-      document.getElementById('btn-submit').disabled = true;
-      document.getElementById('sub-label').textContent = '✓ Passed!';
+    const passed=results.filter(x=>x.passed).length; const total=results.length;
+    if (passed===total) {
+      html+=`<div style="background:var(--success-bg);border:2px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px;text-align:center;margin-top:8px;"><p style="font-size:2rem;margin-bottom:6px;">🎉</p><p style="font-weight:700;color:var(--success);font-size:1rem;">All ${total} tests passed!</p></div>`;
+      document.getElementById('btn-submit').disabled=true;
+      document.getElementById('sub-label').textContent='✓ Passed!';
     } else {
-      html += `<div style="background:var(--yellow-bg);border:2px solid var(--yellow-brd);border-radius:12px;padding:16px;text-align:center;margin-top:8px;">
-        <p style="font-weight:800;color:var(--yellow);">${passed}/${total} tests passed</p>
-        <p style="font-size:.8rem;color:var(--text-muted);margin-top:3px;">Fix the issues and try again!</p>
-      </div>`;
+      html+=`<div style="background:var(--warning-bg);border:2px solid var(--warning-brd);border-radius:var(--radius-lg);padding:16px;text-align:center;margin-top:8px;"><p style="font-weight:700;color:var(--warning);">${passed}/${total} tests passed</p></div>`;
     }
   }
   document.getElementById('results-body').innerHTML = html;
 }
 
-// ── Run Code ──
 async function runCode() {
   if (timeExpired) return;
-  setRunLoading(true);
-  renderLoading(`Running ${getLangLabel(currentLang)} tests…`);
+  setRunLoading(true); renderLoading('Running tests…');
   try {
-    const res = await fetch('/api/run/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-      body: JSON.stringify({ task_id: TASK_ID, session_id: SESSION_ID, code: editor.getValue(), language: currentLang }),
-    });
+    const res = await fetch('/api/run/', { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
     const d = await res.json();
-    if (!res.ok) { renderError(d.error||'Server error'); return; }
-    renderResults(d.results, '▶ Example Test Results', false);
-  } catch(e) { renderError('Network error: ' + e.message); }
-  finally { setRunLoading(false); }
+    if (!res.ok){renderError(d.error||'Server error');return;}
+    renderResults(d.results,'▶ Example Test Results',false);
+  } catch(e){renderError('Network error: '+e.message);}
+  finally{setRunLoading(false);}
 }
 
-// ── Submit ──
 async function submitCode() {
-  if (timeExpired || ALREADY_PASSED) return;
-  setSubLoading(true);
-  renderLoading(`Evaluating ${getLangLabel(currentLang)} against hidden tests…`);
+  if (timeExpired||ALREADY_PASSED) return;
+  setSubLoading(true); renderLoading('Evaluating against hidden tests…');
   try {
-    const res = await fetch('/api/submit/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-      body: JSON.stringify({ task_id: TASK_ID, session_id: SESSION_ID, code: editor.getValue(), language: currentLang }),
-    });
+    const res = await fetch('/api/submit/', { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
     const d = await res.json();
-    if (!res.ok) { renderError(d.error||'Server error'); return; }
-    renderResults(d.results, '✓ Submit Results', true);
-    _toast(d.is_correct ? '🎉 All tests passed!' : `${d.passed_count}/${d.total_count} tests passed`, d.is_correct?'s':'w');
-  } catch(e) { renderError('Network error: ' + e.message); }
-  finally { setSubLoading(false); }
+    if (!res.ok){renderError(d.error||'Server error');return;}
+    renderResults(d.results,'✓ Submit Results',true);
+    _toast(d.is_correct?'🎉 All tests passed!':`${d.passed_count}/${d.total_count} tests passed`,d.is_correct?'s':'w');
+  } catch(e){renderError('Network error: '+e.message);}
+  finally{setSubLoading(false);}
 }
 
-// ── WebSocket ──
 (()=>{
-  const proto = location.protocol==='https:'?'wss':'ws';
-  const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_ID}/`);
-  ws.onmessage = e => {
-    const msg = JSON.parse(e.data);
-    if (msg.event==='session_ended') {
-      _toast('The session has been closed by the teacher.','w');
-      setTimeout(()=>location.href='/sessions/',3000);
-    }
+  const proto=location.protocol==='https:'?'wss':'ws';
+  const ws=new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_ID}/`);
+  ws.onmessage=e=>{
+    const msg=JSON.parse(e.data);
+    if (msg.event==='session_ended'){_toast('The session has been closed by the teacher.','w');setTimeout(()=>location.href='/sessions/',3000);}
   };
 })();
 
-const st = document.createElement('style');
-st.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+const st=document.createElement('style');
+st.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(st);
 </script>
 {% endblock %}

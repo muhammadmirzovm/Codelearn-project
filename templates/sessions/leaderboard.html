@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="page-hero fade-up">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:relative;z-index:1;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
       <h1 class="section-title">🏆 Leaderboard</h1>
       <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
@@ -16,16 +16,15 @@
 </div>
 
 {% if board %}
-<!-- Top 3 podium -->
 <div style="display:flex;justify-content:center;gap:12px;margin-bottom:28px;align-items:flex-end;flex-wrap:wrap;" class="fade-up-2">
   {% for e in board|slice:":3" %}
   {% if e.passed %}
-  <div style="text-align:center;{% if forloop.counter == 1 %}order:-1;{% endif %}">
+  <div style="text-align:center;">
     <div style="font-size:{% if forloop.counter == 1 %}2.5{% else %}1.8{% endif %}rem;margin-bottom:6px;">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}</div>
-    <div style="background:white;border:{% if forloop.counter == 1 %}2.5px solid #fbbf24{% elif forloop.counter == 2 %}2px solid #94a3b8{% else %}2px solid #cd7c2f{% endif %};border-radius:14px;padding:12px 20px;min-width:120px;box-shadow:0 4px 14px rgba(0,0,0,.1);">
-      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:white;margin:0 auto 8px;">{{ e.student.username|first|upper }}</div>
-      <p style="font-weight:800;font-size:.85rem;">{{ e.student.get_full_name|default:e.student.username }}</p>
-      {% if e.submitted_at %}<p style="font-size:.72rem;color:var(--text-muted);margin-top:2px;font-family:'Fira Code',monospace;">{{ e.submitted_at|date:"H:i:s" }}</p>{% endif %}
+    <div style="background:var(--surface);border:{% if forloop.counter == 1 %}2.5px solid #fbbf24{% elif forloop.counter == 2 %}2px solid #94a3b8{% else %}2px solid #cd7c2f{% endif %};border-radius:var(--radius-lg);padding:12px 20px;min-width:120px;box-shadow:var(--shadow-md);">
+      <div class="ac-0" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;margin:0 auto 8px;font-family:var(--font-mono);">{{ e.student.username|first|upper }}</div>
+      <p style="font-weight:700;font-size:.85rem;">{{ e.student.get_full_name|default:e.student.username }}</p>
+      {% if e.submitted_at %}<p style="font-size:.72rem;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">{{ e.submitted_at|date:"H:i:s" }}</p>{% endif %}
     </div>
   </div>
   {% endif %}
@@ -46,14 +45,14 @@
     </thead>
     <tbody id="lb-body">
       {% for e in board %}
-      <tr style="{% if e.passed %}background:var(--green-bg);{% endif %}">
-        <td style="text-align:center;font-weight:800;color:{% if forloop.counter == 1 and e.passed %}#d97706{% elif forloop.counter == 2 and e.passed %}#64748b{% elif forloop.counter == 3 and e.passed %}#b45309{% else %}var(--text-muted){% endif %};">
+      <tr style="{% if e.passed %}background:var(--success-bg);{% endif %}">
+        <td style="text-align:center;font-weight:700;font-family:var(--font-mono);color:{% if forloop.counter == 1 and e.passed %}#d97706{% elif forloop.counter == 2 and e.passed %}#64748b{% elif forloop.counter == 3 and e.passed %}#b45309{% else %}var(--text-muted){% endif %};">
           {% if forloop.counter == 1 and e.passed %}🥇{% elif forloop.counter == 2 and e.passed %}🥈{% elif forloop.counter == 3 and e.passed %}🥉{% else %}{{ forloop.counter }}{% endif %}
         </td>
         <td>
           <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;">{{ e.student.username|first|upper }}</div>
-            <span style="font-weight:700;">{{ e.student.get_full_name|default:e.student.username }}</span>
+            <div class="ac-0" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:var(--font-mono);">{{ e.student.username|first|upper }}</div>
+            <span style="font-weight:600;">{{ e.student.get_full_name|default:e.student.username }}</span>
           </div>
         </td>
         <td>
@@ -61,8 +60,8 @@
           {% elif e.attempts %}<span class="badge badge-running">Working…</span>
           {% else %}<span class="badge badge-notstarted">Not started</span>{% endif %}
         </td>
-        <td class="hide-sm" style="color:var(--text-muted);">{{ e.attempts }}</td>
-        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:'Fira Code',monospace;">
+        <td class="hide-sm" style="color:var(--text-muted);font-family:var(--font-mono);">{{ e.attempts }}</td>
+        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">
           {% if e.submitted_at %}{{ e.submitted_at|date:"H:i:s" }}{% else %}—{% endif %}
         </td>
       </tr>
@@ -72,7 +71,7 @@
   {% if not board %}
   <div style="text-align:center;padding:60px;color:var(--text-muted);">
     <p style="font-size:2.5rem;margin-bottom:8px;">👀</p>
-    <p style="font-weight:600;">No submissions yet</p>
+    <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;">No submissions yet</p>
   </div>
   {% endif %}
 </div>
@@ -89,20 +88,19 @@ async function refresh() {
     const medals = ['🥇','🥈','🥉'];
     const mColors = ['#d97706','#64748b','#b45309'];
     document.getElementById('lb-body').innerHTML = d.board.map((e,i) => {
-      const medal = (i<3&&e.passed) ? medals[i] : (i+1);
+      const medal  = (i<3&&e.passed) ? medals[i] : (i+1);
       const mColor = (i<3&&e.passed) ? mColors[i] : 'var(--text-muted)';
-      const rowBg = e.passed ? 'background:var(--green-bg);' : '';
-      const badge = e.passed
-        ? '<span class="badge badge-passed">✓ Passed</span>'
+      const rowBg  = e.passed ? 'background:var(--success-bg);' : '';
+      const badge  = e.passed ? '<span class="badge badge-passed">✓ Passed</span>'
         : e.attempts ? '<span class="badge badge-running">Working…</span>'
         : '<span class="badge badge-notstarted">Not started</span>';
       const time = e.submitted_at ? new Date(e.submitted_at).toTimeString().slice(0,8) : '—';
       return `<tr style="${rowBg}">
-        <td style="text-align:center;font-weight:800;color:${mColor};">${medal}</td>
-        <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;">${e.username[0].toUpperCase()}</div><span style="font-weight:700;">${e.username}</span></div></td>
+        <td style="text-align:center;font-weight:700;color:${mColor};font-family:var(--font-mono);">${medal}</td>
+        <td><div style="display:flex;align-items:center;gap:8px;"><div class="ac-0" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">${e.username[0].toUpperCase()}</div><span style="font-weight:600;">${e.username}</span></div></td>
         <td>${badge}</td>
-        <td class="hide-sm" style="color:var(--text-muted);">${e.attempts}</td>
-        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:'Fira Code',monospace;">${time}</td>
+        <td class="hide-sm" style="color:var(--text-muted);font-family:var(--font-mono);">${e.attempts}</td>
+        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">${time}</td>
       </tr>`;
     }).join('');
   } catch(e){}

@@ -1,61 +1,81 @@
 {% extends "base.html" %}
 {% block title %}Submission #{{ submission.pk }} – CodeLearn{% endblock %}
+
 {% block content %}
-<div class="max-w-4xl mx-auto">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Submission #{{ submission.pk }}</h1>
-    <span class="badge badge-{{ submission.status }} text-sm px-3 py-1">{{ submission.get_status_display }}</span>
+<div style="max-width:860px;margin:0 auto;">
+
+  <div class="page-hero fade-up" style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <p style="font-size:.72rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:4px;">Submission</p>
+        <h1 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;">#{{ submission.pk }}</h1>
+      </div>
+      <span class="badge badge-{{ submission.status }}" style="font-size:.82rem;padding:6px 14px;">{{ submission.get_status_display }}</span>
+    </div>
   </div>
 
-  <div class="grid gap-4 sm:grid-cols-3 mb-6">
-    <div class="bg-white rounded-xl border p-4 text-center">
-      <p class="text-xs text-gray-500 uppercase mb-1">Task</p>
-      <p class="font-semibold text-gray-800">{{ submission.task.title }}</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px;" class="fade-up-2">
+    <div class="stat-card" style="text-align:center;">
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">Task</p>
+      <p style="font-weight:600;font-size:.95rem;">{{ submission.task.title }}</p>
     </div>
-    <div class="bg-white rounded-xl border p-4 text-center">
-      <p class="text-xs text-gray-500 uppercase mb-1">Tests Passed</p>
-      <p class="font-bold text-xl {% if submission.is_correct %}text-green-600{% else %}text-red-600{% endif %}">
+    <div class="stat-card" style="text-align:center;">
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">Tests Passed</p>
+      <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:{% if submission.is_correct %}var(--success){% else %}var(--danger){% endif %};">
         {{ submission.passed_count }}/{{ submission.total_count }}
       </p>
     </div>
-    <div class="bg-white rounded-xl border p-4 text-center">
-      <p class="text-xs text-gray-500 uppercase mb-1">Submitted At</p>
-      <p class="font-semibold text-gray-800">{{ submission.created_at|date:"M j H:i:s" }}</p>
+    <div class="stat-card" style="text-align:center;">
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">Submitted At</p>
+      <p style="font-weight:600;font-size:.9rem;font-family:var(--font-mono);">{{ submission.created_at|date:"M j H:i:s" }}</p>
     </div>
   </div>
 
-  <!-- Code -->
-  <div class="bg-white rounded-xl border shadow-sm p-5 mb-4">
-    <h2 class="font-semibold text-gray-800 mb-3">Your Code</h2>
-    <textarea id="code-view">{{ submission.code }}</textarea>
+  <div class="card fade-up-2" style="margin-bottom:20px;overflow:hidden;">
+    <div class="card-header">
+      <span style="font-weight:600;font-size:.95rem;">Your Code</span>
+      <span class="badge badge-scheduled" style="font-family:var(--font-mono);">Python</span>
+    </div>
+    <div style="padding:0;">
+      <textarea id="code-view">{{ submission.code }}</textarea>
+    </div>
   </div>
 
-  <!-- Test results -->
   {% if submission.results %}
-  <div class="bg-white rounded-xl border shadow-sm p-5">
-    <h2 class="font-semibold text-gray-800 mb-3">Test Case Results</h2>
-    {% for r in submission.results %}
-    <div class="border-l-4 {% if r.passed %}border-green-400{% else %}border-red-400{% endif %} pl-4 mb-4">
-      <p class="font-medium text-gray-700">
-        {% if r.passed %}✅{% else %}❌{% endif %} Test {{ forloop.counter }}
-      </p>
-      {% if r.stdout %}
-      <pre class="text-xs bg-gray-50 rounded p-2 mt-1 overflow-x-auto">{{ r.stdout }}</pre>
-      {% endif %}
-      {% if r.stderr %}
-      <pre class="text-xs bg-red-50 text-red-600 rounded p-2 mt-1 overflow-x-auto">{{ r.stderr }}</pre>
-      {% endif %}
-      <p class="text-xs text-gray-400 mt-1">Time: {{ r.time_used }}s</p>
+  <div class="card fade-up-3" style="overflow:hidden;">
+    <div class="card-header">
+      <span style="font-weight:600;font-size:.95rem;">Test Case Results</span>
+      <span style="font-size:.82rem;color:var(--text-muted);font-family:var(--font-mono);">{{ submission.passed_count }}/{{ submission.total_count }} passed</span>
     </div>
-    {% endfor %}
+    <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
+      {% for r in submission.results %}
+      <div class="ri {% if r.passed %}pass{% else %}fail{% endif %}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <p style="font-weight:600;font-size:.875rem;">
+            {% if r.passed %}✅{% else %}❌{% endif %} Test {{ forloop.counter }}
+          </p>
+          <span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">{{ r.time_used }}s</span>
+        </div>
+        {% if r.stdout %}
+        <pre style="font-size:.75rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;margin-top:6px;overflow-x:auto;font-family:var(--font-mono);">{{ r.stdout }}</pre>
+        {% endif %}
+        {% if r.stderr %}
+        <pre style="font-size:.75rem;background:var(--danger-bg);border:1px solid var(--danger-brd);color:var(--danger);border-radius:var(--radius-sm);padding:8px 10px;margin-top:6px;overflow-x:auto;font-family:var(--font-mono);">{{ r.stderr }}</pre>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
   </div>
   {% endif %}
+
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
 CodeMirror.fromTextArea(document.getElementById('code-view'), {
-  mode: 'python', theme: 'dracula', lineNumbers: true, readOnly: true
+  mode: 'python', theme: 'nord', lineNumbers: true, readOnly: true,
+  matchBrackets: true
 });
 </script>
 {% endblock %}

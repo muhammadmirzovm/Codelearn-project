@@ -3,9 +3,9 @@
 {% block content %}
 
 <div class="page-hero fade-up">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <h1 class="section-title">🗓 Sessions</h1>
+      <h1 class="section-title">Sessions</h1>
       <p class="section-sub">{% if user.is_teacher %}Schedule and run live coding sessions{% else %}Your available coding sessions{% endif %}</p>
     </div>
     {% if user.is_teacher %}
@@ -30,12 +30,15 @@
     <tbody>
       {% for s in sessions %}
       <tr>
-        <td style="font-weight:700;">{{ s.task.title }}</td>
+        <td style="font-weight:600;">{{ s.task.title }}</td>
         <td style="color:var(--text-muted);">{{ s.group.name }}</td>
-        <td class="hide-sm" style="color:var(--text-muted);font-size:.82rem;">{{ s.start_time|date:"M j, Y · H:i" }}</td>
-        <td class="hide-sm" style="color:var(--text-muted);">
-          {% if s.duration_minutes %}<span style="background:var(--brand-bg);color:var(--brand);padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;">⏱ {{ s.duration_minutes }}min</span>
-          {% else %}<span style="color:var(--text-sub);font-size:.82rem;">∞ No limit</span>{% endif %}
+        <td class="hide-sm" style="color:var(--text-muted);font-size:.82rem;font-family:var(--font-mono);">{{ s.start_time|date:"M j, Y · H:i" }}</td>
+        <td class="hide-sm">
+          {% if s.duration_minutes %}
+          <span style="background:var(--accent-bg);color:var(--accent);padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;font-family:var(--font-mono);">⏱ {{ s.duration_minutes }}min</span>
+          {% else %}
+          <span style="color:var(--text-sub);font-size:.82rem;font-family:var(--font-mono);">∞ No limit</span>
+          {% endif %}
         </td>
         <td>
           {% if s.is_active %}<span class="badge badge-active">🟢 Live</span>
@@ -51,12 +54,12 @@
               {% else %}
               <form method="post" action="{% url 'sessions:activate' s.pk %}" style="display:inline;">{% csrf_token %}<button class="btn btn-success btn-sm">▶ Start</button></form>
               {% endif %}
-              <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-yellow btn-sm">🏆</a>
+              <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
             {% else %}
               {% if s.is_active %}
               <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm">▶ Join</a>
               {% endif %}
-              <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-yellow btn-sm">🏆</a>
+              <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
             {% endif %}
           </div>
         </td>
@@ -65,10 +68,11 @@
     </tbody>
   </table>
 </div>
+
 {% else %}
-<div class="card card-p" style="text-align:center;padding:64px;" class="fade-up">
+<div class="card card-p fade-up" style="text-align:center;padding:64px;">
   <p style="font-size:3.5rem;margin-bottom:12px;">🗓</p>
-  <p style="font-size:1.1rem;font-weight:800;margin-bottom:6px;">No sessions yet</p>
+  <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">No sessions yet</p>
   {% if user.is_teacher %}
   <p style="color:var(--text-muted);margin-bottom:20px;">Create a session to host a live coding challenge for your students</p>
   <a href="{% url 'sessions:session_create' %}" class="btn btn-primary btn-lg">Schedule first session</a>

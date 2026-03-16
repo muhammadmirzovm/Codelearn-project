@@ -12,14 +12,14 @@
       <div class="inp-group">
         <label class="inp-label">Group Name</label>
         {{ form.name }}
-        {% if form.name.errors %}<p style="color:var(--red);font-size:.78rem;margin-top:4px;">{{ form.name.errors|join:" " }}</p>{% endif %}
+        {% if form.name.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.name.errors|join:" " }}</p>{% endif %}
       </div>
       <div class="inp-group">
         <label class="inp-label">Add Students (optional)</label>
-        <p class="inp-hint" style="margin-bottom:8px;">💡 You can skip this — share the invite key instead and students join themselves</p>
-        <div style="max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:5px;background:var(--bg);">
+        <p class="inp-hint" style="margin-bottom:8px;">💡 You can skip this — share the invite key instead</p>
+        <div style="max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:5px;background:var(--bg2);">
           {% for s in form.students %}
-          <label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:.83rem;transition:background .12s;" onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background=''">
+          <label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:.83rem;transition:background .12s;" onmouseover="this.style.background='var(--highlight)'" onmouseout="this.style.background=''">
             {{ s.tag }}<span>{{ s.choice_label }}</span>
           </label>
           {% endfor %}
@@ -32,5 +32,4 @@
     </form>
   </div>
 </div>
-<style>input[type=checkbox]{accent-color:var(--brand);width:14px;height:14px;}</style>
 {% endblock %}

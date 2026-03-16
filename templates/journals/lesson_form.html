@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Новый урок{% endblock %}
+
+{% block content %}
+<div style="max-width:520px;margin:0 auto;">
+  <div class="page-hero fade-up" style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost btn-sm">← Журнал</a>
+    </div>
+    <h1 class="section-title">Новый урок</h1>
+    <p class="section-sub">Добавьте занятие в журнал группы</p>
+  </div>
+
+  <div class="card card-p fade-up-2">
+    {% if form.non_field_errors %}
+    <div style="background:var(--danger-bg);border:1px solid var(--danger-brd);border-radius:var(--radius);padding:.9rem 1.25rem;margin-bottom:1.25rem;font-size:.82rem;color:var(--danger);">
+      ⚠ {{ form.non_field_errors|join:", " }}
+    </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="inp-group">
+        <label class="inp-label" for="{{ form.title.id_for_label }}">Тема урока</label>
+        <input class="inp" type="text"
+          id="{{ form.title.id_for_label }}"
+          name="{{ form.title.html_name }}"
+          value="{{ form.title.value|default_if_none:'' }}"
+          placeholder="Например: Введение в Python"
+          autofocus>
+        {% if form.title.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.title.errors|join:" " }}</p>{% endif %}
+      </div>
+
+      <div class="inp-group">
+        <label class="inp-label" for="{{ form.topic.id_for_label }}">Описание / Заметки</label>
+        <textarea class="inp" id="{{ form.topic.id_for_label }}" name="{{ form.topic.html_name }}" placeholder="Что разбирали на уроке..." style="min-height:90px;resize:vertical;">{{ form.topic.value|default_if_none:'' }}</textarea>
+        {% if form.topic.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.topic.errors|join:" " }}</p>{% endif %}
+      </div>
+
+      <div class="inp-group">
+        <label class="inp-label" for="{{ form.date.id_for_label }}">Дата урока</label>
+        <input class="inp" type="date"
+          id="{{ form.date.id_for_label }}"
+          name="{{ form.date.html_name }}"
+          value="{{ form.date.value|default_if_none:'' }}"
+          style="font-family:var(--font-mono);">
+        {% if form.date.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.date.errors|join:" " }}</p>{% endif %}
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button type="submit" class="btn btn-primary" style="flex:1;">Сохранить урок →</button>
+        <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const dateInput = document.querySelector('input[type="date"]');
+if (dateInput && !dateInput.value) {
+  dateInput.value = new Date().toISOString().split('T')[0];
+}
+</script>
+{% endblock %}
