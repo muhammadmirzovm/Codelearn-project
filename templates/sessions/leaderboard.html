@@ -1,16 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Leaderboard – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Leaderboard" %} – CodeLearn{% endblock %}
 {% block content %}
 
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
-      <h1 class="section-title">🏆 Leaderboard</h1>
+      <h1 class="section-title">🏆 {% trans "Leaderboard" %}</h1>
       <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">
-      {% if session.is_active %}<span class="badge badge-active"><span class="live-dot pulse" style="width:6px;height:6px;margin-right:2px;"></span> Live</span>{% endif %}
-      {% if user.is_student and session.is_active %}<a href="{% url 'sessions:join' session.pk %}" class="btn btn-success btn-sm">▶ Back to coding</a>{% endif %}
+      {% if session.is_active %}<span class="badge badge-active"><span class="live-dot pulse" style="width:6px;height:6px;margin-right:2px;"></span> {% trans "Live" %}</span>{% endif %}
+      {% if user.is_student and session.is_active %}<a href="{% url 'sessions:join' session.pk %}" class="btn btn-success btn-sm">▶ {% trans "Back to coding" %}</a>{% endif %}
     </div>
   </div>
 </div>
@@ -37,10 +38,10 @@
     <thead>
       <tr>
         <th style="width:52px;text-align:center;">#</th>
-        <th>Student</th>
-        <th>Status</th>
-        <th class="hide-sm">Attempts</th>
-        <th class="hide-sm">Time</th>
+        <th>{% trans "Student" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th class="hide-sm">{% trans "Attempts" %}</th>
+        <th class="hide-sm">{% trans "Time" %}</th>
       </tr>
     </thead>
     <tbody id="lb-body">
@@ -56,9 +57,9 @@
           </div>
         </td>
         <td>
-          {% if e.passed %}<span class="badge badge-passed">✓ Passed</span>
-          {% elif e.attempts %}<span class="badge badge-running">Working…</span>
-          {% else %}<span class="badge badge-notstarted">Not started</span>{% endif %}
+          {% if e.passed %}<span class="badge badge-passed">✓ {% trans "Passed" %}</span>
+          {% elif e.attempts %}<span class="badge badge-running">{% trans "Working…" %}</span>
+          {% else %}<span class="badge badge-notstarted">{% trans "Not started" %}</span>{% endif %}
         </td>
         <td class="hide-sm" style="color:var(--text-muted);font-family:var(--font-mono);">{{ e.attempts }}</td>
         <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">
@@ -71,7 +72,7 @@
   {% if not board %}
   <div style="text-align:center;padding:60px;color:var(--text-muted);">
     <p style="font-size:2.5rem;margin-bottom:8px;">👀</p>
-    <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;">No submissions yet</p>
+    <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;">{% trans "No submissions yet" %}</p>
   </div>
   {% endif %}
 </div>
@@ -80,6 +81,12 @@
 {% block extra_js %}
 {% if session.is_active %}
 <script>
+const i18n = {
+  passed:     "{% trans 'Passed' %}",
+  working:    "{% trans 'Working…' %}",
+  notStarted: "{% trans 'Not started' %}",
+};
+
 async function refresh() {
   try {
     const r = await fetch('/api/leaderboard/{{ session.pk }}/');
@@ -91,9 +98,11 @@ async function refresh() {
       const medal  = (i<3&&e.passed) ? medals[i] : (i+1);
       const mColor = (i<3&&e.passed) ? mColors[i] : 'var(--text-muted)';
       const rowBg  = e.passed ? 'background:var(--success-bg);' : '';
-      const badge  = e.passed ? '<span class="badge badge-passed">✓ Passed</span>'
-        : e.attempts ? '<span class="badge badge-running">Working…</span>'
-        : '<span class="badge badge-notstarted">Not started</span>';
+      const badge  = e.passed
+        ? `<span class="badge badge-passed">✓ ${i18n.passed}</span>`
+        : e.attempts
+          ? `<span class="badge badge-running">${i18n.working}</span>`
+          : `<span class="badge badge-notstarted">${i18n.notStarted}</span>`;
       const time = e.submitted_at ? new Date(e.submitted_at).toTimeString().slice(0,8) : '—';
       return `<tr style="${rowBg}">
         <td style="text-align:center;font-weight:700;color:${mColor};font-family:var(--font-mono);">${medal}</td>

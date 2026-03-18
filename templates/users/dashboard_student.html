@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Dashboard – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Dashboard" %} – CodeLearn{% endblock %}
 {% block content %}
 
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <h1 class="section-title">Hey, {{ user.get_full_name|default:user.username }}! 🚀</h1>
-      <p class="section-sub">Ready to code today?</p>
+      <h1 class="section-title">{% blocktrans with name=user.get_full_name|default:user.username %}Hey, {{ name }}! 🚀{% endblocktrans %}</h1>
+      <p class="section-sub">{% trans "Ready to code today?" %}</p>
     </div>
-    <a href="{% url 'users:join_group' %}" class="btn btn-primary">🔑 Join a Group</a>
+    <a href="{% url 'users:join_group' %}" class="btn btn-primary">🔑 {% trans "Join a Group" %}</a>
   </div>
 </div>
 
@@ -16,15 +17,17 @@
 <div style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:24px;" class="fade-up">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
     <span class="live-dot pulse"></span>
-    <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">Active Sessions — Join Now!</span>
+    <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">{% trans "Active Sessions — Join Now!" %}</span>
   </div>
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
     {% for s in active_sessions %}
     <div style="background:var(--surface);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:18px;">
       <p style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px;">{{ s.task.title }}</p>
-      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">{{ s.group.name }}{% if s.duration_minutes %} · ⏱ {{ s.duration_minutes }} min{% endif %}</p>
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">
+        {{ s.group.name }}{% if s.duration_minutes %} · ⏱ {% blocktrans with mins=s.duration_minutes %}{{ mins }} min{% endblocktrans %}{% endif %}
+      </p>
       <div style="display:flex;gap:8px;">
-        <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">▶ Enter</a>
+        <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">▶ {% trans "Enter" %}</a>
         <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
       </div>
     </div>
@@ -34,17 +37,18 @@
 {% else %}
 <div class="card card-p" style="text-align:center;margin-bottom:24px;" class="fade-up">
   <p style="font-size:2.5rem;margin-bottom:8px;">😴</p>
-  <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:4px;">No active sessions right now</p>
-  <p style="color:var(--text-muted);font-size:.875rem;">Check back soon — your teacher will start a session!</p>
+  <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:4px;">{% trans "No active sessions right now" %}</p>
+  <p style="color:var(--text-muted);font-size:.875rem;">{% trans "Check back soon — your teacher will start a session!" %}</p>
 </div>
 {% endif %}
 
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;" class="fade-up-2">
 
+  <!-- MY GROUPS CARD -->
   <div class="card">
     <div class="card-header">
-      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">My Groups</span>
-      <a href="{% url 'users:join_group' %}" class="btn btn-accent-soft btn-sm">🔑 Join</a>
+      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{% trans "My Groups" %}</span>
+      <a href="{% url 'users:join_group' %}" class="btn btn-accent-soft btn-sm">🔑 {% trans "Join" %}</a>
     </div>
     {% with groups=user.student_groups.all %}
     {% if groups %}
@@ -53,11 +57,15 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <div>
             <p style="font-weight:600;font-size:.9rem;">{{ g.name }}</p>
-            <span style="font-size:.72rem;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border-radius:99px;font-weight:600;font-family:var(--font-mono);">{{ g.students.count }} members</span>
+            <span style="font-size:.72rem;padding:2px 8px;background:var(--accent-bg);color:var(--accent);border-radius:99px;font-weight:600;font-family:var(--font-mono);">
+              {% blocktrans with count=g.students.count %}{{ count }} members{% endblocktrans %}
+            </span>
           </div>
-          <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm">Chat</a>
+          <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm">{% trans "Chat" %}</a>
         </div>
-        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:8px;">Teacher: {{ g.teacher.get_full_name|default:g.teacher.username }}</p>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:8px;">
+          {% trans "Teacher" %}: {{ g.teacher.get_full_name|default:g.teacher.username }}
+        </p>
         <div style="display:flex;flex-wrap:wrap;gap:4px;">
           {% for s in g.students.all|slice:":8" %}
           <div title="{{ s.get_full_name|default:s.username }}" class="ac-{{ forloop.counter0 }}" style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;border:2px solid var(--surface);">{{ s.username|first|upper }}</div>
@@ -71,16 +79,17 @@
     {% else %}
     <div style="padding:36px 20px;text-align:center;">
       <p style="font-size:2rem;margin-bottom:8px;">🎒</p>
-      <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:14px;">You're not in any group yet</p>
-      <a href="{% url 'users:join_group' %}" class="btn btn-primary btn-sm">Join with invite key</a>
+      <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:14px;">{% trans "You're not in any group yet" %}</p>
+      <a href="{% url 'users:join_group' %}" class="btn btn-primary btn-sm">{% trans "Join with invite key" %}</a>
     </div>
     {% endif %}
     {% endwith %}
   </div>
 
+  <!-- UPCOMING CARD -->
   <div class="card">
     <div class="card-header">
-      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">Upcoming</span>
+      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{% trans "Upcoming" %}</span>
     </div>
     {% if upcoming_sessions %}
       {% for s in upcoming_sessions %}
@@ -90,13 +99,14 @@
       </div>
       {% endfor %}
     {% else %}
-    <div style="padding:36px 20px;text-align:center;color:var(--text-muted);font-size:.875rem;">No upcoming sessions</div>
+    <div style="padding:36px 20px;text-align:center;color:var(--text-muted);font-size:.875rem;">{% trans "No upcoming sessions" %}</div>
     {% endif %}
   </div>
 
+  <!-- RECENT SUBMISSIONS CARD -->
   <div class="card">
     <div class="card-header">
-      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">Recent Submissions</span>
+      <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{% trans "Recent Submissions" %}</span>
     </div>
     {% if recent_submissions %}
       {% for sub in recent_submissions %}
@@ -109,8 +119,9 @@
       </div>
       {% endfor %}
     {% else %}
-    <div style="padding:36px 20px;text-align:center;color:var(--text-muted);font-size:.875rem;">No submissions yet</div>
+    <div style="padding:36px 20px;text-align:center;color:var(--text-muted);font-size:.875rem;">{% trans "No submissions yet" %}</div>
     {% endif %}
   </div>
+
 </div>
 {% endblock %}

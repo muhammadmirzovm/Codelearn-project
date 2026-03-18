@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{{ task.title }} – CodeLearn{% endblock %}
 
 {% block extra_head %}
@@ -35,7 +36,7 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
       <span class="mono" id="countdown" style="font-size:1rem;">--:--</span>
     </div>
     {% endif %}
-    <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm">🏆 Leaderboard</a>
+    <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm">🏆 {% trans "Leaderboard" %}</a>
   </div>
 </div>
 
@@ -43,8 +44,12 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
 <div style="background:var(--success-bg);border:2px solid var(--success-brd);border-radius:var(--radius-lg);padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;">
   <span style="font-size:1.8rem;">🎉</span>
   <div>
-    <p style="font-weight:700;color:var(--success);font-size:.95rem;">You already solved this task!</p>
-    <p style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">Submitted at {{ my_submission.created_at|date:"H:i:s" }} · {{ my_submission.passed_count }}/{{ my_submission.total_count }} tests passed</p>
+    <p style="font-weight:700;color:var(--success);font-size:.95rem;">{% trans "You already solved this task!" %}</p>
+    <p style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">
+      {% blocktrans with time=my_submission.created_at|date:"H:i:s" passed=my_submission.passed_count total=my_submission.total_count %}
+        Submitted at {{ time }} · {{ passed }}/{{ total }} tests passed
+      {% endblocktrans %}
+    </p>
   </div>
 </div>
 {% endif %}
@@ -54,19 +59,19 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
 
     <div class="card" style="overflow:hidden;">
       <div style="background:var(--accent-bg);padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleProblem()">
-        <span style="font-weight:600;font-size:.9rem;color:var(--accent);">📋 Problem Statement</span>
-        <span id="prob-arrow" style="color:var(--accent);font-size:.75rem;font-family:var(--font-mono);">▼ Hide</span>
+        <span style="font-weight:600;font-size:.9rem;color:var(--accent);">📋 {% trans "Problem Statement" %}</span>
+        <span id="prob-arrow" style="color:var(--accent);font-size:.75rem;font-family:var(--font-mono);">▼ {% trans "Hide" %}</span>
       </div>
       <div id="prob-body" style="padding:16px 18px;">
         <pre style="white-space:pre-wrap;font-family:var(--font-body);font-size:.875rem;color:var(--text);line-height:1.75;">{{ task.description }}</pre>
         {% if task.example_input %}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;">
           <div>
-            <p style="font-size:.68rem;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;font-family:var(--font-mono);">Sample Input</p>
+            <p style="font-size:.68rem;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;font-family:var(--font-mono);">{% trans "Sample Input" %}</p>
             <pre style="background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px;font-family:var(--font-mono);font-size:.78rem;color:var(--accent);">{{ task.example_input }}</pre>
           </div>
           <div>
-            <p style="font-size:.68rem;font-weight:500;color:var(--success);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;font-family:var(--font-mono);">Sample Output</p>
+            <p style="font-size:.68rem;font-weight:500;color:var(--success);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;font-family:var(--font-mono);">{% trans "Sample Output" %}</p>
             <pre style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius);padding:10px;font-family:var(--font-mono);font-size:.78rem;color:var(--success);">{{ task.example_output }}</pre>
           </div>
         </div>
@@ -75,7 +80,7 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
     </div>
 
     <div class="card card-p" style="padding:14px 18px;">
-      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:var(--font-mono);">🌐 Select Language</p>
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:var(--font-mono);">🌐 {% trans "Select Language" %}</p>
       <div style="display:flex;flex-wrap:wrap;gap:8px;" id="lang-selector">
         <button class="lang-pill active" data-lang="python" onclick="switchLang(this)">🐍 Python</button>
         <button class="lang-pill" data-lang="javascript" onclick="switchLang(this)">🟨 JavaScript</button>
@@ -96,7 +101,7 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
         </div>
         <div style="display:flex;gap:6px;">
           <span style="font-size:.72rem;color:#616e88;font-family:var(--font-mono);">{{ task.time_limit }}s · {{ task.memory_limit }}</span>
-          <button onclick="clearEditor()" style="background:transparent;border:none;color:#616e88;cursor:pointer;font-size:.72rem;padding:0 4px;">✕ Clear</button>
+          <button onclick="clearEditor()" style="background:transparent;border:none;color:#616e88;cursor:pointer;font-size:.72rem;padding:0 4px;">✕ {% trans "Clear" %}</button>
         </div>
       </div>
       <textarea id="code-editor">{% if my_submission %}{{ my_submission.code }}{% else %}# Write your Python solution here
@@ -107,41 +112,45 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
     </div>
 
     <div style="display:flex;gap:10px;" id="action-btns">
-      <button id="btn-run" class="btn btn-ghost" style="flex:1;" onclick="runCode()">▶ <span id="run-label">Run Code</span></button>
+      <button id="btn-run" class="btn btn-ghost" style="flex:1;" onclick="runCode()">▶ <span id="run-label">{% trans "Run Code" %}</span></button>
       <button id="btn-submit" class="btn btn-primary" style="flex:1;" onclick="submitCode()" {% if my_submission and my_submission.is_correct %}disabled{% endif %}>
-        ✓ <span id="sub-label">{% if my_submission and my_submission.is_correct %}Already Passed!{% else %}Submit{% endif %}</span>
+        ✓ <span id="sub-label">{% if my_submission and my_submission.is_correct %}{% trans "Already Passed!" %}{% else %}{% trans "Submit" %}{% endif %}</span>
       </button>
     </div>
 
     <div id="time-up-banner" style="display:none;background:var(--danger-bg);border:2px solid var(--danger-brd);border-radius:var(--radius-lg);padding:14px 18px;text-align:center;">
-      <p style="font-weight:700;color:var(--danger);">⏰ Time's up! The session is now closed.</p>
+      <p style="font-weight:700;color:var(--danger);">⏰ {% trans "Time's up! The session is now closed." %}</p>
     </div>
   </div>
 
   <div>
     <div class="card" style="overflow:hidden;min-height:420px;">
       <div style="display:flex;border-bottom:2px solid var(--border);padding:0 6px;gap:2px;">
-        <button class="tab-btn active" id="tab-r" onclick="switchTab('r')">Results</button>
-        <button class="tab-btn" id="tab-h" onclick="switchTab('h')">History</button>
+        <button class="tab-btn active" id="tab-r" onclick="switchTab('r')">{% trans "Results" %}</button>
+        <button class="tab-btn" id="tab-h" onclick="switchTab('h')">{% trans "History" %}</button>
       </div>
       <div id="panel-r" style="padding:18px;">
         <div id="results-body" style="text-align:center;padding:40px 10px;color:var(--text-muted);">
           <p style="font-size:2.5rem;margin-bottom:10px;">💻</p>
-          <p style="font-weight:600;margin-bottom:4px;">Ready to code!</p>
-          <p style="font-size:.82rem;">Select a language, write your code<br>then click <strong>Run Code</strong> to test</p>
+          <p style="font-weight:600;margin-bottom:4px;">{% trans "Ready to code!" %}</p>
+          <p style="font-size:.82rem;">{% trans "Select a language, write your code" %}<br>{% blocktrans %}then click <strong>Run Code</strong> to test{% endblocktrans %}</p>
         </div>
       </div>
       <div id="panel-h" style="display:none;padding:18px;">
         {% if my_submission %}
         <div class="ri {% if my_submission.is_correct %}pass{% else %}fail{% endif %}">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <span style="font-weight:600;font-size:.875rem;">Last Submission</span>
+            <span style="font-weight:600;font-size:.875rem;">{% trans "Last Submission" %}</span>
             <span class="badge badge-{{ my_submission.status }}">{{ my_submission.get_status_display }}</span>
           </div>
-          <p style="font-size:.78rem;color:var(--text-muted);font-family:var(--font-mono);">{{ my_submission.passed_count }}/{{ my_submission.total_count }} tests · {{ my_submission.created_at|date:"H:i:s" }}</p>
+          <p style="font-size:.78rem;color:var(--text-muted);font-family:var(--font-mono);">
+            {% blocktrans with passed=my_submission.passed_count total=my_submission.total_count time=my_submission.created_at|date:"H:i:s" %}
+              {{ passed }}/{{ total }} tests · {{ time }}
+            {% endblocktrans %}
+          </p>
         </div>
         {% else %}
-        <p style="text-align:center;color:var(--text-muted);padding:24px 0;font-size:.875rem;">No submissions yet</p>
+        <p style="text-align:center;color:var(--text-muted);padding:24px 0;font-size:.875rem;">{% trans "No submissions yet" %}</p>
         {% endif %}
       </div>
     </div>
@@ -157,6 +166,33 @@ const CSRF       = '{{ csrf_token }}';
 const DURATION_SECS = {{ session.duration_minutes|default:0 }} * 60;
 const ACTIVATED_AT  = '{{ activated_at_iso }}';
 const ALREADY_PASSED = {% if my_submission and my_submission.is_correct %}true{% else %}false{% endif %};
+
+// i18n strings for JavaScript
+const i18n = {
+  runCode:        "{% trans 'Run Code' %}",
+  running:        "{% trans 'Running…' %}",
+  evaluating:     "{% trans 'Evaluating…' %}",
+  submit:         "{% trans 'Submit' %}",
+  alreadyPassed:  "{% trans 'Already Passed!' %}",
+  passed:         "{% trans 'Passed!' %}",
+  timeUp:         "{% trans 'Time is up! Submissions are now closed.' %}",
+  sessionClosed:  "{% trans 'The session has been closed by the teacher.' %}",
+  clearConfirm:   "{% trans 'Clear the editor?' %}",
+  hide:           "{% trans 'Hide' %}",
+  show:           "{% trans 'Show' %}",
+  runningTests:   "{% trans 'Running tests…' %}",
+  evaluatingTests:"{% trans 'Evaluating against hidden tests…' %}",
+  exampleResults: "{% trans '▶ Example Test Results' %}",
+  submitResults:  "{% trans '✓ Submit Results' %}",
+  allPassed:      "{% trans 'All tests passed!' %}",
+  networkError:   "{% trans 'Network error:' %}",
+  serverError:    "{% trans 'Server error' %}",
+  testLabel:      "{% trans 'Test' %}",
+  inputLabel:     "{% trans 'Input:' %}",
+  expectedLabel:  "{% trans 'Expected:' %}",
+  gotLabel:       "{% trans 'Got:' %}",
+  readyToCode:    "{% trans 'Ready to code!' %}",
+};
 
 const LANG_CONFIG = {
   python:     { filename:'solution.py',  mode:'python',        starter:'# Write your Python solution here\n# Input:  input()  or  int(input())\n# Output: print(...)\n\n' },
@@ -185,10 +221,11 @@ function switchLang(btn) {
   currentLang = lang;
 }
 
-function clearEditor() { if (confirm('Clear the editor?')) editor.setValue(LANG_CONFIG[currentLang].starter); }
+function clearEditor() { if (confirm(i18n.clearConfirm)) editor.setValue(LANG_CONFIG[currentLang].starter); }
 function toggleProblem() {
   const b=document.getElementById('prob-body'); const a=document.getElementById('prob-arrow');
-  const show=b.style.display==='none'; b.style.display=show?'block':'none'; a.textContent=show?'▼ Hide':'▶ Show';
+  const show=b.style.display==='none'; b.style.display=show?'block':'none';
+  a.textContent=show?`▼ ${i18n.hide}`:`▶ ${i18n.show}`;
 }
 function switchTab(t) {
   document.getElementById('panel-r').style.display=t==='r'?'block':'none';
@@ -216,11 +253,11 @@ function lockEditor() {
   document.getElementById('btn-submit').disabled=true;
   document.getElementById('btn-run').disabled=true;
   document.getElementById('time-up-banner').style.display='block';
-  _toast('⏰ Time is up! Submissions are now closed.','w');
+  _toast(`⏰ ${i18n.timeUp}`,'w');
 }
 
-function setRunLoading(on){document.getElementById('btn-run').disabled=on||timeExpired;document.getElementById('run-label').textContent=on?'Running…':'Run Code';}
-function setSubLoading(on){document.getElementById('btn-submit').disabled=on||timeExpired||ALREADY_PASSED;document.getElementById('sub-label').textContent=on?'Evaluating…':(ALREADY_PASSED?'Already Passed!':'Submit');}
+function setRunLoading(on){document.getElementById('btn-run').disabled=on||timeExpired;document.getElementById('run-label').textContent=on?i18n.running:i18n.runCode;}
+function setSubLoading(on){document.getElementById('btn-submit').disabled=on||timeExpired||ALREADY_PASSED;document.getElementById('sub-label').textContent=on?i18n.evaluating:(ALREADY_PASSED?i18n.alreadyPassed:i18n.submit);}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function renderLoading(msg) {
@@ -237,19 +274,19 @@ function renderResults(results, title, isSubmit) {
   let html = title ? `<p style="font-weight:700;color:var(--text);margin-bottom:12px;font-size:.9rem;">${title}</p>` : '';
   results.forEach((r,i) => {
     const cls=r.passed?'pass':(r.error?'warn':'fail'); const icon=r.passed?'✅':(r.error?'⚠️':'❌');
-    html+=`<div class="ri ${cls}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-weight:700;font-size:.85rem;">${icon} Test ${i+1}</span><span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">${r.time_used||''}s</span></div>`;
-    if (r.input&&r.input!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Input:</span> <code style="font-family:var(--font-mono);color:var(--accent);">${esc(r.input.trim())}</code></p>`;
-    if (!r.passed&&r.expected&&r.expected!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Expected:</span> <code style="font-family:var(--font-mono);color:var(--success);">${esc(r.expected.trim())}</code></p>`;
-    if (r.stdout) html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">Got:</span> <code style="font-family:var(--font-mono);color:${r.passed?'var(--success)':'var(--danger)'};">${esc(r.stdout.trim())}</code></p>`;
+    html+=`<div class="ri ${cls}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-weight:700;font-size:.85rem;">${icon} ${i18n.testLabel} ${i+1}</span><span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">${r.time_used||''}s</span></div>`;
+    if (r.input&&r.input!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.inputLabel}</span> <code style="font-family:var(--font-mono);color:var(--accent);">${esc(r.input.trim())}</code></p>`;
+    if (!r.passed&&r.expected&&r.expected!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.expectedLabel}</span> <code style="font-family:var(--font-mono);color:var(--success);">${esc(r.expected.trim())}</code></p>`;
+    if (r.stdout) html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.gotLabel}</span> <code style="font-family:var(--font-mono);color:${r.passed?'var(--success)':'var(--danger)'};">${esc(r.stdout.trim())}</code></p>`;
     if (r.stderr) html+=`<pre class="err">${esc(r.stderr)}</pre>`;
     html+=`</div>`;
   });
   if (isSubmit) {
     const passed=results.filter(x=>x.passed).length; const total=results.length;
     if (passed===total) {
-      html+=`<div style="background:var(--success-bg);border:2px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px;text-align:center;margin-top:8px;"><p style="font-size:2rem;margin-bottom:6px;">🎉</p><p style="font-weight:700;color:var(--success);font-size:1rem;">All ${total} tests passed!</p></div>`;
+      html+=`<div style="background:var(--success-bg);border:2px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px;text-align:center;margin-top:8px;"><p style="font-size:2rem;margin-bottom:6px;">🎉</p><p style="font-weight:700;color:var(--success);font-size:1rem;">${i18n.allPassed.replace('!', '')} ${total}!</p></div>`;
       document.getElementById('btn-submit').disabled=true;
-      document.getElementById('sub-label').textContent='✓ Passed!';
+      document.getElementById('sub-label').textContent=`✓ ${i18n.passed}`;
     } else {
       html+=`<div style="background:var(--warning-bg);border:2px solid var(--warning-brd);border-radius:var(--radius-lg);padding:16px;text-align:center;margin-top:8px;"><p style="font-weight:700;color:var(--warning);">${passed}/${total} tests passed</p></div>`;
     }
@@ -259,26 +296,26 @@ function renderResults(results, title, isSubmit) {
 
 async function runCode() {
   if (timeExpired) return;
-  setRunLoading(true); renderLoading('Running tests…');
+  setRunLoading(true); renderLoading(i18n.runningTests);
   try {
     const res = await fetch('/api/run/', { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
     const d = await res.json();
-    if (!res.ok){renderError(d.error||'Server error');return;}
-    renderResults(d.results,'▶ Example Test Results',false);
-  } catch(e){renderError('Network error: '+e.message);}
+    if (!res.ok){renderError(d.error||i18n.serverError);return;}
+    renderResults(d.results, i18n.exampleResults, false);
+  } catch(e){renderError(`${i18n.networkError} ${e.message}`);}
   finally{setRunLoading(false);}
 }
 
 async function submitCode() {
   if (timeExpired||ALREADY_PASSED) return;
-  setSubLoading(true); renderLoading('Evaluating against hidden tests…');
+  setSubLoading(true); renderLoading(i18n.evaluatingTests);
   try {
     const res = await fetch('/api/submit/', { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
     const d = await res.json();
-    if (!res.ok){renderError(d.error||'Server error');return;}
-    renderResults(d.results,'✓ Submit Results',true);
-    _toast(d.is_correct?'🎉 All tests passed!':`${d.passed_count}/${d.total_count} tests passed`,d.is_correct?'s':'w');
-  } catch(e){renderError('Network error: '+e.message);}
+    if (!res.ok){renderError(d.error||i18n.serverError);return;}
+    renderResults(d.results, i18n.submitResults, true);
+    _toast(d.is_correct?`🎉 ${i18n.allPassed}`:`${d.passed_count}/${d.total_count} tests passed`,d.is_correct?'s':'w');
+  } catch(e){renderError(`${i18n.networkError} ${e.message}`);}
   finally{setSubLoading(false);}
 }
 
@@ -287,7 +324,7 @@ async function submitCode() {
   const ws=new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_ID}/`);
   ws.onmessage=e=>{
     const msg=JSON.parse(e.data);
-    if (msg.event==='session_ended'){_toast('The session has been closed by the teacher.','w');setTimeout(()=>location.href='/sessions/',3000);}
+    if (msg.event==='session_ended'){_toast(i18n.sessionClosed,'w');setTimeout(()=>location.href='/sessions/',3000);}
   };
 })();
 

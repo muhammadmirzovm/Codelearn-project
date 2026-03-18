@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block title %}{{ title }} – CodeLearn{% endblock %}
 
 {% block extra_head %}
@@ -19,56 +20,66 @@
 <div style="max-width:860px;margin:0 auto;">
   <div class="page-hero fade-up" style="margin-bottom:24px;">
     <h1 class="section-title">{{ title }}</h1>
-    <p class="section-sub">Define the problem and add as many test cases as you need</p>
+    <p class="section-sub">{% trans "Define the problem and add as many test cases as you need" %}</p>
   </div>
 
   <form method="post" id="main-form" novalidate>
     {% csrf_token %}
     {{ formset.management_form }}
 
+    <!-- TASK DETAILS CARD -->
     <div class="card card-p fade-up-2" style="margin-bottom:20px;">
-      <h2 style="font-weight:600;font-size:1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">📄 Task Details</h2>
+      <h2 style="font-weight:600;font-size:1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">📄 {% trans "Task Details" %}</h2>
       <div class="inp-group">
-        <label class="inp-label">Title *</label>
+        <label class="inp-label">{% trans "Title" %} *</label>
         {{ form.title }}
         {% if form.title.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.title.errors.0 }}</p>{% endif %}
       </div>
       <div class="inp-group">
-        <label class="inp-label">Problem Statement *</label>
+        <label class="inp-label">{% trans "Problem Statement" %} *</label>
         {{ form.description }}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="inp-group">
-          <label class="inp-label">Sample Input <span style="font-weight:400;color:var(--text-sub);text-transform:none;font-size:.72rem;">(shown to students)</span></label>
+          <label class="inp-label">
+            {% trans "Sample Input" %}
+            <span style="font-weight:400;color:var(--text-sub);text-transform:none;font-size:.72rem;">({% trans "shown to students" %})</span>
+          </label>
           {{ form.example_input }}
         </div>
         <div class="inp-group">
-          <label class="inp-label">Sample Output <span style="font-weight:400;color:var(--text-sub);text-transform:none;font-size:.72rem;">(shown to students)</span></label>
+          <label class="inp-label">
+            {% trans "Sample Output" %}
+            <span style="font-weight:400;color:var(--text-sub);text-transform:none;font-size:.72rem;">({% trans "shown to students" %})</span>
+          </label>
           {{ form.example_output }}
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="inp-group">
-          <label class="inp-label">Time Limit (seconds)</label>
+          <label class="inp-label">{% trans "Time Limit (seconds)" %}</label>
           {{ form.time_limit }}
         </div>
         <div class="inp-group">
-          <label class="inp-label">Memory Limit</label>
+          <label class="inp-label">{% trans "Memory Limit" %}</label>
           {{ form.memory_limit }}
         </div>
       </div>
     </div>
 
+    <!-- TEST CASES CARD -->
     <div class="card card-p fade-up-3" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:10px;">
         <div>
-          <h2 style="font-weight:600;font-size:1rem;">🧪 Test Cases</h2>
+          <h2 style="font-weight:600;font-size:1rem;">🧪 {% trans "Test Cases" %}</h2>
           <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px;">
-            <span style="background:var(--success-bg);color:var(--success);padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;font-family:var(--font-mono);">Example</span> = visible to students during Run Code &nbsp;·&nbsp;
-            <span style="background:var(--bg2);color:var(--text-muted);padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;font-family:var(--font-mono);">Hidden</span> = only used for Submit evaluation
+            <span style="background:var(--success-bg);color:var(--success);padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;font-family:var(--font-mono);">{% trans "Example" %}</span>
+            = {% trans "visible to students during Run Code" %} &nbsp;·&nbsp;
+            <span style="background:var(--bg2);color:var(--text-muted);padding:1px 7px;border-radius:99px;font-weight:600;font-size:.72rem;font-family:var(--font-mono);">{% trans "Hidden" %}</span>
+            = {% trans "only used for Submit evaluation" %}
           </p>
         </div>
-        <button type="button" id="add-tc" class="btn btn-primary">＋ Add Test Case</button>
+        <button type="button" id="add-tc" class="btn btn-primary">＋ {% trans "Add Test Case" %}</button>
       </div>
 
       <div id="delete-forms" style="display:none;">
@@ -80,42 +91,42 @@
       <div id="tc-list" style="display:flex;flex-direction:column;gap:12px;">
         {% for f in formset %}{% if not f.instance.pk or not f.DELETE.value %}
         <div class="tc-card" data-idx="{{ forloop.counter0 }}">
-          <span class="tc-num">Test #<span class="tc-index">{{ forloop.counter }}</span></span>
+          <span class="tc-num">{% trans "Test" %} #<span class="tc-index">{{ forloop.counter }}</span></span>
           {{ f.id }}
           <div style="padding-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
             <div>
-              <label class="inp-label">Input (stdin)</label>
-              <textarea name="{{ f.input_data.html_name }}" class="inp" rows="3" placeholder="stdin input…">{{ f.input_data.value|default:'' }}</textarea>
+              <label class="inp-label">{% trans "Input (stdin)" %}</label>
+              <textarea name="{{ f.input_data.html_name }}" class="inp" rows="3" placeholder="{% trans 'stdin input…' %}">{{ f.input_data.value|default:'' }}</textarea>
             </div>
             <div>
-              <label class="inp-label">Expected Output</label>
-              <textarea name="{{ f.expected_output.html_name }}" class="inp" rows="3" placeholder="expected stdout…">{{ f.expected_output.value|default:'' }}</textarea>
+              <label class="inp-label">{% trans "Expected Output" %}</label>
+              <textarea name="{{ f.expected_output.html_name }}" class="inp" rows="3" placeholder="{% trans 'expected stdout…' %}">{{ f.expected_output.value|default:'' }}</textarea>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-            <label style="font-size:.78rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);">Type</label>
+            <label style="font-size:.78rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);">{% trans "Type" %}</label>
             <div class="type-toggle">
               <input type="radio" name="{{ f.is_example.html_name }}" value="true" id="ex_true_{{ forloop.counter0 }}" {% if f.is_example.value %}checked{% endif %}>
-              <label for="ex_true_{{ forloop.counter0 }}">✅ Example</label>
+              <label for="ex_true_{{ forloop.counter0 }}">✅ {% trans "Example" %}</label>
               <input type="radio" name="{{ f.is_example.html_name }}" value="false" id="ex_false_{{ forloop.counter0 }}" {% if not f.is_example.value %}checked{% endif %}>
-              <label for="ex_false_{{ forloop.counter0 }}">🔒 Hidden</label>
+              <label for="ex_false_{{ forloop.counter0 }}">🔒 {% trans "Hidden" %}</label>
             </div>
             <input type="hidden" name="{{ f.order.html_name }}" class="tc-order" value="{{ forloop.counter }}"/>
           </div>
-          <button type="button" class="tc-del" onclick="deleteTC(this)" title="Remove">✕</button>
+          <button type="button" class="tc-del" onclick="deleteTC(this)" title="{% trans 'Remove' %}">✕</button>
         </div>
         {% endif %}{% endfor %}
       </div>
 
       <div id="tc-empty" style="{% if formset.forms %}display:none;{% endif %}text-align:center;padding:32px;color:var(--text-muted);font-size:.9rem;">
         <p style="font-size:2rem;margin-bottom:8px;">🧪</p>
-        <p>No test cases yet. Click <strong>＋ Add Test Case</strong> to start.</p>
+        <p>{% blocktrans %}No test cases yet. Click <strong>＋ Add Test Case</strong> to start.{% endblocktrans %}</p>
       </div>
     </div>
 
     <div style="display:flex;gap:10px;" class="fade-up-3">
-      <button type="submit" class="btn btn-primary btn-lg" style="flex:1;" id="save-btn">💾 Save Task</button>
-      <a href="{% url 'tasks:task_list' %}" class="btn btn-ghost btn-lg">Cancel</a>
+      <button type="submit" class="btn btn-primary btn-lg" style="flex:1;" id="save-btn">💾 {% trans "Save Task" %}</button>
+      <a href="{% url 'tasks:task_list' %}" class="btn btn-ghost btn-lg">{% trans "Cancel" %}</a>
     </div>
   </form>
 </div>
@@ -123,6 +134,19 @@
 
 {% block extra_js %}
 <script>
+// i18n strings injected into JavaScript
+const i18n = {
+  test:              "{% trans 'Test' %}",
+  inputStdin:        "{% trans 'Input (stdin)' %}",
+  expectedOutput:    "{% trans 'Expected Output' %}",
+  stdinPlaceholder:  "{% trans 'stdin input…' %}",
+  stdoutPlaceholder: "{% trans 'expected stdout…' %}",
+  typeLabel:         "{% trans 'Type' %}",
+  example:           "{% trans 'Example' %}",
+  hidden:            "{% trans 'Hidden' %}",
+  remove:            "{% trans 'Remove' %}",
+};
+
 let totalForms = parseInt(document.querySelector('[name$="TOTAL_FORMS"]').value) || 0;
 let formIdx = totalForms;
 
@@ -154,32 +178,33 @@ document.getElementById('add-tc').addEventListener('click', () => {
   const idx = formIdx++;
   totalForms++;
   document.querySelector('[name$="TOTAL_FORMS"]').value = totalForms;
+  const cardNum = document.querySelectorAll('#tc-list .tc-card').length + 1;
   const html = `
     <div class="tc-card" data-idx="${idx}" style="animation:fadeUp .25s ease both;">
-      <span class="tc-num">Test #<span class="tc-index">${document.querySelectorAll('#tc-list .tc-card').length + 1}</span></span>
+      <span class="tc-num">${i18n.test} #<span class="tc-index">${cardNum}</span></span>
       <input type="hidden" name="testcase_set-${idx}-id" value="">
       <input type="hidden" name="testcase_set-${idx}-task" value="">
       <div style="padding-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
-          <label class="inp-label">Input (stdin)</label>
-          <textarea name="testcase_set-${idx}-input_data" class="inp" rows="3" placeholder="stdin input…"></textarea>
+          <label class="inp-label">${i18n.inputStdin}</label>
+          <textarea name="testcase_set-${idx}-input_data" class="inp" rows="3" placeholder="${i18n.stdinPlaceholder}"></textarea>
         </div>
         <div>
-          <label class="inp-label">Expected Output</label>
-          <textarea name="testcase_set-${idx}-expected_output" class="inp" rows="3" placeholder="expected stdout…"></textarea>
+          <label class="inp-label">${i18n.expectedOutput}</label>
+          <textarea name="testcase_set-${idx}-expected_output" class="inp" rows="3" placeholder="${i18n.stdoutPlaceholder}"></textarea>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px;margin-top:10px;">
-        <label style="font-size:.78rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);">Type</label>
+        <label style="font-size:.78rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);">${i18n.typeLabel}</label>
         <div class="type-toggle">
           <input type="radio" name="testcase_set-${idx}-is_example" value="true" id="ex_true_${idx}" checked>
-          <label for="ex_true_${idx}">✅ Example</label>
+          <label for="ex_true_${idx}">✅ ${i18n.example}</label>
           <input type="radio" name="testcase_set-${idx}-is_example" value="false" id="ex_false_${idx}">
-          <label for="ex_false_${idx}">🔒 Hidden</label>
+          <label for="ex_false_${idx}">🔒 ${i18n.hidden}</label>
         </div>
         <input type="hidden" name="testcase_set-${idx}-order" class="tc-order" value="${totalForms}"/>
       </div>
-      <button type="button" class="tc-del" onclick="deleteTC(this)" title="Remove">✕</button>
+      <button type="button" class="tc-del" onclick="deleteTC(this)" title="${i18n.remove}">✕</button>
     </div>`;
   const list = document.getElementById('tc-list');
   list.insertAdjacentHTML('beforeend', html);

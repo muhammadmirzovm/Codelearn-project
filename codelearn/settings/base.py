@@ -33,11 +33,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Third-party
+
     'channels',
     'crispy_forms',
     'crispy_tailwind',
-    # Local apps
+    'rosetta',
+
     'apps.users',
     'apps.tasks',
     'apps.sessions_app',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,6 +93,22 @@ LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Tashkent'
 USE_I18N = True
 USE_TZ = True
+
+LANGUAGES = [
+    ('en', 'English'),
+    ('ru', 'Русский'),
+    ('uz', "O'zbek"),
+]
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',                        # global
+    BASE_DIR / 'apps/journals/locale',
+    BASE_DIR / 'apps/runner/locale',
+    BASE_DIR / 'apps/sessions_app/locale',
+    BASE_DIR / 'apps/submissions/locale',
+    BASE_DIR / 'apps/tasks/locale',
+    BASE_DIR / 'apps/users/locale',
+]
+USE_I18N = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'

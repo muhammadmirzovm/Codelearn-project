@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Новый урок{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "New Lesson" %}{% endblock %}
 
 {% block content %}
 <div style="max-width:520px;margin:0 auto;">
   <div class="page-hero fade-up" style="margin-bottom:24px;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost btn-sm">← Журнал</a>
+      <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost btn-sm">← {% trans "Journal" %}</a>
     </div>
-    <h1 class="section-title">Новый урок</h1>
-    <p class="section-sub">Добавьте занятие в журнал группы</p>
+    <h1 class="section-title">{% trans "New Lesson" %}</h1>
+    <p class="section-sub">{% trans "Add a lesson to the group journal" %}</p>
   </div>
 
   <div class="card card-p fade-up-2">
@@ -22,24 +23,26 @@
       {% csrf_token %}
 
       <div class="inp-group">
-        <label class="inp-label" for="{{ form.title.id_for_label }}">Тема урока</label>
+        <label class="inp-label" for="{{ form.title.id_for_label }}">{% trans "Lesson Topic" %}</label>
         <input class="inp" type="text"
           id="{{ form.title.id_for_label }}"
           name="{{ form.title.html_name }}"
           value="{{ form.title.value|default_if_none:'' }}"
-          placeholder="Например: Введение в Python"
+          placeholder="{% trans 'e.g. Introduction to Python' %}"
           autofocus>
         {% if form.title.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.title.errors|join:" " }}</p>{% endif %}
       </div>
 
       <div class="inp-group">
-        <label class="inp-label" for="{{ form.topic.id_for_label }}">Описание / Заметки</label>
-        <textarea class="inp" id="{{ form.topic.id_for_label }}" name="{{ form.topic.html_name }}" placeholder="Что разбирали на уроке..." style="min-height:90px;resize:vertical;">{{ form.topic.value|default_if_none:'' }}</textarea>
+        <label class="inp-label" for="{{ form.topic.id_for_label }}">{% trans "Description / Notes" %}</label>
+        <textarea class="inp" id="{{ form.topic.id_for_label }}" name="{{ form.topic.html_name }}"
+          placeholder="{% trans 'What was covered in the lesson...' %}"
+          style="min-height:90px;resize:vertical;">{{ form.topic.value|default_if_none:'' }}</textarea>
         {% if form.topic.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.topic.errors|join:" " }}</p>{% endif %}
       </div>
 
       <div class="inp-group">
-        <label class="inp-label" for="{{ form.date.id_for_label }}">Дата урока</label>
+        <label class="inp-label" for="{{ form.date.id_for_label }}">{% trans "Lesson Date" %}</label>
         <input class="inp" type="date"
           id="{{ form.date.id_for_label }}"
           name="{{ form.date.html_name }}"
@@ -49,8 +52,8 @@
       </div>
 
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button type="submit" class="btn btn-primary" style="flex:1;">Сохранить урок →</button>
-        <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost">Отмена</a>
+        <button type="submit" class="btn btn-primary" style="flex:1;">{% trans "Save Lesson" %} →</button>
+        <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost">{% trans "Cancel" %}</a>
       </div>
     </form>
   </div>

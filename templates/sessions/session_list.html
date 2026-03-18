@@ -1,15 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Sessions – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Sessions" %} – CodeLearn{% endblock %}
 {% block content %}
 
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <h1 class="section-title">Sessions</h1>
-      <p class="section-sub">{% if user.is_teacher %}Schedule and run live coding sessions{% else %}Your available coding sessions{% endif %}</p>
+      <h1 class="section-title">{% trans "Sessions" %}</h1>
+      <p class="section-sub">
+        {% if user.is_teacher %}
+          {% trans "Schedule and run live coding sessions" %}
+        {% else %}
+          {% trans "Your available coding sessions" %}
+        {% endif %}
+      </p>
     </div>
     {% if user.is_teacher %}
-    <a href="{% url 'sessions:session_create' %}" class="btn btn-primary">＋ Schedule Session</a>
+    <a href="{% url 'sessions:session_create' %}" class="btn btn-primary">＋ {% trans "Schedule Session" %}</a>
     {% endif %}
   </div>
 </div>
@@ -19,12 +26,12 @@
   <table class="tbl">
     <thead>
       <tr>
-        <th>Task</th>
-        <th>Group</th>
-        <th class="hide-sm">Start Time</th>
-        <th class="hide-sm">Duration</th>
-        <th>Status</th>
-        <th style="text-align:right;">Actions</th>
+        <th>{% trans "Task" %}</th>
+        <th>{% trans "Group" %}</th>
+        <th class="hide-sm">{% trans "Start Time" %}</th>
+        <th class="hide-sm">{% trans "Duration" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th style="text-align:right;">{% trans "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -37,27 +44,33 @@
           {% if s.duration_minutes %}
           <span style="background:var(--accent-bg);color:var(--accent);padding:2px 9px;border-radius:99px;font-size:.78rem;font-weight:600;font-family:var(--font-mono);">⏱ {{ s.duration_minutes }}min</span>
           {% else %}
-          <span style="color:var(--text-sub);font-size:.82rem;font-family:var(--font-mono);">∞ No limit</span>
+          <span style="color:var(--text-sub);font-size:.82rem;font-family:var(--font-mono);">∞ {% trans "No limit" %}</span>
           {% endif %}
         </td>
         <td>
-          {% if s.is_active %}<span class="badge badge-active">🟢 Live</span>
-          {% elif s.has_started %}<span class="badge badge-ended">Ended</span>
-          {% else %}<span class="badge badge-scheduled">Scheduled</span>{% endif %}
+          {% if s.is_active %}<span class="badge badge-active">🟢 {% trans "Live" %}</span>
+          {% elif s.has_started %}<span class="badge badge-ended">{% trans "Ended" %}</span>
+          {% else %}<span class="badge badge-scheduled">{% trans "Scheduled" %}</span>{% endif %}
         </td>
         <td style="text-align:right;">
           <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
             {% if user.is_teacher %}
               {% if s.is_active %}
-              <a href="{% url 'sessions:monitor' s.pk %}" class="btn btn-primary btn-sm">📡 Monitor</a>
-              <form method="post" action="{% url 'sessions:deactivate' s.pk %}" style="display:inline;">{% csrf_token %}<button class="btn btn-red-soft btn-sm" onclick="return confirm('Close session?')">■ Close</button></form>
+              <a href="{% url 'sessions:monitor' s.pk %}" class="btn btn-primary btn-sm">📡 {% trans "Monitor" %}</a>
+              <form method="post" action="{% url 'sessions:deactivate' s.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-red-soft btn-sm" onclick="return confirm('{% trans "Close session?" %}')">■ {% trans "Close" %}</button>
+              </form>
               {% else %}
-              <form method="post" action="{% url 'sessions:activate' s.pk %}" style="display:inline;">{% csrf_token %}<button class="btn btn-success btn-sm">▶ Start</button></form>
+              <form method="post" action="{% url 'sessions:activate' s.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-success btn-sm">▶ {% trans "Start" %}</button>
+              </form>
               {% endif %}
               <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
             {% else %}
               {% if s.is_active %}
-              <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm">▶ Join</a>
+              <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm">▶ {% trans "Join" %}</a>
               {% endif %}
               <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
             {% endif %}
@@ -72,12 +85,12 @@
 {% else %}
 <div class="card card-p fade-up" style="text-align:center;padding:64px;">
   <p style="font-size:3.5rem;margin-bottom:12px;">🗓</p>
-  <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">No sessions yet</p>
+  <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">{% trans "No sessions yet" %}</p>
   {% if user.is_teacher %}
-  <p style="color:var(--text-muted);margin-bottom:20px;">Create a session to host a live coding challenge for your students</p>
-  <a href="{% url 'sessions:session_create' %}" class="btn btn-primary btn-lg">Schedule first session</a>
+  <p style="color:var(--text-muted);margin-bottom:20px;">{% trans "Create a session to host a live coding challenge for your students" %}</p>
+  <a href="{% url 'sessions:session_create' %}" class="btn btn-primary btn-lg">{% trans "Schedule first session" %}</a>
   {% else %}
-  <p style="color:var(--text-muted);">Join a group first, then your teacher will schedule sessions for you</p>
+  <p style="color:var(--text-muted);">{% trans "Join a group first, then your teacher will schedule sessions for you" %}</p>
   {% endif %}
 </div>
 {% endif %}

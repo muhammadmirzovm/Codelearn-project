@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Оценить — {{ lesson.title }}{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Grade" %} — {{ lesson.title }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -19,8 +20,8 @@
 
   <div class="page-hero fade-up" style="margin-bottom:24px;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost btn-sm">← Журнал</a>
-      <span style="color:var(--text-muted);font-size:.85rem;font-family:var(--font-mono);">/ Оценки</span>
+      <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost btn-sm">← {% trans "Journal" %}</a>
+      <span style="color:var(--text-muted);font-size:.85rem;font-family:var(--font-mono);">/ {% trans "Grades" %}</span>
     </div>
     <p style="font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem;">{{ lesson.date|date:"d M Y" }}</p>
     <h1 class="section-title">{{ lesson.title }}</h1>
@@ -32,10 +33,10 @@
       <table class="tbl">
         <thead>
           <tr>
-            <th>Студент</th>
-            <th>Оценка (0–5)</th>
-            <th>Присутствие</th>
-            <th>Комментарий</th>
+            <th>{% trans "Student" %}</th>
+            <th>{% trans "Grade (0–5)" %}</th>
+            <th>{% trans "Attendance" %}</th>
+            <th>{% trans "Comment" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -55,16 +56,16 @@
             <td>
               <label class="attend-label">
                 <input class="attend-check" type="checkbox" name="attended_{{ record.pk }}" {% if record.attended %}checked{% endif %}>
-                Был на уроке
+                {% trans "Was present" %}
               </label>
             </td>
             <td>
-              <input class="comment-input" type="text" name="comment_{{ record.pk }}" value="{{ record.comment }}" placeholder="Заметка...">
+              <input class="comment-input" type="text" name="comment_{{ record.pk }}" value="{{ record.comment }}" placeholder="{% trans 'Note...' %}">
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="4" style="padding:2rem;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:.83rem;">В группе нет студентов</td>
+            <td colspan="4" style="padding:2rem;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:.83rem;">{% trans "No students in this group" %}</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -72,8 +73,8 @@
     </div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;">
-      <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost">← Отмена</a>
-      <button type="submit" class="btn btn-primary btn-lg">Сохранить оценки →</button>
+      <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost">← {% trans "Cancel" %}</a>
+      <button type="submit" class="btn btn-primary btn-lg">{% trans "Save Grades" %} →</button>
     </div>
   </form>
 </div>

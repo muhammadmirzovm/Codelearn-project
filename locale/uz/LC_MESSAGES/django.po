@@ -1,0 +1,1171 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-18 23:02+0500\n"
+"PO-Revision-Date: 2026-03-18 23:18+0500\n"
+"Last-Translator:   <>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Translated-Using: django-rosetta 0.10.3\n"
+
+#: templates/base.html:8
+msgid "CodeLearn"
+msgstr "CodeLearn"
+
+#: templates/base.html:40 templates/base.html:116
+#: templates/tasks/task_list.html:9
+msgid "Challenges"
+msgstr "Sinovlar"
+
+#: templates/base.html:42 templates/base.html:118
+#: templates/users/group_list.html:3
+msgid "Groups"
+msgstr "Guruhlar"
+
+#: templates/base.html:57 templates/base.html:122
+msgid "Sign out"
+msgstr "Chiqish"
+
+#: templates/base.html:60 templates/users/login.html:3
+msgid "Login"
+msgstr "Kirish"
+
+#: templates/base.html:61 templates/users/login.html:37
+msgid "Get started"
+msgstr "Boshlash"
+
+#: templates/base.html:67
+#, fuzzy
+#| msgid "Select Language"
+msgid "Change language"
+msgstr "Tilni tanlang"
+
+#: templates/base.html:80 templates/base.html:129
+#, fuzzy
+#| msgid "Select Language"
+msgid "Language"
+msgstr "Tilni tanlang"
+
+#: templates/base.html:107
+msgid "Toggle theme"
+msgstr "Mavzuni almashtirish"
+
+#: templates/journals/journal_detail.html:3
+#: templates/journals/lesson_form.html:9
+#: templates/journals/record_form.html:23 templates/users/group_list.html:45
+msgid "Journal"
+msgstr "Jurnal"
+
+#: templates/journals/journal_detail.html:76
+#, fuzzy
+#| msgid "Journal"
+msgid "Academic Journal"
+msgstr "Jurnal"
+
+#: templates/journals/journal_detail.html:79
+#: templates/users/dashboard_student.html:67
+#: templates/users/group_list.html:41
+msgid "Teacher"
+msgstr "O‘qituvchi"
+
+#: templates/journals/journal_detail.html:81 templates/tasks/task_list.html:26
+msgid "Created"
+msgstr "Yaratilgan"
+
+#: templates/journals/journal_detail.html:87
+#: templates/journals/lesson_form.html:3
+#: templates/journals/lesson_form.html:11
+msgid "New Lesson"
+msgstr "Yangi dars"
+
+#: templates/journals/journal_detail.html:99
+#: templates/journals/journal_detail.html:149
+msgid "Lessons"
+msgstr "Darslar"
+
+#: templates/journals/journal_detail.html:103
+#: templates/sessions/session_monitor.html:37
+msgid "Students"
+msgstr "Talabalar"
+
+#: templates/journals/journal_detail.html:107
+msgid "Max Score"
+msgstr "Maksimal ball"
+
+#: templates/journals/journal_detail.html:112
+msgid "Student Performance"
+msgstr "Talabalar natijalari"
+
+#: templates/journals/journal_detail.html:117
+#: templates/journals/journal_detail.html:172
+#: templates/journals/record_form.html:36
+#: templates/sessions/leaderboard.html:41
+#: templates/sessions/session_monitor.html:61
+msgid "Student"
+msgstr "Talaba"
+
+#: templates/journals/journal_detail.html:118
+#: templates/sessions/session_monitor.html:63
+msgid "Score"
+msgstr "Ballar"
+
+#: templates/journals/journal_detail.html:119
+#: templates/journals/journal_detail.html:173
+#: templates/journals/record_form.html:38
+msgid "Attendance"
+msgstr "Davomat"
+
+#: templates/journals/journal_detail.html:120
+msgid "Progress"
+msgstr "Rivojlanish"
+
+#: templates/journals/journal_detail.html:140
+#: templates/journals/record_form.html:68
+msgid "No students in this group"
+msgstr "Bu guruhda talabalar yo‘q"
+
+#: templates/journals/journal_detail.html:157
+#: templates/users/dashboard_teacher.html:30
+#, python-format
+msgid "%(count)s students"
+msgstr "%(count) talabalar"
+
+#: templates/journals/journal_detail.html:160
+#: templates/journals/journal_detail.html:174
+#: templates/journals/record_form.html:3
+msgid "Grade"
+msgstr "Ball"
+
+#: templates/journals/journal_detail.html:175
+#: templates/journals/record_form.html:39
+msgid "Comment"
+msgstr "Izoh"
+
+#: templates/journals/journal_detail.html:184
+msgid "Present"
+msgstr "Davomatda"
+
+#: templates/journals/journal_detail.html:186
+msgid "Absent"
+msgstr "Yo‘q"
+
+#: templates/journals/journal_detail.html:208
+msgid "No records for this lesson"
+msgstr "Bu dars uchun yozuvlar yo‘q"
+
+#: templates/journals/journal_detail.html:217
+#, fuzzy
+#| msgid "No messages yet"
+msgid "No lessons yet"
+msgstr "Hali xabarlar yo‘q"
+
+#: templates/journals/journal_detail.html:218
+msgid "Add the first lesson to start keeping the journal"
+msgstr "Jurnalni yuritishni boshlash uchun birinchi darsni qo‘shing"
+
+#: templates/journals/journal_detail.html:220
+#| msgid "Add Test Case"
+msgid "Add lesson"
+msgstr "Dars qo'shish"
+
+#: templates/journals/lesson_form.html:12
+msgid "Add a lesson to the group journal"
+msgstr "Guruh jurnali uchun dars qo‘shish"
+
+#: templates/journals/lesson_form.html:26
+msgid "Lesson Topic"
+msgstr "Dars mavzusi"
+
+#: templates/journals/lesson_form.html:31
+msgid "e.g. Introduction to Python"
+msgstr "Masalan: Pythonga kirish"
+
+#: templates/journals/lesson_form.html:37
+msgid "Description / Notes"
+msgstr "Tavsif / Izohlar"
+
+#: templates/journals/lesson_form.html:39
+msgid "What was covered in the lesson..."
+msgstr "Darsda nimalar qamrab olindi..."
+
+#: templates/journals/lesson_form.html:45
+msgid "Lesson Date"
+msgstr "Dars sanasi"
+
+#: templates/journals/lesson_form.html:55
+#| msgid "Save Task"
+msgid "Save Lesson"
+msgstr "Darsni saqlash"
+
+#: templates/journals/lesson_form.html:56
+#: templates/journals/record_form.html:76
+#: templates/sessions/session_form.html:26
+#: templates/tasks/task_confirm_delete.html:14
+#: templates/tasks/task_form.html:129
+#: templates/users/group_confirm_delete.html:14
+#: templates/users/group_form.html:31
+msgid "Cancel"
+msgstr "Bekor qilish"
+
+#: templates/journals/record_form.html:24
+msgid "Grades"
+msgstr "Baholar"
+
+#: templates/journals/record_form.html:37
+msgid "Grade (0–5)"
+msgstr "Ball (0–5)"
+
+#: templates/journals/record_form.html:59
+msgid "Was present"
+msgstr "Davomatda bo‘ldi"
+
+#: templates/journals/record_form.html:63
+msgid "Note..."
+msgstr "Izoh..."
+
+#: templates/journals/record_form.html:77
+#| msgid "Save Task"
+msgid "Save Grades"
+msgstr "Baholarni saqlash"
+
+#: templates/sessions/leaderboard.html:3 templates/sessions/leaderboard.html:9
+#: templates/sessions/session_join.html:39
+#: templates/sessions/session_monitor.html:25
+#| msgid "Dashboard"
+msgid "Leaderboard"
+msgstr "Yetakchilar jadvali"
+
+#: templates/sessions/leaderboard.html:13
+#: templates/sessions/session_list.html:51
+#: templates/sessions/session_monitor.html:119
+msgid "Live"
+msgstr "Jonli"
+
+#: templates/sessions/leaderboard.html:14
+#| msgid "Back to dashboard"
+msgid "Back to coding"
+msgstr "Kodga qaytish"
+
+#: templates/sessions/leaderboard.html:42
+#: templates/sessions/session_list.html:33
+#: templates/sessions/session_monitor.html:62
+msgid "Status"
+msgstr "Holat"
+
+#: templates/sessions/leaderboard.html:43
+msgid "Attempts"
+msgstr "Urinishlar"
+
+#: templates/sessions/leaderboard.html:44
+msgid "Time"
+msgstr "Vaqt"
+
+#: templates/sessions/leaderboard.html:60
+#: templates/sessions/leaderboard.html:85
+#: templates/sessions/session_monitor.html:41
+#| msgid "Tests Passed"
+msgid "Passed"
+msgstr "O'tgan"
+
+#: templates/sessions/leaderboard.html:61
+#: templates/sessions/leaderboard.html:86
+msgid "Working…"
+msgstr "Ishlayapti…"
+
+#: templates/sessions/leaderboard.html:62
+#: templates/sessions/leaderboard.html:87
+#: templates/sessions/session_monitor.html:83
+#: templates/sessions/session_monitor.html:125
+#| msgid "Get started"
+msgid "Not started"
+msgstr "Boshlanmabdi"
+
+#: templates/sessions/leaderboard.html:75
+#: templates/sessions/session_join.html:153
+#: templates/users/dashboard_student.html:122
+msgid "No submissions yet"
+msgstr "Hali yuborishlar yo‘q"
+
+#: templates/sessions/session_form.html:3
+#: templates/sessions/session_form.html:7
+#: templates/sessions/session_form.html:25
+#: templates/sessions/session_list.html:19
+#: templates/users/dashboard_teacher.html:14
+msgid "Schedule Session"
+msgstr "Sessiya rejalashtirish"
+
+#: templates/sessions/session_form.html:8
+msgid "Set a task, group, time and optional countdown for your students"
+msgstr ""
+"Talabalaringiz uchun vazifa, guruh, vaqt va taymer hisoblagichni belgilang"
+
+#: templates/sessions/session_form.html:22
+msgid "Tip:"
+msgstr "Maslahat:"
+
+#: templates/sessions/session_form.html:22
+msgid ""
+"Duration = 0 means unlimited time. Otherwise the timer starts the moment you"
+" click Start Session."
+msgstr ""
+"Davomiylik = 0 cheksiz vaqt degani. Aks holda, “Sessiyani boshlash” "
+"tugmasini bosganingizda taymer ishga tushadi."
+
+#: templates/sessions/session_join.html:47
+msgid "You already solved this task!"
+msgstr "Siz allaqachon bu vazifani yechdingiz!"
+
+#: templates/sessions/session_join.html:49
+#, python-format
+msgid ""
+"\n"
+"        Submitted at %(time)s · %(passed)s/%(total)s tests passed\n"
+"      "
+msgstr ""
+"\n"
+"%(time)s da yuborildi · %(passed)s/%(total)s testlar o‘tildi"
+
+#: templates/sessions/session_join.html:62 templates/tasks/task_form.html:39
+msgid "Problem Statement"
+msgstr "Masala sharti"
+
+#: templates/sessions/session_join.html:63
+#: templates/sessions/session_join.html:181
+msgid "Hide"
+msgstr "Yashirish"
+
+#: templates/sessions/session_join.html:70 templates/tasks/task_form.html:45
+msgid "Sample Input"
+msgstr "Namuna kiritish"
+
+#: templates/sessions/session_join.html:74 templates/tasks/task_form.html:52
+msgid "Sample Output"
+msgstr "Namuna chiqish"
+
+#: templates/sessions/session_join.html:83
+msgid "Select Language"
+msgstr "Tilni tanlang"
+
+#: templates/sessions/session_join.html:104
+msgid "Clear"
+msgstr "Tozalash"
+
+#: templates/sessions/session_join.html:115
+#: templates/sessions/session_join.html:172
+#| msgid "Your Code"
+msgid "Run Code"
+msgstr "Run"
+
+#: templates/sessions/session_join.html:117
+#: templates/sessions/session_join.html:176
+msgid "Already Passed!"
+msgstr "Allaqachon o‘tildi!"
+
+#: templates/sessions/session_join.html:117
+#: templates/sessions/session_join.html:175
+#| msgid "Submitted At"
+msgid "Submit"
+msgstr "Yuborish"
+
+#: templates/sessions/session_join.html:122
+msgid "Time's up! The session is now closed."
+msgstr "Vaqt tugadi! Sessiya yopildi."
+
+#: templates/sessions/session_join.html:129
+msgid "Results"
+msgstr "Natijalar"
+
+#: templates/sessions/session_join.html:130
+msgid "History"
+msgstr "Tarix"
+
+#: templates/sessions/session_join.html:135
+#: templates/sessions/session_join.html:194
+#, fuzzy
+#| msgid "Ready to code today?"
+msgid "Ready to code!"
+msgstr "Bugun kod yozishga tayyormisiz?"
+
+#: templates/sessions/session_join.html:136
+msgid "Select a language, write your code"
+msgstr "Tilni tanlang, kod yozing"
+
+#: templates/sessions/session_join.html:136
+#| msgid ""
+#| "No test cases yet. Click <strong>＋ Add Test Case</strong> to start."
+msgid "then click <strong>Run Code</strong> to test"
+msgstr ""
+"keyin sinab ko‘rish uchun <strong>Kodni ishga tushirish</strong> ni bosing"
+
+#: templates/sessions/session_join.html:143
+#| msgid "Submission"
+msgid "Last Submission"
+msgstr "Oxirgi topshiriq"
+
+#: templates/sessions/session_join.html:147
+#, python-format
+msgid ""
+"\n"
+"              %(passed)s/%(total)s tests · %(time)s\n"
+"            "
+msgstr ""
+"\n"
+"%(passed)s/%(total)s testlar · %(time)s"
+
+#: templates/sessions/session_join.html:173
+msgid "Running…"
+msgstr "Ishlayapti…"
+
+#: templates/sessions/session_join.html:174
+msgid "Evaluating…"
+msgstr "Baholash…"
+
+#: templates/sessions/session_join.html:177
+#| msgid "Tests Passed"
+msgid "Passed!"
+msgstr "Testlar bajarildi"
+
+#: templates/sessions/session_join.html:178
+msgid "Time is up! Submissions are now closed."
+msgstr "Vaqt tugadi! Yuborish yopildi."
+
+#: templates/sessions/session_join.html:179
+msgid "The session has been closed by the teacher."
+msgstr "Sessiya o‘qituvchi tomonidan yopildi."
+
+#: templates/sessions/session_join.html:180
+msgid "Clear the editor?"
+msgstr "Tahrirchini tozalash?"
+
+#: templates/sessions/session_join.html:182
+msgid "Show"
+msgstr "Ko‘rsatish"
+
+#: templates/sessions/session_join.html:183
+msgid "Running tests…"
+msgstr "Testlar ishlayapti…"
+
+#: templates/sessions/session_join.html:184
+msgid "Evaluating against hidden tests…"
+msgstr "Yashirin testlar bo‘yicha baholash…"
+
+#: templates/sessions/session_join.html:185
+msgid "▶ Example Test Results"
+msgstr "▶ Misol Test Natijalari"
+
+#: templates/sessions/session_join.html:186
+msgid "✓ Submit Results"
+msgstr "✓ Natijalarni yuborish"
+
+#: templates/sessions/session_join.html:187
+#| msgid "Tests Passed"
+msgid "All tests passed!"
+msgstr "Hamma testlar bajarildi"
+
+#: templates/sessions/session_join.html:188
+msgid "Network error:"
+msgstr "Tarmoq xatosi:"
+
+#: templates/sessions/session_join.html:189
+msgid "Server error"
+msgstr "Server xatosi"
+
+#: templates/sessions/session_join.html:190 templates/tasks/task_form.html:94
+#: templates/tasks/task_form.html:139
+msgid "Test"
+msgstr "Test"
+
+#: templates/sessions/session_join.html:191
+msgid "Input:"
+msgstr "Kiritish:"
+
+#: templates/sessions/session_join.html:192
+#| msgid "Expected Output"
+msgid "Expected:"
+msgstr "Kutilgan chiqish"
+
+#: templates/sessions/session_join.html:193
+msgid "Got:"
+msgstr "Olingan:"
+
+#: templates/sessions/session_list.html:3
+#: templates/sessions/session_list.html:9
+#| msgid "Submission"
+msgid "Sessions"
+msgstr "Sessiyalar"
+
+#: templates/sessions/session_list.html:12
+#| msgid "Teacher Dashboard — run your live coding sessions"
+msgid "Schedule and run live coding sessions"
+msgstr "Jonli kod yozish sessiyalarini rejalashtiring va boshqaring"
+
+#: templates/sessions/session_list.html:14
+#| msgid "No upcoming sessions"
+msgid "Your available coding sessions"
+msgstr "Siz uchun mavjud kodlash sessiyalari"
+
+#: templates/sessions/session_list.html:29
+#: templates/submissions/submission_detail.html:20
+msgid "Task"
+msgstr "Vazifa"
+
+#: templates/sessions/session_list.html:30
+#| msgid "Groups"
+msgid "Group"
+msgstr "Guruh"
+
+#: templates/sessions/session_list.html:31
+#| msgid "Start Now"
+msgid "Start Time"
+msgstr "Boshlash vaqti"
+
+#: templates/sessions/session_list.html:32
+msgid "Duration"
+msgstr "Davomiyligi"
+
+#: templates/sessions/session_list.html:34 templates/tasks/task_list.html:27
+msgid "Actions"
+msgstr "Amallar"
+
+#: templates/sessions/session_list.html:47
+#| msgid "Memory Limit"
+msgid "No limit"
+msgstr "Limit yo'q"
+
+#: templates/sessions/session_list.html:52
+msgid "Ended"
+msgstr "Tugadi"
+
+#: templates/sessions/session_list.html:53
+#| msgid "Schedule"
+msgid "Scheduled"
+msgstr "Rejalashtirilgan"
+
+#: templates/sessions/session_list.html:59
+#: templates/sessions/session_monitor.html:3
+#: templates/users/dashboard_teacher.html:33
+msgid "Monitor"
+msgstr "Nazorat qilish"
+
+#: templates/sessions/session_list.html:62
+#| msgid "Schedule Session"
+msgid "Close session?"
+msgstr "Sessiyani tugatish ?"
+
+#: templates/sessions/session_list.html:62
+msgid "Close"
+msgstr "Yopish"
+
+#: templates/sessions/session_list.html:67
+#| msgid "Start Now"
+msgid "Start"
+msgstr "Boshlash"
+
+#: templates/sessions/session_list.html:73
+#: templates/users/dashboard_student.html:51
+msgid "Join"
+msgstr "Qo‘shilish"
+
+#: templates/sessions/session_list.html:88
+#| msgid "No submissions yet"
+msgid "No sessions yet"
+msgstr "Hali sessiyalar yo‘q"
+
+#: templates/sessions/session_list.html:90
+msgid "Create a session to host a live coding challenge for your students"
+msgstr ""
+"Talabalaringiz uchun jonli kodlash chaqiruvini o'tkazish uchun sessiya "
+"yarating"
+
+#: templates/sessions/session_list.html:91
+#| msgid "Schedule Session"
+msgid "Schedule first session"
+msgstr "Birinchi sessiyani rejalashtir"
+
+#: templates/sessions/session_list.html:93
+msgid "Join a group first, then your teacher will schedule sessions for you"
+msgstr ""
+"Avval guruhga qo‘shiling, keyin o‘qituvchingiz siz uchun sessiyalarni "
+"rejalashtiradi"
+
+#: templates/sessions/session_monitor.html:10
+#| msgid "Monitor"
+msgid "Live Monitor"
+msgstr "Jonli monitor"
+
+#: templates/sessions/session_monitor.html:15
+#| msgid "Connecting..."
+msgid "Connecting"
+msgstr "Ulanmoqda..."
+
+#: templates/sessions/session_monitor.html:28
+msgid "Close this session?"
+msgstr "Ushbu sessiyani yopish?"
+
+#: templates/sessions/session_monitor.html:28
+#| msgid "Schedule Session"
+msgid "Close Session"
+msgstr "Sessiyani tugatish"
+
+#: templates/sessions/session_monitor.html:45
+#| msgid "Submitted At"
+msgid "Submitted"
+msgstr "Yuborilgan"
+
+#: templates/sessions/session_monitor.html:49
+msgid "Working"
+msgstr "Ishlayapti"
+
+#: templates/sessions/session_monitor.html:53
+msgid "Idle"
+msgstr "Bo‘sh"
+
+#: templates/sessions/session_monitor.html:64
+msgid "Last Activity"
+msgstr "So‘nggi faoliyat"
+
+#: templates/sessions/session_monitor.html:120
+#| msgid "Connecting..."
+msgid "Reconnecting"
+msgstr "Qayta ulanmoqda…"
+
+#: templates/sessions/session_monitor.html:121
+msgid "▶ Running…"
+msgstr "▶ Ishlayapti…"
+
+#: templates/sessions/session_monitor.html:122
+msgid "⏳ Evaluating…"
+msgstr "⏳ Baholash…"
+
+#: templates/sessions/session_monitor.html:123
+#| msgid "Tests Passed"
+msgid "✓ Passed"
+msgstr "O'tildi"
+
+#: templates/sessions/session_monitor.html:124
+msgid "✗ Failed"
+msgstr "✗ Muvaffaqiyatsiz"
+
+#: templates/submissions/submission_detail.html:3
+#: templates/submissions/submission_detail.html:11
+msgid "Submission"
+msgstr "Yuborish"
+
+#: templates/submissions/submission_detail.html:24
+msgid "Tests Passed"
+msgstr "Testlar bajarildi"
+
+#: templates/submissions/submission_detail.html:30
+msgid "Submitted At"
+msgstr "Yuborilgan vaqt"
+
+#: templates/submissions/submission_detail.html:37
+msgid "Your Code"
+msgstr "Sizning kodingiz"
+
+#: templates/submissions/submission_detail.html:48
+msgid "Test Case Results"
+msgstr "Test natijalari"
+
+#: templates/submissions/submission_detail.html:50
+#, python-format
+msgid "%(passed)s/%(total)s passed"
+msgstr "%(total)s ta testdan %(passed)s tasi bajarildi"
+
+#: templates/submissions/submission_detail.html:59
+#, python-format
+msgid "Test %(num)s"
+msgstr "%(num)s-test"
+
+#: templates/tasks/task_confirm_delete.html:3
+msgid "Delete Task"
+msgstr "Vazifani o‘chirish"
+
+#: templates/tasks/task_confirm_delete.html:8
+msgid "Delete Task?"
+msgstr "Vazifani o‘chirish?"
+
+#: templates/tasks/task_confirm_delete.html:9
+#: templates/users/group_confirm_delete.html:9
+msgid "You are about to permanently delete:"
+msgstr "Siz butunlay o‘chirmoqchisiz:"
+
+#: templates/tasks/task_confirm_delete.html:11
+msgid ""
+"All test cases will be permanently deleted. This action cannot be undone."
+msgstr "Barcha testlar butunlay o‘chiriladi. Bu amalni bekor qilib bo‘lmaydi."
+
+#: templates/tasks/task_confirm_delete.html:15
+#: templates/users/group_confirm_delete.html:15
+msgid "Yes, Delete"
+msgstr "Ha, o‘chirish"
+
+#: templates/tasks/task_form.html:23
+msgid "Define the problem and add as many test cases as you need"
+msgstr "Masalani aniqlang va kerakli miqdorda test qo‘shing"
+
+#: templates/tasks/task_form.html:32
+msgid "Task Details"
+msgstr "Vazifa tafsilotlari"
+
+#: templates/tasks/task_form.html:34 templates/tasks/task_list.html:23
+msgid "Title"
+msgstr "Sarlavha"
+
+#: templates/tasks/task_form.html:46 templates/tasks/task_form.html:53
+msgid "shown to students"
+msgstr "talabalarga ko‘rsatiladi"
+
+#: templates/tasks/task_form.html:60
+msgid "Time Limit (seconds)"
+msgstr "Vaqt limiti (soniya)"
+
+#: templates/tasks/task_form.html:64
+msgid "Memory Limit"
+msgstr "Xotira limiti"
+
+#: templates/tasks/task_form.html:74 templates/tasks/task_list.html:24
+msgid "Test Cases"
+msgstr "Testlar"
+
+#: templates/tasks/task_form.html:76 templates/tasks/task_form.html:110
+#: templates/tasks/task_form.html:145
+msgid "Example"
+msgstr "Namuna"
+
+#: templates/tasks/task_form.html:77
+msgid "visible to students during Run Code"
+msgstr "Kodni ishga tushirganda talabalarga ko‘rinadi"
+
+#: templates/tasks/task_form.html:78 templates/tasks/task_form.html:112
+#: templates/tasks/task_form.html:146
+msgid "Hidden"
+msgstr "Yashirin"
+
+#: templates/tasks/task_form.html:79
+msgid "only used for Submit evaluation"
+msgstr "faqat yuborishda tekshiriladi"
+
+#: templates/tasks/task_form.html:82
+msgid "Add Test Case"
+msgstr "Test qo‘shish"
+
+#: templates/tasks/task_form.html:98 templates/tasks/task_form.html:140
+msgid "Input (stdin)"
+msgstr "Kiritish (stdin)"
+
+#: templates/tasks/task_form.html:99 templates/tasks/task_form.html:142
+msgid "stdin input…"
+msgstr "stdin kiritish…"
+
+#: templates/tasks/task_form.html:102 templates/tasks/task_form.html:141
+msgid "Expected Output"
+msgstr "Kutilgan chiqish"
+
+#: templates/tasks/task_form.html:103 templates/tasks/task_form.html:143
+msgid "expected stdout…"
+msgstr "kutilgan stdout…"
+
+#: templates/tasks/task_form.html:107 templates/tasks/task_form.html:144
+msgid "Type"
+msgstr "Turi"
+
+#: templates/tasks/task_form.html:116 templates/tasks/task_form.html:147
+msgid "Remove"
+msgstr "O‘chirish"
+
+#: templates/tasks/task_form.html:123
+msgid "No test cases yet. Click <strong>＋ Add Test Case</strong> to start."
+msgstr "Hali testlar yo‘q. Boshlash uchun ＋ Test qo‘shish ni bosing."
+
+#: templates/tasks/task_form.html:128
+msgid "Save Task"
+msgstr "Vazifani saqlash"
+
+#: templates/tasks/task_list.html:3
+msgid "Tasks"
+msgstr "Vazifalar"
+
+#: templates/tasks/task_list.html:10
+msgid "Your coding problems and test cases"
+msgstr "Sizning masalalaringiz va testlaringiz"
+
+#: templates/tasks/task_list.html:13
+msgid "Create Task"
+msgstr "Vazifa yaratish"
+
+#: templates/tasks/task_list.html:25
+msgid "Limits"
+msgstr "Limitlar"
+
+#: templates/tasks/task_list.html:39
+#, python-format
+msgid "%(count)s example"
+msgstr "%(count)s ta namuna"
+
+#: templates/tasks/task_list.html:42
+#, python-format
+msgid "%(count)s hidden"
+msgstr "%(count)s ta yashirin test"
+
+#: templates/tasks/task_list.html:49 templates/users/dashboard_teacher.html:62
+#: templates/users/group_list.html:67
+msgid "Edit"
+msgstr "Tahrirlash"
+
+#: templates/tasks/task_list.html:62
+msgid "No tasks yet"
+msgstr "Hali vazifalar yo‘q"
+
+#: templates/tasks/task_list.html:63
+msgid "Create coding problems with hidden test cases for your sessions"
+msgstr "Darslar uchun yashirin testli masalalar yarating"
+
+#: templates/tasks/task_list.html:65
+msgid "Create first task"
+msgstr "Birinchi vazifani yaratish"
+
+#: templates/users/dashboard_student.html:3
+#: templates/users/dashboard_teacher.html:3
+msgid "Dashboard"
+msgstr "Boshqaruv paneli"
+
+#: templates/users/dashboard_student.html:9
+#, python-format
+msgid "Hey, %(name)s! 🚀"
+msgstr "Salom, %(name)s"
+
+#: templates/users/dashboard_student.html:10
+msgid "Ready to code today?"
+msgstr "Bugun kod yozishga tayyormisiz?"
+
+#: templates/users/dashboard_student.html:12 templates/users/join_group.html:9
+msgid "Join a Group"
+msgstr "Guruhga qo‘shilish"
+
+#: templates/users/dashboard_student.html:20
+msgid "Active Sessions — Join Now!"
+msgstr "Faol sessiyalar — Hozir qo‘shiling!"
+
+#: templates/users/dashboard_student.html:27
+#, python-format
+msgid "%(mins)s min"
+msgstr "%(mins)s daqiqa"
+
+#: templates/users/dashboard_student.html:30
+msgid "Enter"
+msgstr "Kirish"
+
+#: templates/users/dashboard_student.html:40
+msgid "No active sessions right now"
+msgstr "Hozir faol sessiyalar yo‘q"
+
+#: templates/users/dashboard_student.html:41
+msgid "Check back soon — your teacher will start a session!"
+msgstr "Tez orada yana tekshiring — o‘qituvchingiz sessiyani boshlaydi!"
+
+#: templates/users/dashboard_student.html:50
+#: templates/users/dashboard_teacher.html:47 templates/users/group_list.html:9
+msgid "My Groups"
+msgstr "Mening guruhlarim"
+
+#: templates/users/dashboard_student.html:61
+#, python-format
+msgid "%(count)s members"
+msgstr "%(count)s ta a'zolar"
+
+#: templates/users/dashboard_student.html:64
+#: templates/users/dashboard_teacher.html:61
+#: templates/users/group_detail.html:4 templates/users/group_list.html:65
+msgid "Chat"
+msgstr "Chat"
+
+#: templates/users/dashboard_student.html:82
+msgid "You're not in any group yet"
+msgstr "Siz hali hech qaysi guruhda emassiz"
+
+#: templates/users/dashboard_student.html:83
+#: templates/users/group_list.html:103
+msgid "Join with invite key"
+msgstr "Taklif kaliti orqali qo‘shilish"
+
+#: templates/users/dashboard_student.html:92
+msgid "Upcoming"
+msgstr "Kutilayotgan"
+
+#: templates/users/dashboard_student.html:102
+msgid "No upcoming sessions"
+msgstr "Kutilayotgan sessiyalar yo‘q"
+
+#: templates/users/dashboard_student.html:109
+msgid "Recent Submissions"
+msgstr "So‘nggi yuborishlar"
+
+#: templates/users/dashboard_teacher.html:9
+#, python-format
+msgid "Good day, %(name)s! 👋"
+msgstr "Xayrli kun, %(name)s! 👋"
+
+#: templates/users/dashboard_teacher.html:10
+msgid "Teacher Dashboard — run your live coding sessions"
+msgstr "O‘qituvchi paneli — jonli kod sessiyalarini boshqaring"
+
+#: templates/users/dashboard_teacher.html:13
+msgid "New Task"
+msgstr "Yangi vazifa"
+
+#: templates/users/dashboard_teacher.html:23
+msgid "Live Sessions Running"
+msgstr "Jonli sessiyalar ishlamoqda"
+
+#: templates/users/dashboard_teacher.html:48
+msgid "New"
+msgstr "Yangi"
+
+#: templates/users/dashboard_teacher.html:57
+#: templates/users/group_list.html:37
+#, python-format
+msgid "%(count)s student"
+msgstr "%(count)s talaba"
+
+#: templates/users/dashboard_teacher.html:70
+#: templates/users/group_list.html:97
+msgid "No groups yet"
+msgstr "Hali guruhlar yo‘q"
+
+#: templates/users/dashboard_teacher.html:71
+#: templates/users/group_list.html:100
+msgid "Create first group"
+msgstr "Birinchi guruhni yaratish"
+
+#: templates/users/dashboard_teacher.html:79
+msgid "Upcoming Sessions"
+msgstr "Kutilayotgan sessiyalar"
+
+#: templates/users/dashboard_teacher.html:80
+msgid "Schedule"
+msgstr "Rejalashtirish"
+
+#: templates/users/dashboard_teacher.html:87
+msgid "Start Now"
+msgstr "Hozir boshlash"
+
+#: templates/users/dashboard_teacher.html:93
+msgid "No sessions scheduled"
+msgstr "Hech qanday sessiya rejalashtirilmagan"
+
+#: templates/users/dashboard_teacher.html:94
+msgid "Schedule now"
+msgstr "Hozir rejalashtirish"
+
+#: templates/users/group_confirm_delete.html:3
+msgid "Delete Group"
+msgstr "Guruhni o‘chirish"
+
+#: templates/users/group_confirm_delete.html:8
+msgid "Delete Group?"
+msgstr "Guruhni o‘chirish?"
+
+#: templates/users/group_confirm_delete.html:11
+msgid ""
+"This will remove all students, messages, and journal records. This action "
+"cannot be undone."
+msgstr ""
+"Bu barcha talabalar, xabarlar va jurnal yozuvlarini o‘chiradi. Bu amalni "
+"bekor qilib bo‘lmaydi."
+
+#: templates/users/group_detail.html:85
+msgid "Back"
+msgstr "Orqaga"
+
+#: templates/users/group_detail.html:89
+msgid "Real-time group chat"
+msgstr "Jonli guruh chat"
+
+#: templates/users/group_detail.html:93
+msgid "Connecting..."
+msgstr "Ulanmoqda…"
+
+#: templates/users/group_detail.html:107
+#, python-format
+msgid "%(name)s · %(count)s members"
+msgstr "%(name)s · %(count)s a'zolar"
+
+#: templates/users/group_detail.html:113
+msgid "Earlier messages"
+msgstr "Oldingi xabarlar"
+
+#: templates/users/group_detail.html:137
+msgid "No messages yet"
+msgstr "Hali xabarlar yo‘q"
+
+#: templates/users/group_detail.html:138
+#, python-format
+msgid "Be the first to say hello in <strong>%(name)s</strong>!"
+msgstr "<strong>%(name)s</strong> da birinchi bo‘lib salom ayting!"
+
+#: templates/users/group_detail.html:150
+#, python-format
+msgid "Message %(name)s..."
+msgstr "Xabar %(name)s…"
+
+#: templates/users/group_detail.html:153
+msgid "Send"
+msgstr "Yuborish"
+
+#: templates/users/group_detail.html:161
+msgid "Online"
+msgstr "Onlayn"
+
+#: templates/users/group_detail.html:168 templates/users/group_list.html:52
+msgid "Members"
+msgstr "A’zolar"
+
+#: templates/users/group_detail.html:178 templates/users/group_detail.html:224
+msgid "Admin"
+msgstr "Administrator"
+
+#: templates/users/group_detail.html:220
+msgid "Connected"
+msgstr "Ulandi"
+
+#: templates/users/group_detail.html:221
+msgid "Disconnected"
+msgstr "Ulanmagan"
+
+#: templates/users/group_detail.html:222
+msgid "is typing..."
+msgstr "Yozmoqda…"
+
+#: templates/users/group_detail.html:223
+msgid "you"
+msgstr "Siz"
+
+#: templates/users/group_form.html:8
+msgid "Students can also join later using the invite key"
+msgstr "Talabalar keyinroq taklif kaliti orqali qo‘shilishi mumkin"
+
+#: templates/users/group_form.html:14
+msgid "Group Name"
+msgstr "Guruh nomi"
+
+#: templates/users/group_form.html:19
+msgid "Add Students (optional)"
+msgstr "Talabalarni qo‘shish (ixtiyoriy)"
+
+#: templates/users/group_form.html:20
+msgid "You can skip this — share the invite key instead"
+msgstr "Siz buni o‘tkazib yuborishingiz mumkin — taklif kalitini ulashing"
+
+#: templates/users/group_form.html:30
+msgid "Save Group"
+msgstr "Guruhni saqlash"
+
+#: templates/users/group_list.html:12
+msgid "Share the invite key — students join instantly"
+msgstr "Taklif kalitini ulashing — talabalar darhol qo‘shiladi"
+
+#: templates/users/group_list.html:14
+msgid "Groups you're a member of"
+msgstr "Siz a’zo bo‘lgan guruhlar"
+
+#: templates/users/group_list.html:19
+msgid "Create Group"
+msgstr "Guruh yaratish"
+
+#: templates/users/group_list.html:21 templates/users/join_group.html:3
+#: templates/users/join_group.html:23
+msgid "Join Group"
+msgstr "Guruhga qo‘shilish"
+
+#: templates/users/group_list.html:68
+msgid "Delete"
+msgstr "O‘chirish"
+
+#: templates/users/group_list.html:75 templates/users/join_group.html:16
+msgid "Invite Key"
+msgstr "Taklif kaliti"
+
+#: templates/users/group_list.html:77
+msgid "Copy"
+msgstr "Nusxalash"
+
+#: templates/users/group_list.html:81
+msgid "Regenerate? Old key stops working."
+msgstr "Yangi yaratilsinmi? Eski kalit ishlashni to‘xtatadi."
+
+#: templates/users/group_list.html:99
+msgid "Create a group, share the invite key with your students"
+msgstr "Guruh yarating, taklif kalitini talabalar bilan ulashing"
+
+#: templates/users/group_list.html:102
+msgid "Ask your teacher for an invite key to join a group"
+msgstr "Guruhga qo‘shilish uchun o‘qituvchingizdan taklif kalitini so‘rang"
+
+#: templates/users/join_group.html:10
+msgid "Paste the invite key your teacher shared"
+msgstr "O‘qituvchingiz ulashgan taklif kalitini joylashtiring"
+
+#: templates/users/join_group.html:21
+msgid "Ask your teacher to copy the invite key from their Groups page"
+msgstr ""
+"O‘qituvchingizdan taklif kalitini Guruhlar sahifasidan nusxalashni so‘rang"
+
+#: templates/users/join_group.html:27
+msgid "Back to dashboard"
+msgstr "Boshqaruv paneliga qaytish"
+
+#: templates/users/login.html:9
+msgid "Welcome back!"
+msgstr "Yana xush kelibsiz!"
+
+#: templates/users/login.html:10
+msgid "Sign in to continue to CodeLearn"
+msgstr "CodeLearn’ga davom etish uchun tizimga kiring"
+
+#: templates/users/login.html:33 templates/users/register.html:50
+msgid "Sign in"
+msgstr "Kirish"
+
+#: templates/users/login.html:37
+msgid "Don't have an account?"
+msgstr "Akkauntingiz yo‘qmi?"
+
+#: templates/users/register.html:3
+msgid "Register"
+msgstr "Ro‘yxatdan o‘tish"
+
+#: templates/users/register.html:9
+msgid "Create your account"
+msgstr "Akkaunt yarating"
+
+#: templates/users/register.html:10
+msgid "Join CodeLearn as a teacher or student"
+msgstr "CodeLearn’ga o‘qituvchi yoki talaba sifatida qo‘shiling"
+
+#: templates/users/register.html:27
+msgid "Create & manage groups"
+msgstr "Guruhlar yarating va boshqaring"
+
+#: templates/users/register.html:29
+msgid "Join & solve tasks"
+msgstr "Qo‘shiling va vazifalarni yeching"
+
+#: templates/users/register.html:46
+msgid "Create Account"
+msgstr "Akkaunt yaratish"
+
+#: templates/users/register.html:50
+msgid "Already have an account?"
+msgstr "Allaqachon hisobingiz bormi?"

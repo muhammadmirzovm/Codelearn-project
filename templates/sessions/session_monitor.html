@@ -1,17 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Monitor – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Monitor" %} – CodeLearn{% endblock %}
 {% block content %}
 
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div style="display:flex;align-items:center;gap:12px;">
       <div>
-        <h1 class="section-title">📡 Live Monitor</h1>
+        <h1 class="section-title">📡 {% trans "Live Monitor" %}</h1>
         <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
       </div>
       <div id="ws-indicator" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:var(--bg2);border:1px solid var(--border);">
         <span id="ws-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-sub);"></span>
-        <span id="ws-label" style="font-size:.72rem;font-weight:600;color:var(--text-sub);font-family:var(--font-mono);">Connecting</span>
+        <span id="ws-label" style="font-size:.72rem;font-weight:600;color:var(--text-sub);font-family:var(--font-mono);">{% trans "Connecting" %}</span>
       </div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -21,10 +22,10 @@
         <span class="mono" id="countdown">--:--</span>
       </div>
       {% endif %}
-      <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm">🏆 Leaderboard</a>
+      <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm">🏆 {% trans "Leaderboard" %}</a>
       <form method="post" action="{% url 'sessions:deactivate' session.pk %}" style="display:inline;">
         {% csrf_token %}
-        <button class="btn btn-danger btn-sm" onclick="return confirm('Close this session?')">■ Close Session</button>
+        <button class="btn btn-danger btn-sm" onclick="return confirm('{% trans "Close this session?" %}')">■ {% trans "Close Session" %}</button>
       </form>
     </div>
   </div>
@@ -33,23 +34,23 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px;" class="fade-up-2">
   <div class="stat-card" style="text-align:center;">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-total">{{ student_data|length }}</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Students</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Students" %}</p>
   </div>
   <div class="stat-card" style="text-align:center;border-left:3px solid var(--success);">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--success);" id="s-passed">0</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Passed ✓</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Passed" %} ✓</p>
   </div>
   <div class="stat-card" style="text-align:center;border-left:3px solid var(--accent);">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-sub">0</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Submitted</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Submitted" %}</p>
   </div>
   <div class="stat-card" style="text-align:center;border-left:3px solid var(--warning);">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--warning);" id="s-run">0</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Working</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Working" %}</p>
   </div>
   <div class="stat-card" style="text-align:center;border-left:3px solid var(--border2);">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--text-muted);" id="s-idle">{{ student_data|length }}</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">Idle</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Idle" %}</p>
   </div>
 </div>
 
@@ -57,10 +58,10 @@
   <table class="tbl">
     <thead>
       <tr>
-        <th>Student</th>
-        <th>Status</th>
-        <th class="hide-sm">Score</th>
-        <th class="hide-sm">Last Activity</th>
+        <th>{% trans "Student" %}</th>
+        <th>{% trans "Status" %}</th>
+        <th class="hide-sm">{% trans "Score" %}</th>
+        <th class="hide-sm">{% trans "Last Activity" %}</th>
       </tr>
     </thead>
     <tbody id="monitor-body">
@@ -79,7 +80,7 @@
           {% if item.submission %}
             <span class="badge badge-{{ item.submission.status }}">{{ item.submission.get_status_display }}</span>
           {% else %}
-            <span class="badge badge-notstarted">Not started</span>
+            <span class="badge badge-notstarted">{% trans "Not started" %}</span>
           {% endif %}
         </td>
         <td class="hide-sm" id="score-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.875rem;font-family:var(--font-mono);">
@@ -113,6 +114,17 @@ const DURATION_SECS = DATA.duration_mins * 60;
 const ACTIVATED_AT  = DATA.activated_at;
 const total         = DATA.total;
 
+// i18n strings for JavaScript
+const i18n = {
+  live:         "{% trans 'Live' %}",
+  reconnecting: "{% trans 'Reconnecting' %}",
+  running:      "{% trans '▶ Running…' %}",
+  evaluating:   "{% trans '⏳ Evaluating…' %}",
+  passed:       "{% trans '✓ Passed' %}",
+  failed:       "{% trans '✗ Failed' %}",
+  notStarted:   "{% trans 'Not started' %}",
+};
+
 let nPassed = DATA.statuses.filter(s => s === 'passed').length;
 let nSub    = DATA.statuses.filter(s => s !== 'none' && s !== 'passed').length;
 let nRun    = 0;
@@ -145,10 +157,10 @@ function setWS(ok) {
   const lbl = document.getElementById('ws-label');
   const ind = document.getElementById('ws-indicator');
   if (ok) {
-    dot.style.background = 'var(--success)'; lbl.textContent = 'Live'; lbl.style.color = 'var(--success)';
+    dot.style.background = 'var(--success)'; lbl.textContent = i18n.live; lbl.style.color = 'var(--success)';
     ind.style.background = 'var(--success-bg)'; ind.style.borderColor = 'var(--success-brd)';
   } else {
-    dot.style.background = 'var(--text-sub)'; lbl.textContent = 'Reconnecting'; lbl.style.color = 'var(--text-sub)';
+    dot.style.background = 'var(--text-sub)'; lbl.textContent = i18n.reconnecting; lbl.style.color = 'var(--text-sub)';
     ind.style.background = 'var(--bg2)'; ind.style.borderColor = 'var(--border)';
   }
 }
@@ -171,13 +183,15 @@ function connectWS() {
   ws.onclose = () => { setWS(false); setTimeout(connectWS, 3000); };
   ws.onmessage = e => {
     const msg = JSON.parse(e.data); const d = msg.data; const sid = d.student_id;
-    if (msg.event==='ran_example') { nRun++; updateStats(); updateRow(sid,'<span class="badge badge-running">▶ Running…</span>','rgba(13,148,136,.07)'); }
-    else if (msg.event==='submitted') { nRun=Math.max(0,nRun-1); nSub++; updateStats(); updateRow(sid,'<span class="badge badge-pending">⏳ Evaluating…</span>','rgba(13,148,136,.05)'); }
+    if (msg.event==='ran_example') { nRun++; updateStats(); updateRow(sid,`<span class="badge badge-running">${i18n.running}</span>`,'rgba(13,148,136,.07)'); }
+    else if (msg.event==='submitted') { nRun=Math.max(0,nRun-1); nSub++; updateStats(); updateRow(sid,`<span class="badge badge-pending">${i18n.evaluating}</span>`,'rgba(13,148,136,.05)'); }
     else if (msg.event==='submission_result') {
       nSub=Math.max(0,nSub-1);
       if (d.is_correct) nPassed++;
       updateStats();
-      const badge = d.is_correct ? '<span class="badge badge-passed">✓ Passed</span>' : '<span class="badge badge-failed">✗ Failed</span>';
+      const badge = d.is_correct
+        ? `<span class="badge badge-passed">${i18n.passed}</span>`
+        : `<span class="badge badge-failed">${i18n.failed}</span>`;
       updateRow(sid, badge, d.is_correct?'rgba(5,150,105,.07)':'rgba(220,38,38,.06)');
     }
   };

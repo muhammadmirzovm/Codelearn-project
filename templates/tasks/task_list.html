@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Tasks – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Tasks" %} – CodeLearn{% endblock %}
 {% block content %}
 
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <h1 class="section-title">Challenges</h1>
-      <p class="section-sub">Your coding problems and test cases</p>
+      <h1 class="section-title">{% trans "Challenges" %}</h1>
+      <p class="section-sub">{% trans "Your coding problems and test cases" %}</p>
     </div>
     {% if user.is_teacher %}
-    <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">＋ Create Task</a>
+    <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">＋ {% trans "Create Task" %}</a>
     {% endif %}
   </div>
 </div>
@@ -19,11 +20,11 @@
   <table class="tbl">
     <thead>
       <tr>
-        <th>Title</th>
-        <th class="hide-sm">Test Cases</th>
-        <th class="hide-sm">Limits</th>
-        <th class="hide-sm">Created</th>
-        <th style="text-align:right;">Actions</th>
+        <th>{% trans "Title" %}</th>
+        <th class="hide-sm">{% trans "Test Cases" %}</th>
+        <th class="hide-sm">{% trans "Limits" %}</th>
+        <th class="hide-sm">{% trans "Created" %}</th>
+        <th style="text-align:right;">{% trans "Actions" %}</th>
       </tr>
     </thead>
     <tbody>
@@ -34,14 +35,18 @@
           <p style="font-size:.75rem;color:var(--text-muted);margin-top:1px;">{{ t.description|truncatechars:60 }}</p>
         </td>
         <td class="hide-sm">
-          <span style="background:var(--success-bg);color:var(--success);padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:600;font-family:var(--font-mono);">{{ t.example_cases.count }} example</span>
-          <span style="background:var(--bg2);color:var(--text-muted);padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:600;margin-left:4px;font-family:var(--font-mono);">{{ t.hidden_cases.count }} hidden</span>
+          <span style="background:var(--success-bg);color:var(--success);padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:600;font-family:var(--font-mono);">
+            {% blocktrans with count=t.example_cases.count %}{{ count }} example{% endblocktrans %}
+          </span>
+          <span style="background:var(--bg2);color:var(--text-muted);padding:2px 9px;border-radius:99px;font-size:.75rem;font-weight:600;margin-left:4px;font-family:var(--font-mono);">
+            {% blocktrans with count=t.hidden_cases.count %}{{ count }} hidden{% endblocktrans %}
+          </span>
         </td>
         <td class="hide-sm" style="font-size:.82rem;color:var(--text-muted);font-family:var(--font-mono);">{{ t.time_limit }}s · {{ t.memory_limit }}</td>
         <td class="hide-sm" style="font-size:.82rem;color:var(--text-muted);font-family:var(--font-mono);">{{ t.created_at|date:"M j, Y" }}</td>
         <td style="text-align:right;">
           {% if user.is_teacher %}
-          <a href="{% url 'tasks:task_edit' t.pk %}" class="btn btn-accent-soft btn-sm">✏️ Edit</a>
+          <a href="{% url 'tasks:task_edit' t.pk %}" class="btn btn-accent-soft btn-sm">✏️ {% trans "Edit" %}</a>
           <a href="{% url 'tasks:task_delete' t.pk %}" class="btn btn-red-soft btn-sm" style="margin-left:6px;">🗑</a>
           {% endif %}
         </td>
@@ -54,10 +59,10 @@
 {% else %}
 <div class="card card-p fade-up" style="text-align:center;padding:64px;">
   <p style="font-size:3.5rem;margin-bottom:12px;">📝</p>
-  <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">No tasks yet</p>
-  <p style="color:var(--text-muted);margin-bottom:20px;">Create coding problems with hidden test cases for your sessions</p>
+  <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">{% trans "No tasks yet" %}</p>
+  <p style="color:var(--text-muted);margin-bottom:20px;">{% trans "Create coding problems with hidden test cases for your sessions" %}</p>
   {% if user.is_teacher %}
-  <a href="{% url 'tasks:task_create' %}" class="btn btn-primary btn-lg">Create first task</a>
+  <a href="{% url 'tasks:task_create' %}" class="btn btn-primary btn-lg">{% trans "Create first task" %}</a>
   {% endif %}
 </div>
 {% endif %}

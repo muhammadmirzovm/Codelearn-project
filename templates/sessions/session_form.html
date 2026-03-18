@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Schedule Session – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Schedule Session" %} – CodeLearn{% endblock %}
 {% block content %}
 <div style="max-width:540px;margin:0 auto;">
   <div class="page-hero fade-up" style="margin-bottom:24px;">
-    <h1 class="section-title">▶ Schedule Session</h1>
-    <p class="section-sub">Set a task, group, time and optional countdown for your students</p>
+    <h1 class="section-title">▶ {% trans "Schedule Session" %}</h1>
+    <p class="section-sub">{% trans "Set a task, group, time and optional countdown for your students" %}</p>
   </div>
   <div class="card card-p fade-up-2">
     <form method="post">
@@ -18,11 +19,11 @@
       </div>
       {% endfor %}
       <div style="background:var(--accent-bg);border:1px solid var(--accent-bgd);border-radius:var(--radius);padding:12px 14px;margin-bottom:18px;font-size:.82rem;color:var(--accent);">
-        💡 <strong>Tip:</strong> Duration = 0 means unlimited time. Otherwise the timer starts the moment you click "Start Session".
+        💡 <strong>{% trans "Tip:" %}</strong> {% trans "Duration = 0 means unlimited time. Otherwise the timer starts the moment you click Start Session." %}
       </div>
       <div style="display:flex;gap:10px;">
-        <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">Schedule Session →</button>
-        <a href="{% url 'sessions:session_list' %}" class="btn btn-ghost btn-lg">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">{% trans "Schedule Session" %} →</button>
+        <a href="{% url 'sessions:session_list' %}" class="btn btn-ghost btn-lg">{% trans "Cancel" %}</a>
       </div>
     </form>
   </div>

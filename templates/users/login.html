@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Sign In – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Login" %} – CodeLearn{% endblock %}
 {% block content %}
 <div style="min-height:72vh;display:flex;align-items:center;justify-content:center;">
-  <div style="width:100%;max-width:420px;" class="fade-up">
+  <div style="width:100%;max-width:440px;" class="fade-up">
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="width:60px;height:60px;background:var(--accent);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(13,148,136,.3);">⚡</div>
-      <h1 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;">Welcome back!</h1>
-      <p style="color:var(--text-muted);margin-top:4px;">Sign in to your CodeLearn account</p>
+      <div style="width:60px;height:60px;background:var(--accent);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(99,102,241,.3);">🔐</div>
+      <h1 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;">{% trans "Welcome back!" %}</h1>
+      <p style="color:var(--text-muted);margin-top:4px;">{% trans "Sign in to continue to CodeLearn" %}</p>
     </div>
     <div class="card card-p">
       <form method="post" novalidate>
@@ -14,19 +15,115 @@
         {% for field in form %}
         <div class="inp-group">
           <label class="inp-label">{{ field.label }}</label>
-          <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}"
+
+          {% if field.field.widget.input_type == 'password' %}
+          <!-- Password field with eye icon -->
+          <div class="pw-wrap">
+            <input type="password"
+              name="{{ field.html_name }}"
+              id="pw-{{ field.html_name }}"
+              {% if field.value %}value="{{ field.value }}"{% endif %}
+              class="inp pw-inp"
+              {% if field.field.required %}required{% endif %}
+              placeholder="{{ field.label }}"/>
+            <button type="button" class="pw-eye"
+              onclick="togglePw('pw-{{ field.html_name }}', this)"
+              tabindex="-1"
+              title="{% trans 'Show password' %}">
+              <!-- Eye Open -->
+              <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <!-- Eye Closed -->
+              <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+
+          {% else %}
+          <!-- Normal field -->
+          <input type="{{ field.field.widget.input_type }}"
+            name="{{ field.html_name }}"
             {% if field.value %}value="{{ field.value }}"{% endif %}
-            class="inp" {% if field.field.required %}required{% endif %}
-            placeholder="Enter your {{ field.label|lower }}" autocomplete="on"/>
+            class="inp"
+            {% if field.field.required %}required{% endif %}
+            placeholder="{{ field.label }}"/>
+          {% endif %}
+
+          {% if field.help_text %}<p class="inp-hint">{{ field.help_text }}</p>{% endif %}
           {% if field.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;font-weight:500;">⚠ {{ field.errors|join:" " }}</p>{% endif %}
         </div>
         {% endfor %}
-        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:4px;">Sign In →</button>
+
+        {% if form.non_field_errors %}
+        <div style="background:var(--danger-bg);border:1.5px solid var(--danger);border-radius:var(--radius-lg);padding:12px 16px;margin-bottom:16px;">
+          <p style="color:var(--danger);font-size:.85rem;font-weight:500;">⚠ {{ form.non_field_errors|join:" " }}</p>
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:4px;">{% trans "Sign in" %} →</button>
       </form>
     </div>
     <p style="text-align:center;margin-top:18px;font-size:.875rem;color:var(--text-muted);">
-      No account? <a href="{% url 'users:register' %}" style="color:var(--accent);font-weight:600;">Create one free →</a>
+      {% trans "Don't have an account?" %} <a href="{% url 'users:register' %}" style="color:var(--accent);font-weight:600;">{% trans "Get started" %} →</a>
     </p>
   </div>
 </div>
+
+<style>
+.pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pw-inp {
+  width: 100%;
+  padding-right: 46px !important;
+}
+.pw-eye {
+  position: absolute;
+  right: 11px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: color .15s, background .15s;
+  outline: none;
+  flex-shrink: 0;
+}
+.pw-eye:hover {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+.pw-eye svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  transition: opacity .15s;
+}
+</style>
+
+<script>
+function togglePw(inputId, btn) {
+  const input   = document.getElementById(inputId);
+  const showing = input.type === 'text';
+
+  input.type = showing ? 'password' : 'text';
+
+  btn.querySelector('.eye-open').style.display   = showing ? 'block' : 'none';
+  btn.querySelector('.eye-closed').style.display = showing ? 'none'  : 'block';
+  btn.title = showing ? '{% trans "Show password" %}' : '{% trans "Hide password" %}';
+
+  input.focus();
+}
+</script>
 {% endblock %}

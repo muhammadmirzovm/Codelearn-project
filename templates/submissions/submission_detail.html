@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Submission #{{ submission.pk }} – CodeLearn{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Submission" %} #{{ submission.pk }} – CodeLearn{% endblock %}
 
 {% block content %}
 <div style="max-width:860px;margin:0 auto;">
@@ -7,7 +8,7 @@
   <div class="page-hero fade-up" style="margin-bottom:24px;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div>
-        <p style="font-size:.72rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:4px;">Submission</p>
+        <p style="font-size:.72rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:4px;">{% trans "Submission" %}</p>
         <h1 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;">#{{ submission.pk }}</h1>
       </div>
       <span class="badge badge-{{ submission.status }}" style="font-size:.82rem;padding:6px 14px;">{{ submission.get_status_display }}</span>
@@ -16,24 +17,24 @@
 
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px;" class="fade-up-2">
     <div class="stat-card" style="text-align:center;">
-      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">Task</p>
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">{% trans "Task" %}</p>
       <p style="font-weight:600;font-size:.95rem;">{{ submission.task.title }}</p>
     </div>
     <div class="stat-card" style="text-align:center;">
-      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">Tests Passed</p>
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">{% trans "Tests Passed" %}</p>
       <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:{% if submission.is_correct %}var(--success){% else %}var(--danger){% endif %};">
         {{ submission.passed_count }}/{{ submission.total_count }}
       </p>
     </div>
     <div class="stat-card" style="text-align:center;">
-      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">Submitted At</p>
+      <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:6px;">{% trans "Submitted At" %}</p>
       <p style="font-weight:600;font-size:.9rem;font-family:var(--font-mono);">{{ submission.created_at|date:"M j H:i:s" }}</p>
     </div>
   </div>
 
   <div class="card fade-up-2" style="margin-bottom:20px;overflow:hidden;">
     <div class="card-header">
-      <span style="font-weight:600;font-size:.95rem;">Your Code</span>
+      <span style="font-weight:600;font-size:.95rem;">{% trans "Your Code" %}</span>
       <span class="badge badge-scheduled" style="font-family:var(--font-mono);">Python</span>
     </div>
     <div style="padding:0;">
@@ -44,15 +45,18 @@
   {% if submission.results %}
   <div class="card fade-up-3" style="overflow:hidden;">
     <div class="card-header">
-      <span style="font-weight:600;font-size:.95rem;">Test Case Results</span>
-      <span style="font-size:.82rem;color:var(--text-muted);font-family:var(--font-mono);">{{ submission.passed_count }}/{{ submission.total_count }} passed</span>
+      <span style="font-weight:600;font-size:.95rem;">{% trans "Test Case Results" %}</span>
+      <span style="font-size:.82rem;color:var(--text-muted);font-family:var(--font-mono);">
+        {% blocktrans with passed=submission.passed_count total=submission.total_count %}{{ passed }}/{{ total }} passed{% endblocktrans %}
+      </span>
     </div>
     <div style="padding:16px;display:flex;flex-direction:column;gap:10px;">
       {% for r in submission.results %}
       <div class="ri {% if r.passed %}pass{% else %}fail{% endif %}">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <p style="font-weight:600;font-size:.875rem;">
-            {% if r.passed %}✅{% else %}❌{% endif %} Test {{ forloop.counter }}
+            {% if r.passed %}✅{% else %}❌{% endif %}
+            {% blocktrans with num=forloop.counter %}Test {{ num }}{% endblocktrans %}
           </p>
           <span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">{{ r.time_used }}s</span>
         </div>

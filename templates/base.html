@@ -1,10 +1,11 @@
 {% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{% block title %}CodeLearn{% endblock %}</title>
+  <title>{% block title %}{% trans 'CodeLearn' %}{% endblock %}</title>
   <link rel="shortcut icon" href="{% static 'images/code-slash.svg' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
@@ -35,11 +36,11 @@
       </a>
       {% if user.is_authenticated %}
       <div class="nav-links hide-sm">
-  {% if user.is_teacher %}
-  <a href="{% url 'tasks:task_list' %}" class="nav-link">Challenges</a>
-  {% endif %}
-  <a href="{% url 'users:group_list' %}" class="nav-link">Groups</a>
-</div>
+        {% if user.is_teacher %}
+        <a href="{% url 'tasks:task_list' %}" class="nav-link">{% trans 'Challenges' %}</a>
+        {% endif %}
+        <a href="{% url 'users:group_list' %}" class="nav-link">{% trans 'Groups' %}</a>
+      </div>
       {% endif %}
     </div>
     <div class="nav-right">
@@ -47,17 +48,63 @@
       <div class="nav-user hide-sm">
         <div class="nav-avatar">{{ user.username|first|upper }}</div>
         <span class="nav-username">{{ user.get_full_name|default:user.username }}</span>
-        <span class="role-badge {% if user.is_teacher %}role-teacher{% else %}role-student{% endif %}">{{ user.get_role_display }}</span>
+        <span class="role-badge {% if user.is_teacher %}role-teacher{% else %}role-student{% endif %}">
+          {{ user.get_role_display }}
+        </span>
       </div>
       <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
-</form>
+        {% csrf_token %}
+        <button type="submit" class="btn btn-ghost btn-sm">{% trans 'Sign out' %}</button>
+      </form>
       {% else %}
-      <a href="{% url 'users:login' %}"    class="btn btn-ghost btn-sm">Login</a>
-      <a href="{% url 'users:register' %}" class="btn btn-primary btn-sm">Get started</a>
+      <a href="{% url 'users:login' %}" class="btn btn-ghost btn-sm">{% trans 'Login' %}</a>
+      <a href="{% url 'users:register' %}" class="btn btn-primary btn-sm">{% trans 'Get started' %}</a>
       {% endif %}
-      <button class="theme-toggle" id="theme-toggle" title="Toggle theme">☀️</button>
+
+      <!-- 🌐 Language Switcher -->
+      {% get_current_language as LANGUAGE_CODE %}
+      <div class="lang-switcher" id="lang-switcher">
+        <button class="lang-trigger" id="lang-trigger" title="{% trans 'Change language' %}">
+          <span class="lang-globe">🌐</span>
+          <span class="lang-current">
+            {% if LANGUAGE_CODE == 'ru' %}RU
+            {% elif LANGUAGE_CODE == 'uz' %}UZ
+            {% else %}EN{% endif %}
+          </span>
+          <svg class="lang-arrow" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 1l4 4 4-4"/>
+          </svg>
+        </button>
+        <div class="lang-dropdown" id="lang-dropdown">
+          <div class="lang-dropdown-inner">
+            <p class="lang-dropdown-label">{% trans "Language" %}</p>
+            <form action="{% url 'set_language' %}" method="post">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ request.get_full_path }}">
+              <button type="submit" name="language" value="en"
+                class="lang-option {% if LANGUAGE_CODE == 'en' %}lang-option-active{% endif %}">
+                <span class="lang-flag">🇬🇧</span>
+                <span class="lang-name">English</span>
+                {% if LANGUAGE_CODE == 'en' %}<span class="lang-check">✓</span>{% endif %}
+              </button>
+              <button type="submit" name="language" value="ru"
+                class="lang-option {% if LANGUAGE_CODE == 'ru' %}lang-option-active{% endif %}">
+                <span class="lang-flag">🇷🇺</span>
+                <span class="lang-name">Русский</span>
+                {% if LANGUAGE_CODE == 'ru' %}<span class="lang-check">✓</span>{% endif %}
+              </button>
+              <button type="submit" name="language" value="uz"
+                class="lang-option {% if LANGUAGE_CODE == 'uz' %}lang-option-active{% endif %}">
+                <span class="lang-flag">🇺🇿</span>
+                <span class="lang-name">O'zbek</span>
+                {% if LANGUAGE_CODE == 'uz' %}<span class="lang-check">✓</span>{% endif %}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <button class="theme-toggle" id="theme-toggle" title="{% trans 'Toggle theme' %}">☀️</button>
       <button class="hamburger" id="hamburger"><i class="bi bi-list"></i></button>
     </div>
   </div>
@@ -66,13 +113,36 @@
 {% if user.is_authenticated %}
 <div class="mobile-menu" id="mobile-menu">
   {% if user.is_teacher %}
-  <a href="{% url 'tasks:task_list' %}" class="nav-link">Challenges</a>
+  <a href="{% url 'tasks:task_list' %}" class="nav-link">{% trans 'Challenges' %}</a>
   {% endif %}
-  <a href="{% url 'users:group_list' %}" class="nav-link">Groups</a>
+  <a href="{% url 'users:group_list' %}" class="nav-link">{% trans 'Groups' %}</a>
   <form method="post" action="{% url 'users:logout' %}" style="display:inline;width:100%;">
     {% csrf_token %}
-    <button type="submit" class="nav-link" style="width:100%;text-align:left;background:transparent;border:none;cursor:pointer;">Sign out</button>
+    <button type="submit" class="nav-link" style="width:100%;text-align:left;background:transparent;border:none;cursor:pointer;">
+      {% trans 'Sign out' %}
+    </button>
   </form>
+
+  <!-- Mobile Language Switcher -->
+  <div style="padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);margin-top:4px;">
+    <p style="font-size:.62rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;">
+      🌐 {% trans "Language" %}
+    </p>
+    <form action="{% url 'set_language' %}" method="post" style="display:flex;gap:6px;">
+      {% csrf_token %}
+      <input name="next" type="hidden" value="{{ request.get_full_path }}">
+      {% get_current_language as LANGUAGE_CODE %}
+      <button type="submit" name="language" value="en" class="mobile-lang-btn {% if LANGUAGE_CODE == 'en' %}mobile-lang-active{% endif %}">
+        🇬🇧 EN
+      </button>
+      <button type="submit" name="language" value="ru" class="mobile-lang-btn {% if LANGUAGE_CODE == 'ru' %}mobile-lang-active{% endif %}">
+        🇷🇺 RU
+      </button>
+      <button type="submit" name="language" value="uz" class="mobile-lang-btn {% if LANGUAGE_CODE == 'uz' %}mobile-lang-active{% endif %}">
+        🇺🇿 UZ
+      </button>
+    </form>
+  </div>
 </div>
 {% endif %}
 
@@ -140,6 +210,158 @@
   #navbar .hamburger { border-color: rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); }
   main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; min-height: calc(100vh - 121px); }
   footer { text-align: center; padding: 20px; font-size: .78rem; color: var(--text-sub); border-top: 1px solid var(--border); background: var(--surface); }
+
+  /* ════════════════════════════
+     🌐 Language Switcher
+  ════════════════════════════ */
+  .lang-switcher { position: relative; }
+
+  .lang-trigger {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px;
+    border: 1.5px solid rgba(255,255,255,.15);
+    border-radius: 99px;
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.75);
+    cursor: pointer;
+    font-size: .75rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    letter-spacing: .06em;
+    transition: all .18s;
+    white-space: nowrap;
+    outline: none;
+  }
+  .lang-trigger:hover,
+  .lang-switcher.open .lang-trigger {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(13,148,136,.15);
+    box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+  }
+  .lang-globe { font-size: .9rem; }
+  .lang-current { font-size: .72rem; }
+  .lang-arrow {
+    width: 9px; height: 9px;
+    transition: transform .22s;
+    opacity: .65;
+  }
+  .lang-switcher.open .lang-arrow { transform: rotate(180deg); opacity: 1; }
+
+  /* Dropdown */
+  .lang-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    z-index: 999;
+    animation: langPop .18s cubic-bezier(.34,1.56,.64,1);
+  }
+  .lang-switcher.open .lang-dropdown { display: block; }
+
+  @keyframes langPop {
+    from { opacity: 0; transform: translateY(-8px) scale(.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Dropdown arrow pointer */
+  .lang-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 14px;
+    width: 12px;
+    height: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-right: none;
+    transform: rotate(45deg);
+    border-radius: 2px;
+  }
+
+  .lang-dropdown-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 48px rgba(0,0,0,.2), 0 4px 14px rgba(0,0,0,.1);
+    padding: 8px;
+    min-width: 168px;
+    overflow: hidden;
+  }
+
+  .lang-dropdown-label {
+    font-family: var(--font-mono);
+    font-size: .58rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 4px 10px 8px;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 6px;
+  }
+
+  .lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border: none;
+    border-radius: var(--radius);
+    background: transparent;
+    cursor: pointer;
+    font-size: .85rem;
+    color: var(--text);
+    transition: background .12s;
+    text-align: left;
+    outline: none;
+  }
+  .lang-option:hover { background: var(--highlight); }
+  .lang-option-active {
+    background: var(--accent-bg) !important;
+    color: var(--accent) !important;
+    font-weight: 600;
+  }
+  .lang-flag { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
+  .lang-name { flex: 1; font-weight: 500; }
+  .lang-check {
+    font-size: .72rem;
+    color: var(--accent);
+    font-weight: 800;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-bgd);
+    border-radius: 99px;
+    padding: 1px 6px;
+  }
+
+  /* Mobile language buttons */
+  .mobile-lang-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border-radius: var(--radius);
+    border: 1.5px solid rgba(255,255,255,.15);
+    background: transparent;
+    color: rgba(255,255,255,.6);
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: var(--font-mono);
+  }
+  .mobile-lang-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(13,148,136,.15);
+  }
+  .mobile-lang-active {
+    border-color: var(--accent) !important;
+    background: rgba(13,148,136,.25) !important;
+    color: var(--accent) !important;
+  }
 </style>
 
 <script>
@@ -151,10 +373,13 @@
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-  const toggle = document.getElementById('theme-toggle');
-  const burger = document.getElementById('hamburger');
-  const menu   = document.getElementById('mobile-menu');
+  const toggle   = document.getElementById('theme-toggle');
+  const burger   = document.getElementById('hamburger');
+  const menu     = document.getElementById('mobile-menu');
+  const langBtn  = document.getElementById('lang-trigger');
+  const langWrap = document.getElementById('lang-switcher');
 
+  // Theme toggle
   if (toggle) {
     toggle.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme');
@@ -165,10 +390,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Hamburger menu
   if (burger && menu) {
     burger.addEventListener('click', () => menu.classList.toggle('open'));
   }
 
+  // Language dropdown toggle
+  if (langBtn && langWrap) {
+    langBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langWrap.classList.toggle('open');
+    });
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      if (!langWrap.contains(e.target)) {
+        langWrap.classList.remove('open');
+      }
+    });
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') langWrap.classList.remove('open');
+    });
+  }
+
+  // Django messages → toasts
   const msgs = document.getElementById('django-messages');
   if (msgs) {
     JSON.parse(msgs.textContent).forEach(m => {
@@ -177,6 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Active nav link highlight
   const links = document.querySelectorAll('.nav-link');
   links.forEach(l => {
     if (l.href === location.href) l.classList.add('active');

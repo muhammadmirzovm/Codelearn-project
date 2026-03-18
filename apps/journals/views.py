@@ -19,7 +19,6 @@ class JournalDetailView(LoginRequiredMixin, DetailView):
         user = self.request.user
         if user != group.teacher and user not in group.students.all():
             raise PermissionDenied
-        # Auto-create journal if it doesn't exist
         journal, _ = Journal.objects.get_or_create(group=group)
         return journal
 
