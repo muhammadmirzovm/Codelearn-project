@@ -3,16 +3,20 @@
 
 {% block title %}{% trans "Profile" %} – {{ user.username }}{% endblock %}
 
+{% block codemirror %}{% endblock codemirror %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="profile-wrap">
 
-  {# ── Hero card ─────────────────────────────────────────────────────────── #}
+  {# ── Hero ──────────────────────────────────────────────────────────────── #}
   <div class="profile-hero">
     <div class="profile-avatar-lg">{{ user.username|first|upper }}</div>
     <div class="profile-hero-info">
-      <h1 class="profile-name">
-        {{ user.get_full_name|default:user.username }}
-      </h1>
+      <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
       <div class="profile-meta">
         <span class="role-badge {% if user.is_teacher %}role-teacher{% else %}role-student{% endif %}">
           {{ user.get_role_display }}
@@ -39,7 +43,6 @@
         {% if user.is_teacher %}{% trans "Groups taught" %}{% else %}{% trans "Groups joined" %}{% endif %}
       </span>
     </div>
-
     {% if user.is_teacher %}
     <div class="stat-card">
       <span class="stat-icon">🎓</span>
@@ -53,7 +56,6 @@
       <span class="stat-label">{% trans "Submissions" %}</span>
     </div>
     {% endif %}
-
     <div class="stat-card">
       <span class="stat-icon">🔔</span>
       <span class="stat-value">{{ notifications_count }}</span>
@@ -64,10 +66,206 @@
     </div>
   </div>
 
-  {# ── Two-column forms ──────────────────────────────────────────────────── #}
+  {# ── Academic Progress (students only) ────────────────────────────────── #}
+  {% if journal_stats %}
+  <div class="profile-section-label">📊 {% trans "My Academic Progress" %}</div>
+
+  {% for js in journal_stats %}
+  <div class="jstat-card">
+
+    {# Header #}
+    <div class="jstat-header">
+      <div class="jstat-header-left">
+        <div class="jstat-group-name">{{ js.group.name }}</div>
+        <div class="jstat-teacher">
+          <i class="bi bi-person-fill"></i>
+          {{ js.group.teacher.get_full_name|default:js.group.teacher.username }}
+        </div>
+      </div>
+      <div class="jstat-header-right">
+        <div class="jstat-pill {% if js.grade_pct >= 80 %}pill-green{% elif js.grade_pct >= 50 %}pill-orange{% else %}pill-red{% endif %}">
+          {{ js.grade_pct }}% {% trans "overall" %}
+        </div>
+      </div>
+    </div>
+
+    {# Numbers #}
+    <div class="jstat-numbers">
+      <div class="jstat-num">
+        <span class="jstat-val">{{ js.total_grade }}</span>
+        <span class="jstat-of">/ {{ js.max_score }}</span>
+        <span class="jstat-lbl">{% trans "Score" %}</span>
+      </div>
+      <div class="jstat-divider"></div>
+      <div class="jstat-num">
+        <span class="jstat-val">{{ js.attended }}</span>
+        <span class="jstat-of">/ {{ js.lesson_count }}</span>
+        <span class="jstat-lbl">{% trans "Attended" %}</span>
+      </div>
+      <div class="jstat-divider"></div>
+      <div class="jstat-num">
+        <span class="jstat-val {% if js.attendance_pct >= 80 %}color-green{% elif js.attendance_pct >= 50 %}color-orange{% else %}color-red{% endif %}">
+          {{ js.attendance_pct }}%
+        </span>
+        <span class="jstat-lbl">{% trans "Attendance" %}</span>
+      </div>
+    </div>
+
+    {# Charts #}
+    <div class="jstat-charts">
+
+      {# Line chart — scrollable #}
+      <div class="chart-box chart-box-line">
+        <div class="chart-box-label">📈 {% trans "Grade per lesson" %}</div>
+        <div class="line-scroll-wrap" id="lineWrap{{ forloop.counter }}">
+          <canvas id="lineChart{{ forloop.counter }}" height="130"></canvas>
+        </div>
+      </div>
+
+      {# Doughnut #}
+      <div class="chart-box chart-box-donut">
+        <div class="chart-box-label">🎯 {% trans "Attendance" %}</div>
+        <div class="donut-wrap">
+          <canvas id="donutChart{{ forloop.counter }}" width="120" height="120"></canvas>
+          <div class="donut-center">
+            <span class="donut-pct {% if js.attendance_pct >= 80 %}color-green{% elif js.attendance_pct >= 50 %}color-orange{% else %}color-red{% endif %}">
+              {{ js.attendance_pct }}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {# Chart.js data for this card #}
+  <script>
+  (function () {
+    const accent    = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()     || '#0d9488';
+    const accentBg  = getComputedStyle(document.documentElement).getPropertyValue('--accent-bg').trim()  || 'rgba(13,148,136,.12)';
+    const textMuted = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#888';
+    const borderCol = getComputedStyle(document.documentElement).getPropertyValue('--border').trim()     || '#e2e8f0';
+
+    // ── Line chart ──────────────────────────────────────────────────────────
+    const lineLabels = {{ js.chart_labels|safe }};
+    const lineData   = {{ js.chart_grades|safe }};
+
+    // Dynamic width: 44px per point, min = container width
+    const canvas  = document.getElementById('lineChart{{ forloop.counter }}');
+    const wrapper = document.getElementById('lineWrap{{ forloop.counter }}');
+    const minW    = Math.max(lineLabels.length * 44, wrapper.clientWidth || 300);
+    canvas.style.width  = minW + 'px';
+    canvas.style.height = '130px';
+    canvas.width  = minW;
+    canvas.height = 130;
+
+    new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: lineLabels,
+        datasets: [{
+          label: '{% trans "Grade" %}',
+          data: lineData,
+          borderColor: accent,
+          backgroundColor: accentBg,
+          borderWidth: 2.5,
+          pointBackgroundColor: accent,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.35,
+          spanGaps: false,
+        }]
+      },
+      options: {
+        responsive: false,          // must be false for fixed-width scroll
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => ctx.parsed.y === null
+                ? '{% trans "No grade" %}'
+                : `{% trans "Grade" %}: ${ctx.parsed.y}`
+            }
+          }
+        },
+        scales: {
+          y: {
+            min: 0, max: 5,
+            ticks: {
+              stepSize: 1,
+              color: textMuted,
+              font: { family: 'monospace', size: 11 },
+            },
+            grid: { color: borderCol },
+          },
+          x: {
+            ticks: {
+              color: textMuted,
+              font: { family: 'monospace', size: 10 },
+              maxRotation: 0,
+              autoSkip: false,    // show every label
+            },
+            grid: { display: false },
+          }
+        }
+      }
+    });
+
+    // Touch/mouse drag-to-scroll
+    const wrap = document.getElementById('lineWrap{{ forloop.counter }}');
+    let isDown = false, startX, scrollLeft;
+    wrap.addEventListener('mousedown',  e => { isDown = true; wrap.classList.add('grabbing'); startX = e.pageX - wrap.offsetLeft; scrollLeft = wrap.scrollLeft; });
+    wrap.addEventListener('mouseleave', () => { isDown = false; wrap.classList.remove('grabbing'); });
+    wrap.addEventListener('mouseup',    () => { isDown = false; wrap.classList.remove('grabbing'); });
+    wrap.addEventListener('mousemove',  e => { if (!isDown) return; e.preventDefault(); wrap.scrollLeft = scrollLeft - (e.pageX - wrap.offsetLeft - startX); });
+
+    // ── Doughnut ────────────────────────────────────────────────────────────
+    const attended = {{ js.attended }};
+    const absent   = {{ js.absent }};
+    const pct      = {{ js.attendance_pct }};
+    const color    = pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444';
+
+    new Chart(document.getElementById('donutChart{{ forloop.counter }}'), {
+      type: 'doughnut',
+      data: {
+        labels: ['{% trans "Present" %}', '{% trans "Absent" %}'],
+        datasets: [{
+          data: [attended, absent],
+          backgroundColor: [color, borderCol],
+          borderWidth: 0,
+          hoverOffset: 4,
+        }]
+      },
+      options: {
+        responsive: false,
+        cutout: '72%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}` }
+          }
+        }
+      }
+    });
+  })();
+  </script>
+
+  {% endfor %}
+
+  {% elif not user.is_teacher %}
+  <div class="profile-section-label">📊 {% trans "My Academic Progress" %}</div>
+  <div class="jstat-empty">
+    <span style="font-size:2rem;">📋</span>
+    <p>{% trans "No journal records yet. Join a group to see your progress." %}</p>
+  </div>
+  {% endif %}
+
+  {# ── Account Settings ──────────────────────────────────────────────────── #}
+  <div class="profile-section-label">⚙️ {% trans "Account Settings" %}</div>
   <div class="profile-grid">
 
-    {# Edit info #}
     <div class="profile-card">
       <div class="profile-card-header">
         <i class="bi bi-person-gear"></i>
@@ -76,44 +274,30 @@
       <form method="post" class="profile-form" novalidate>
         {% csrf_token %}
         <input type="hidden" name="action" value="update_info">
-
         <div class="field-group">
           <label for="id_first_name">{% trans "First name" %}</label>
           <input type="text" id="id_first_name" name="first_name"
-                 value="{{ form.first_name.value|default:'' }}"
-                 placeholder="{% trans 'First name' %}">
-          {% if form.first_name.errors %}
-          <span class="field-error">{{ form.first_name.errors.0 }}</span>
-          {% endif %}
+                 value="{{ form.first_name.value|default:'' }}" placeholder="{% trans 'First name' %}">
+          {% if form.first_name.errors %}<span class="field-error">{{ form.first_name.errors.0 }}</span>{% endif %}
         </div>
-
         <div class="field-group">
           <label for="id_last_name">{% trans "Last name" %}</label>
           <input type="text" id="id_last_name" name="last_name"
-                 value="{{ form.last_name.value|default:'' }}"
-                 placeholder="{% trans 'Last name' %}">
-          {% if form.last_name.errors %}
-          <span class="field-error">{{ form.last_name.errors.0 }}</span>
-          {% endif %}
+                 value="{{ form.last_name.value|default:'' }}" placeholder="{% trans 'Last name' %}">
+          {% if form.last_name.errors %}<span class="field-error">{{ form.last_name.errors.0 }}</span>{% endif %}
         </div>
-
         <div class="field-group">
           <label for="id_email">{% trans "Email" %}</label>
           <input type="email" id="id_email" name="email"
-                 value="{{ form.email.value|default:'' }}"
-                 placeholder="email@example.com">
-          {% if form.email.errors %}
-          <span class="field-error">{{ form.email.errors.0 }}</span>
-          {% endif %}
+                 value="{{ form.email.value|default:'' }}" placeholder="email@example.com">
+          {% if form.email.errors %}<span class="field-error">{{ form.email.errors.0 }}</span>{% endif %}
         </div>
-
         <button type="submit" class="btn btn-primary btn-sm" style="width:100%;margin-top:4px;">
           <i class="bi bi-check2"></i> {% trans "Save changes" %}
         </button>
       </form>
     </div>
 
-    {# Change password #}
     <div class="profile-card">
       <div class="profile-card-header">
         <i class="bi bi-shield-lock"></i>
@@ -122,195 +306,141 @@
       <form method="post" class="profile-form" novalidate>
         {% csrf_token %}
         <input type="hidden" name="action" value="change_password">
-
         <div class="field-group">
           <label for="id_old_password">{% trans "Current password" %}</label>
           <div class="input-eye">
             <input type="password" id="id_old_password" name="old_password"
                    placeholder="{% trans 'Current password' %}" autocomplete="current-password">
-            <button type="button" class="eye-btn" onclick="togglePw('id_old_password', this)">
-              <i class="bi bi-eye"></i>
-            </button>
+            <button type="button" class="eye-btn" onclick="togglePw('id_old_password',this)"><i class="bi bi-eye"></i></button>
           </div>
-          {% if pw_form.old_password.errors %}
-          <span class="field-error">{{ pw_form.old_password.errors.0 }}</span>
-          {% endif %}
+          {% if pw_form.old_password.errors %}<span class="field-error">{{ pw_form.old_password.errors.0 }}</span>{% endif %}
         </div>
-
         <div class="field-group">
           <label for="id_new_password1">{% trans "New password" %}</label>
           <div class="input-eye">
             <input type="password" id="id_new_password1" name="new_password1"
                    placeholder="{% trans 'New password' %}" autocomplete="new-password">
-            <button type="button" class="eye-btn" onclick="togglePw('id_new_password1', this)">
-              <i class="bi bi-eye"></i>
-            </button>
+            <button type="button" class="eye-btn" onclick="togglePw('id_new_password1',this)"><i class="bi bi-eye"></i></button>
           </div>
-          {% if pw_form.new_password1.errors %}
-          <span class="field-error">{{ pw_form.new_password1.errors.0 }}</span>
-          {% endif %}
+          {% if pw_form.new_password1.errors %}<span class="field-error">{{ pw_form.new_password1.errors.0 }}</span>{% endif %}
         </div>
-
         <div class="field-group">
           <label for="id_new_password2">{% trans "Confirm new password" %}</label>
           <div class="input-eye">
             <input type="password" id="id_new_password2" name="new_password2"
                    placeholder="{% trans 'Confirm new password' %}" autocomplete="new-password">
-            <button type="button" class="eye-btn" onclick="togglePw('id_new_password2', this)">
-              <i class="bi bi-eye"></i>
-            </button>
+            <button type="button" class="eye-btn" onclick="togglePw('id_new_password2',this)"><i class="bi bi-eye"></i></button>
           </div>
-          {% if pw_form.new_password2.errors %}
-          <span class="field-error">{{ pw_form.new_password2.errors.0 }}</span>
-          {% endif %}
+          {% if pw_form.new_password2.errors %}<span class="field-error">{{ pw_form.new_password2.errors.0 }}</span>{% endif %}
         </div>
-
         <button type="submit" class="btn btn-primary btn-sm" style="width:100%;margin-top:4px;">
           <i class="bi bi-lock"></i> {% trans "Update password" %}
         </button>
       </form>
     </div>
-  </div>
 
+  </div>
 </div>
 
 <style>
-  /* ── Layout ─────────────────────────────────────────────────────────────── */
-  .profile-wrap {
-    max-width: 860px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
+  .profile-wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 
-  /* ── Hero ────────────────────────────────────────────────────────────────── */
-  .profile-hero {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    padding: 28px 32px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 2px 12px rgba(0,0,0,.06);
-  }
-  .profile-avatar-lg {
-    width: 72px; height: 72px;
-    background: var(--accent);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.8rem; font-weight: 800; color: #fff;
-    font-family: var(--font-mono);
-    flex-shrink: 0;
-    box-shadow: 0 0 0 4px var(--accent-bg);
-  }
-  .profile-name {
-    font-size: 1.4rem; font-weight: 700;
-    color: var(--text); margin: 0 0 8px;
-  }
-  .profile-meta {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
-    font-size: .8rem; color: var(--text-muted);
-  }
-  .profile-since, .profile-email {
-    display: flex; align-items: center; gap: 5px;
-  }
+  /* Hero */
+  .profile-hero { display: flex; align-items: center; gap: 24px; padding: 28px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+  .profile-avatar-lg { width: 72px; height: 72px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; color: #fff; font-family: var(--font-mono); flex-shrink: 0; box-shadow: 0 0 0 4px var(--accent-bg); }
+  .profile-name { font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0 0 8px; }
+  .profile-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: .8rem; color: var(--text-muted); }
+  .profile-since, .profile-email { display: flex; align-items: center; gap: 5px; }
 
-  /* ── Stats ───────────────────────────────────────────────────────────────── */
-  .profile-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    display: flex; flex-direction: column; align-items: center;
-    gap: 4px; text-align: center;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .stat-card:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-bg);
-  }
+  /* Stats */
+  .profile-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; transition: border-color .15s, box-shadow .15s; }
+  .stat-card:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
   .stat-icon  { font-size: 1.6rem; }
   .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--text); font-family: var(--font-mono); }
   .stat-label { font-size: .75rem; color: var(--text-muted); font-weight: 500; }
-  .stat-badge {
-    font-size: .65rem; font-weight: 700;
-    background: #ef4444; color: #fff;
-    border-radius: 99px; padding: 2px 8px;
-    margin-top: 4px;
-  }
+  .stat-badge { font-size: .65rem; font-weight: 700; background: #ef4444; color: #fff; border-radius: 99px; padding: 2px 8px; margin-top: 4px; }
 
-  /* ── Forms grid ──────────────────────────────────────────────────────────── */
-  .profile-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+  /* Section label */
+  .profile-section-label { font-size: .78rem; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: .08em; display: flex; align-items: center; gap: 10px; }
+  .profile-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Journal card */
+  .jstat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .jstat-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 12px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+  .jstat-group-name { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .jstat-teacher    { font-size: .72rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+  .jstat-pill { font-size: .7rem; font-weight: 700; font-family: var(--font-mono); border-radius: 99px; padding: 3px 10px; }
+  .pill-green  { background: rgba(34,197,94,.15);  color: #22c55e; }
+  .pill-orange { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .pill-red    { background: rgba(239,68,68,.15);  color: #ef4444; }
+
+  .jstat-numbers { display: flex; align-items: center; padding: 16px 18px; }
+  .jstat-num  { flex: 1; text-align: center; }
+  .jstat-val  { font-size: 1.4rem; font-weight: 800; color: var(--text); font-family: var(--font-mono); display: block; line-height: 1; }
+  .jstat-of   { font-size: .72rem; color: var(--text-muted); font-family: var(--font-mono); }
+  .jstat-lbl  { display: block; font-size: .62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 5px; }
+  .jstat-divider { width: 1px; height: 40px; background: var(--border); flex-shrink: 0; }
+
+  .color-green  { color: #22c55e !important; }
+  .color-orange { color: #f59e0b !important; }
+  .color-red    { color: #ef4444 !important; }
+
+  /* Charts layout */
+  .jstat-charts { display: grid; grid-template-columns: 1fr 150px; border-top: 1px solid var(--border); }
+  .chart-box { padding: 14px 16px; }
+  .chart-box-line { border-right: 1px solid var(--border); min-width: 0; }
+  .chart-box-label { font-size: .65rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 10px; }
+
+  /* Scrollable line chart wrapper */
+  .line-scroll-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    cursor: grab;
+    /* thin scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
   }
-  .profile-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-  .profile-card-header {
-    display: flex; align-items: center; gap: 10px;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-  }
+  .line-scroll-wrap::-webkit-scrollbar       { height: 4px; }
+  .line-scroll-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+  .line-scroll-wrap.grabbing { cursor: grabbing; }
+
+  /* Doughnut */
+  .donut-wrap    { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+  .donut-center  { position: absolute; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .donut-pct     { font-size: .9rem; font-weight: 800; font-family: var(--font-mono); }
+
+  /* Empty state */
+  .jstat-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px 20px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg); color: var(--text-muted); font-size: .85rem; }
+
+  /* Forms */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .profile-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .profile-card-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg2); }
   .profile-card-header i  { font-size: 1rem; color: var(--accent); }
   .profile-card-header h2 { font-size: .9rem; font-weight: 700; color: var(--text); margin: 0; }
   .profile-form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-
-  /* ── Fields ──────────────────────────────────────────────────────────────── */
-  .field-group { display: flex; flex-direction: column; gap: 5px; }
-  .field-group label {
-    font-size: .75rem; font-weight: 600;
-    color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em;
-  }
-  .field-group input {
-    width: 100%; padding: 9px 12px;
-    background: var(--input-bg, var(--bg));
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text); font-size: .88rem;
-    outline: none; transition: border-color .15s, box-shadow .15s;
-    box-sizing: border-box;
-  }
-  .field-group input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-bg);
-  }
-  .field-error {
-    font-size: .72rem; color: #ef4444; font-weight: 500;
-  }
-
-  /* ── Password eye toggle ─────────────────────────────────────────────────── */
+  .field-group  { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label { font-size: .75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .field-group input { width: 100%; padding: 9px 12px; background: var(--input-bg,var(--bg)); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: .88rem; outline: none; transition: border-color .15s, box-shadow .15s; box-sizing: border-box; }
+  .field-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .field-error { font-size: .72rem; color: #ef4444; font-weight: 500; }
   .input-eye { position: relative; }
   .input-eye input { padding-right: 38px; }
-  .eye-btn {
-    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-    background: transparent; border: none; cursor: pointer;
-    color: var(--text-muted); font-size: .9rem; padding: 2px;
-    transition: color .12s;
-  }
+  .eye-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: .9rem; padding: 2px; transition: color .12s; }
   .eye-btn:hover { color: var(--accent); }
 
-  /* ── Responsive ──────────────────────────────────────────────────────────── */
+  /* Responsive */
   @media (max-width: 680px) {
     .profile-hero   { flex-direction: column; text-align: center; padding: 20px; }
     .profile-meta   { justify-content: center; }
-    .profile-stats  { grid-template-columns: repeat(3, 1fr); }
+    .profile-stats  { grid-template-columns: repeat(3,1fr); }
     .profile-grid   { grid-template-columns: 1fr; }
+    .jstat-charts   { grid-template-columns: 1fr; }
+    .chart-box-line { border-right: none; border-bottom: 1px solid var(--border); }
   }
   @media (max-width: 420px) {
-    .profile-stats  { grid-template-columns: 1fr; }
+    .profile-stats { grid-template-columns: 1fr; }
   }
 </style>
 

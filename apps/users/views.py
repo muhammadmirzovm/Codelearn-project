@@ -24,6 +24,8 @@ from django.http import JsonResponse
 from django.contrib.auth import update_session_auth_hash
 from .forms import ProfileForm, PasswordChangeForm
 
+
+import json
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -157,7 +159,6 @@ def mark_all_read(request):
     request.user.notifications.filter(is_read=False).update(is_read=True)
     return JsonResponse({'ok': True})
 
-
 @login_required
 def profile(request):
     user = request.user
@@ -178,39 +179,97 @@ def profile(request):
             pw_form = PasswordChangeForm(user, request.POST)
             if pw_form.is_valid():
                 pw_form.save()
-                update_session_auth_hash(request, pw_form.user)  # keep session alive
+                update_session_auth_hash(request, pw_form.user)
                 messages.success(request, '✅ Password changed successfully!')
                 return redirect('users:profile')
             else:
                 messages.error(request, '❌ Please fix the password errors.')
  
-    # Stats
+    # ── Common ────────────────────────────────────────────────────────────────
+    notifications_count = user.notifications.count()
+    unread_notif_count  = user.notifications.filter(is_read=False).count()
+ 
+    # ── Teacher ───────────────────────────────────────────────────────────────
     if user.is_teacher:
-        groups_count = user.taught_groups.count()
-        students_count = User.objects.filter(
+        groups_count      = user.taught_groups.count()
+        students_count    = User.objects.filter(
             student_groups__teacher=user
         ).distinct().count()
         submissions_count = None
+        journal_stats     = None
+ 
+    # ── Student ───────────────────────────────────────────────────────────────
     else:
-        groups_count = user.student_groups.count()
+        from apps.journals.models import Record
+ 
+        groups_count   = user.student_groups.count()
         students_count = None
-        # Import here to avoid circular imports
+ 
         try:
             from apps.submissions.models import Submission
             submissions_count = Submission.objects.filter(student=user).count()
         except Exception:
             submissions_count = 0
  
-    notifications_count = user.notifications.count()
-    unread_notif_count  = user.notifications.filter(is_read=False).count()
+        journal_stats = []
+        for group in user.student_groups.select_related('journal').all():
+            try:
+                journal = group.journal
+            except Exception:
+                continue
+ 
+            # Lessons ordered by date (oldest → newest) for the line chart
+            lessons = journal.lessons.order_by('date')
+            lesson_count = lessons.count()
+            if lesson_count == 0:
+                continue
+ 
+            records = Record.objects.filter(
+                lesson__journal=journal,
+                student=user,
+            ).select_related('lesson')
+ 
+            # Build a dict for fast lookup: lesson_id → record
+            record_map = {r.lesson_id: r for r in records}
+ 
+            # Per-lesson arrays for Chart.js
+            chart_labels = []   # ["01.03", "08.03", ...]
+            chart_grades = []   # [4, 5, null, 3, ...]  null = absent/no grade
+ 
+            for lesson in lessons:
+                rec = record_map.get(lesson.pk)
+                chart_labels.append(lesson.date.strftime('%d.%m'))
+                if rec and rec.grade is not None:
+                    chart_grades.append(rec.grade)
+                else:
+                    chart_grades.append(None)  # will become null in JSON → gap in line
+ 
+            attended    = records.filter(attended=True).count()
+            total_grade = sum(r.grade for r in records if r.grade is not None)
+            max_score   = lesson_count * 5
+ 
+            journal_stats.append({
+                'group':          group,
+                'lesson_count':   lesson_count,
+                'attended':       attended,
+                'absent':         lesson_count - attended,
+                'total_grade':    total_grade,
+                'max_score':      max_score,
+                'attendance_pct': round(attended / lesson_count * 100) if lesson_count else 0,
+                'grade_pct':      round(total_grade / max_score * 100) if max_score else 0,
+                # JSON strings for Chart.js (safe to dump directly into <script>)
+                'chart_labels':   json.dumps(chart_labels),
+                'chart_grades':   json.dumps(chart_grades),
+            })
  
     context = {
-        'form':              ProfileForm(instance=user),
-        'pw_form':           PasswordChangeForm(user),
-        'groups_count':      groups_count,
-        'students_count':    students_count,
-        'submissions_count': submissions_count,
+        'form':                ProfileForm(instance=user),
+        'pw_form':             PasswordChangeForm(user),
+        'groups_count':        groups_count,
+        'students_count':      students_count,
+        'submissions_count':   submissions_count,
         'notifications_count': notifications_count,
         'unread_notif_count':  unread_notif_count,
+        'journal_stats':       journal_stats,
     }
     return render(request, 'users/profile.html', context)
