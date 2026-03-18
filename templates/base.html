@@ -10,7 +10,6 @@
   <link rel="shortcut icon" href="{% static 'images/code-slash.svg' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-  {# ── CodeMirror: override with empty block on pages that don't need it ── #}
   {% block codemirror %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/nord.min.css"/>
@@ -22,8 +21,6 @@
 
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   {% block extra_head %}{% endblock %}
-
-  {# ── Apply saved theme before first paint — prevents flash ────────────── #}
   <script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');})();</script>
 </head>
 <body>
@@ -36,35 +33,47 @@
 </script>
 {% endif %}
 
-{# ── Django URLs → JS (single source of truth, no hardcoding in JS) ───── #}
 {% if user.is_authenticated %}
 <div id="js-urls" hidden
   data-notif-read-url="{% url 'users:notif_mark_one' pk=0 %}"
   data-notif-all-url="{% url 'users:notif_mark_read' %}">
 </div>
 {% endif %}
-
 <nav id="navbar">
   <div class="nav-inner">
+
+    {# Brand #}
     <div class="nav-left">
       <a href="{% url 'dashboard:home' %}" class="nav-brand">
         <div class="nav-logo"><i class="bi bi-code-slash"></i></div>
         <span class="nav-brand-text">Code<span class="nav-brand-accent">Learn</span></span>
       </a>
+
+      {# Desktop nav links #}
       {% if user.is_authenticated %}
       <div class="nav-links hide-sm">
         {% if user.is_teacher %}
         <a href="{% url 'tasks:task_list' %}" class="nav-link">{% trans 'Challenges' %}</a>
         {% endif %}
         <a href="{% url 'users:group_list' %}" class="nav-link">{% trans 'Groups' %}</a>
+        <a href="{% url 'support:contact' %}" class="nav-link">{% trans 'Support' %}</a>
+        {% if user.is_superuser %}
+        <a href="{% url 'support:inbox' %}" class="nav-link nav-link-inbox">
+          {% trans 'Inbox' %}
+          {% if open_tickets_count %}
+          <span class="nav-inbox-badge">{{ open_tickets_count }}</span>
+          {% endif %}
+        </a>
+        {% endif %}
       </div>
       {% endif %}
     </div>
 
+    {# Right side #}
     <div class="nav-right">
       {% if user.is_authenticated %}
 
-      {# ── Profile pill — now a link ──────────────────────────────────── #}
+      {# Profile pill #}
       <a href="{% url 'users:profile' %}" class="nav-user hide-sm" title="{% trans 'My profile' %}">
         <div class="nav-avatar">{{ user.username|first|upper }}</div>
         <span class="nav-username">{{ user.get_full_name|default:user.username }}</span>
@@ -73,21 +82,19 @@
         </span>
       </a>
 
-      <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
+      <form method="post" action="{% url 'users:logout' %}" style="display:inline;" class="hide-sm">
         {% csrf_token %}
         <button type="submit" class="btn btn-ghost btn-sm">{% trans 'Sign out' %}</button>
       </form>
 
-      {# ── Notification Bell ──────────────────────────────────────────── #}
+      {# Notification Bell #}
       <div class="notif-wrap" id="notif-wrap">
         <button class="notif-trigger" id="notif-trigger"
                 aria-label="{% trans 'Notifications' %}"
                 aria-haspopup="true" aria-expanded="false">
           <i class="bi bi-bell-fill" aria-hidden="true"></i>
           {% if unread_count %}
-          <span class="notif-badge" id="notif-badge" aria-label="{{ unread_count }} unread">
-            {{ unread_count }}
-          </span>
+          <span class="notif-badge" id="notif-badge" aria-label="{{ unread_count }} unread">{{ unread_count }}</span>
           {% endif %}
         </button>
 
@@ -102,12 +109,10 @@
               <button class="notif-mark-all" id="notif-mark-all">{% trans "Mark all read" %}</button>
               {% endif %}
             </div>
-
             <div class="notif-list" id="notif-list">
               {% for n in notifications %}
               <div class="notif-item notif-{{ n.notif_type }} {% if not n.is_read %}notif-unread{% endif %}"
-                   data-id="{{ n.pk }}"
-                   role="button" tabindex="0"
+                   data-id="{{ n.pk }}" role="button" tabindex="0"
                    aria-label="{{ n.title }}{% if not n.is_read %} (unread){% endif %}">
                 <div class="notif-item-icon" aria-hidden="true">
                   {% if n.notif_type == 'success' %}✅
@@ -117,9 +122,7 @@
                 </div>
                 <div class="notif-item-body">
                   <p class="notif-item-title">{{ n.title }}</p>
-                  {% if n.message %}
-                  <p class="notif-item-msg">{{ n.message|truncatechars:80 }}</p>
-                  {% endif %}
+                  {% if n.message %}<p class="notif-item-msg">{{ n.message|truncatechars:80 }}</p>{% endif %}
                   <p class="notif-item-time">{{ n.created_at|timesince }} {% trans "ago" %}</p>
                 </div>
                 {% if not n.is_read %}<span class="notif-dot" aria-hidden="true"></span>{% endif %}
@@ -140,8 +143,8 @@
       <a href="{% url 'users:register' %}" class="btn btn-primary btn-sm">{% trans 'Get started' %}</a>
       {% endif %}
 
-      {# ── Language Switcher ──────────────────────────────────────────── #}
-      <div class="lang-switcher" id="lang-switcher">
+      {# Language Switcher #}
+      <div class="lang-switcher hide-sm" id="lang-switcher">
         <button class="lang-trigger" id="lang-trigger"
                 aria-label="{% trans 'Change language' %}"
                 aria-haspopup="true" aria-expanded="false">
@@ -159,22 +162,16 @@
             <form action="{% url 'set_language' %}" method="post">
               {% csrf_token %}
               <input name="next" type="hidden" value="{{ request.get_full_path }}">
-              <button type="submit" name="language" value="en"
-                class="lang-option {% if LANGUAGE_CODE == 'en' %}lang-option-active{% endif %}">
-                <span class="lang-flag" aria-hidden="true">🇬🇧</span>
-                <span class="lang-name">English</span>
+              <button type="submit" name="language" value="en" class="lang-option {% if LANGUAGE_CODE == 'en' %}lang-option-active{% endif %}">
+                <span class="lang-flag" aria-hidden="true">🇬🇧</span><span class="lang-name">English</span>
                 {% if LANGUAGE_CODE == 'en' %}<span class="lang-check" aria-hidden="true">✓</span>{% endif %}
               </button>
-              <button type="submit" name="language" value="ru"
-                class="lang-option {% if LANGUAGE_CODE == 'ru' %}lang-option-active{% endif %}">
-                <span class="lang-flag" aria-hidden="true">🇷🇺</span>
-                <span class="lang-name">Русский</span>
+              <button type="submit" name="language" value="ru" class="lang-option {% if LANGUAGE_CODE == 'ru' %}lang-option-active{% endif %}">
+                <span class="lang-flag" aria-hidden="true">🇷🇺</span><span class="lang-name">Русский</span>
                 {% if LANGUAGE_CODE == 'ru' %}<span class="lang-check" aria-hidden="true">✓</span>{% endif %}
               </button>
-              <button type="submit" name="language" value="uz"
-                class="lang-option {% if LANGUAGE_CODE == 'uz' %}lang-option-active{% endif %}">
-                <span class="lang-flag" aria-hidden="true">🇺🇿</span>
-                <span class="lang-name">O'zbek</span>
+              <button type="submit" name="language" value="uz" class="lang-option {% if LANGUAGE_CODE == 'uz' %}lang-option-active{% endif %}">
+                <span class="lang-flag" aria-hidden="true">🇺🇿</span><span class="lang-name">O'zbek</span>
                 {% if LANGUAGE_CODE == 'uz' %}<span class="lang-check" aria-hidden="true">✓</span>{% endif %}
               </button>
             </form>
@@ -183,7 +180,7 @@
       </div>
 
       <button class="theme-toggle" id="theme-toggle" aria-label="{% trans 'Toggle theme' %}">☀️</button>
-      <button class="hamburger" id="hamburger" aria-label="{% trans 'Open menu' %}">
+      <button class="hamburger" id="hamburger" aria-label="{% trans 'Open menu' %}" aria-expanded="false">
         <i class="bi bi-list" aria-hidden="true"></i>
       </button>
     </div>
@@ -191,282 +188,546 @@
 </nav>
 
 {% if user.is_authenticated %}
-<div class="mobile-menu" id="mobile-menu" aria-label="{% trans 'Mobile navigation' %}">
-  <a href="{% url 'users:profile' %}" class="nav-link">
-    <i class="bi bi-person-circle"></i> {% trans 'Profile' %}
-  </a>
-  {% if user.is_teacher %}
-  <a href="{% url 'tasks:task_list' %}" class="nav-link">{% trans 'Challenges' %}</a>
-  {% endif %}
-  <a href="{% url 'users:group_list' %}" class="nav-link">{% trans 'Groups' %}</a>
-  <form method="post" action="{% url 'users:logout' %}" style="display:inline;width:100%;">
-    {% csrf_token %}
-    <button type="submit" class="nav-link"
-            style="width:100%;text-align:left;background:transparent;border:none;cursor:pointer;">
-      {% trans 'Sign out' %}
-    </button>
-  </form>
+<div class="drawer-overlay" id="drawer-overlay" aria-hidden="true"></div>
 
-  <div style="padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);margin-top:4px;">
-    <p style="font-size:.62rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;">
-      🌐 {% trans "Language" %}
-    </p>
-    <form action="{% url 'set_language' %}" method="post" style="display:flex;gap:6px;">
+<aside class="drawer" id="drawer" aria-label="{% trans 'Navigation menu' %}" aria-hidden="true">
+
+  {# Drawer header — user info #}
+  <div class="drawer-header">
+    <div class="drawer-user">
+      <div class="drawer-avatar">{{ user.username|first|upper }}</div>
+      <div class="drawer-user-info">
+        <p class="drawer-username">{{ user.get_full_name|default:user.username }}</p>
+        <span class="role-badge {% if user.is_teacher %}role-teacher{% else %}role-student{% endif %}" style="font-size:.62rem;">
+          {{ user.get_role_display }}
+        </span>
+      </div>
+    </div>
+    <button class="drawer-close" id="drawer-close" aria-label="{% trans 'Close menu' %}">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  {# Nav links #}
+  <nav class="drawer-nav">
+    <a href="{% url 'dashboard:home' %}" class="drawer-link">
+      <i class="bi bi-house"></i> {% trans 'Home' %}
+    </a>
+    <a href="{% url 'users:profile' %}" class="drawer-link">
+      <i class="bi bi-person-circle"></i> {% trans 'Profile' %}
+    </a>
+    {% if user.is_teacher %}
+    <a href="{% url 'tasks:task_list' %}" class="drawer-link">
+      <i class="bi bi-lightning-charge"></i> {% trans 'Challenges' %}
+    </a>
+    {% endif %}
+    <a href="{% url 'users:group_list' %}" class="drawer-link">
+      <i class="bi bi-people"></i> {% trans 'Groups' %}
+    </a>
+    <a href="{% url 'support:contact' %}" class="drawer-link">
+      <i class="bi bi-chat-dots"></i> {% trans 'Support' %}
+    </a>
+    {% if user.is_superuser %}
+    <a href="{% url 'support:inbox' %}" class="drawer-link drawer-link-inbox">
+      <i class="bi bi-inbox"></i>
+      {% trans 'Inbox' %}
+      {% if open_tickets_count %}
+      <span class="drawer-inbox-badge">{{ open_tickets_count }}</span>
+      {% endif %}
+    </a>
+    {% endif %}
+  </nav>
+
+  {# Language switcher #}
+  <div class="drawer-section">
+    <p class="drawer-section-label">🌐 {% trans "Language" %}</p>
+    <form action="{% url 'set_language' %}" method="post" class="drawer-lang-row">
       {% csrf_token %}
       <input name="next" type="hidden" value="{{ request.get_full_path }}">
       <button type="submit" name="language" value="en"
-              class="mobile-lang-btn {% if LANGUAGE_CODE == 'en' %}mobile-lang-active{% endif %}">🇬🇧 EN</button>
+              class="drawer-lang-btn {% if LANGUAGE_CODE == 'en' %}drawer-lang-active{% endif %}">
+        🇬🇧 EN
+      </button>
       <button type="submit" name="language" value="ru"
-              class="mobile-lang-btn {% if LANGUAGE_CODE == 'ru' %}mobile-lang-active{% endif %}">🇷🇺 RU</button>
+              class="drawer-lang-btn {% if LANGUAGE_CODE == 'ru' %}drawer-lang-active{% endif %}">
+        🇷🇺 RU
+      </button>
       <button type="submit" name="language" value="uz"
-              class="mobile-lang-btn {% if LANGUAGE_CODE == 'uz' %}mobile-lang-active{% endif %}">🇺🇿 UZ</button>
+              class="drawer-lang-btn {% if LANGUAGE_CODE == 'uz' %}drawer-lang-active{% endif %}">
+        🇺🇿 UZ
+      </button>
     </form>
   </div>
-</div>
+
+  {# Theme toggle #}
+  <div class="drawer-section">
+    <p class="drawer-section-label">🎨 {% trans "Theme" %}</p>
+    <button class="drawer-theme-btn" id="drawer-theme-btn">
+      <span id="drawer-theme-icon">☀️</span>
+      <span id="drawer-theme-label">{% trans "Toggle theme" %}</span>
+    </button>
+  </div>
+
+  {# Sign out #}
+  <div class="drawer-footer">
+    <form method="post" action="{% url 'users:logout' %}" style="width:100%;">
+      {% csrf_token %}
+      <button type="submit" class="drawer-signout">
+        <i class="bi bi-box-arrow-right"></i> {% trans 'Sign out' %}
+      </button>
+    </form>
+  </div>
+
+</aside>
 {% endif %}
+
 
 <main>
   {% block content %}{% endblock %}
 </main>
 
 <footer>
-  <span>⚡ CodeLearn © {% now "Y" %}</span>
+  <div class="footer-inner">
+    <span class="footer-brand">⚡ CodeLearn © {% now "Y" %}</span>
+    <div class="footer-links">
+      {% if user.is_authenticated %}
+      <a href="{% url 'support:contact' %}" class="footer-link">
+        <i class="bi bi-chat-dots"></i> {% trans "Contact Support" %}
+      </a>
+      <a href="{% url 'support:my_tickets' %}" class="footer-link">
+        <i class="bi bi-ticket"></i> {% trans "My Tickets" %}
+      </a>
+      {% endif %}
+    </div>
+  </div>
 </footer>
 
 <style>
-  #navbar {
-    background: var(--nav-bg);
-    border-bottom: 1px solid rgba(255,255,255,.06);
-    position: sticky; top: 0; z-index: 200;
-  }
-  .nav-inner {
-    max-width: 1200px; margin: 0 auto; padding: 0 20px;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 60px;
-  }
-  .nav-left  { display: flex; align-items: center; gap: 24px; }
-  .nav-right { display: flex; align-items: center; gap: 10px; }
-  .nav-brand { display: flex; align-items: center; gap: 9px; }
-  .nav-logo {
-    width: 32px; height: 32px; background: var(--accent);
-    border-radius: var(--radius);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 16px;
-  }
-  .nav-brand-text   { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: #fff; }
-  .nav-brand-accent { color: var(--accent); }
-  .nav-links { display: flex; gap: 2px; }
-  #navbar .nav-link        { color: rgba(255,255,255,.6); }
-  #navbar .nav-link:hover  { color: #fff; background: rgba(255,255,255,.08); }
-  #navbar .nav-link.active { color: #fff; background: rgba(13,148,136,.25); }
 
-  /* ── Profile pill (now <a>) ─────────────────────────────────────────────── */
-  .nav-user {
-    display: flex; align-items: center; gap: 8px;
-    padding: 5px 12px 5px 7px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 99px;
-    text-decoration: none;
-    transition: border-color .15s, background .15s;
-  }
-  .nav-user:hover {
-    background: rgba(255,255,255,.12);
-    border-color: var(--accent);
-  }
-  .nav-avatar {
-    width: 26px; height: 26px; background: var(--accent); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white; font-family: var(--font-mono);
-  }
-  .nav-username { font-size: .82rem; color: rgba(255,255,255,.85); font-weight: 500; }
+#navbar {
+  background: var(--nav-bg);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  position: sticky; top: 0; z-index: 300;
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+.nav-left  { display: flex; align-items: center; gap: 24px; }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+.nav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+.nav-logo  {
+  width: 32px; height: 32px; background: var(--accent);
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 16px; flex-shrink: 0;
+}
+.nav-brand-text   { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: #fff; }
+.nav-brand-accent { color: var(--accent); }
+.nav-links { display: flex; gap: 2px; }
 
-  #navbar .btn-ghost       { border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.7); background: transparent; }
-  #navbar .btn-ghost:hover { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.25); }
-  #navbar .theme-toggle       { border-color: rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); }
-  #navbar .theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.15); }
-  #navbar .hamburger { border-color: rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); }
+#navbar .nav-link {
+  color: rgba(255,255,255,.6); padding: 6px 10px;
+  border-radius: var(--radius); font-size: .84rem; font-weight: 500;
+  text-decoration: none; transition: color .15s, background .15s;
+  display: flex; align-items: center; gap: 5px;
+}
+#navbar .nav-link:hover  { color: #fff; background: rgba(255,255,255,.08); }
+#navbar .nav-link.active { color: #fff; background: rgba(13,148,136,.25); }
 
-  main   { max-width: 1200px; margin: 0 auto; padding: 28px 20px; min-height: calc(100vh - 121px); }
-  footer { text-align: center; padding: 20px; font-size: .78rem; color: var(--text-sub); border-top: 1px solid var(--border); background: var(--surface); }
+/* Inbox link with badge */
+.nav-link-inbox { position: relative; }
+.nav-inbox-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 17px; height: 17px;
+  background: #ef4444; color: #fff;
+  font-size: .58rem; font-weight: 800; font-family: var(--font-mono);
+  border-radius: 99px; padding: 0 4px;
+  animation: badgePop .3s cubic-bezier(.34,1.56,.64,1);
+}
 
-  /* ════════════════════ 🔔 Notification Bell ════════════════════ */
-  .notif-wrap { position: relative; }
-  .notif-trigger {
-    position: relative; width: 36px; height: 36px;
-    border: 1.5px solid rgba(255,255,255,.15); border-radius: 50%;
-    background: rgba(255,255,255,.06); color: rgba(255,255,255,.75);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; transition: all .18s; outline: none;
-  }
-  .notif-trigger:hover,
-  .notif-wrap.open .notif-trigger {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(13,148,136,.15); box-shadow: 0 0 0 3px rgba(13,148,136,.12);
-  }
-  .notif-trigger:has(.notif-badge) { animation: bellShake 4s ease-in-out infinite; }
-  @keyframes bellShake {
-    0%,90%,100% { transform: rotate(0); }
-    92% { transform: rotate(-12deg); } 94% { transform: rotate(12deg); }
-    96% { transform: rotate(-8deg);  } 98% { transform: rotate(8deg);  }
-  }
-  .notif-badge {
-    position: absolute; top: -4px; right: -4px;
-    min-width: 18px; height: 18px; background: #ef4444; color: #fff;
-    font-size: .62rem; font-weight: 800; font-family: var(--font-mono);
-    border-radius: 99px; display: flex; align-items: center; justify-content: center;
-    padding: 0 4px; border: 2px solid var(--nav-bg);
-    animation: badgePop .3s cubic-bezier(.34,1.56,.64,1);
-  }
-  @keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
-  .notif-dropdown {
-    position: absolute; top: calc(100% + 12px); right: -8px; z-index: 999;
-    opacity: 0; visibility: hidden; pointer-events: none;
-    transform: translateY(-8px) scale(.96);
-    transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1), visibility .18s;
-  }
-  .notif-wrap.open .notif-dropdown {
-    opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1);
-  }
-  .notif-dropdown::before {
-    content: ''; position: absolute; top: -6px; right: 18px;
-    width: 12px; height: 12px; background: var(--surface);
-    border: 1px solid var(--border); border-bottom: none; border-right: none;
-    transform: rotate(45deg); border-radius: 2px;
-  }
-  .notif-dropdown-inner {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 48px rgba(0,0,0,.2), 0 4px 14px rgba(0,0,0,.1);
-    width: 320px; overflow: hidden;
-  }
-  .notif-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg2);
-  }
-  .notif-header-title { font-size: .82rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
-  .notif-count-pill   { font-size: .62rem; font-weight: 800; background: #ef4444; color: #fff; border-radius: 99px; padding: 1px 6px; font-family: var(--font-mono); }
-  .notif-mark-all     { font-size: .72rem; color: var(--accent); font-weight: 600; background: transparent; border: none; cursor: pointer; padding: 3px 8px; border-radius: var(--radius-sm); transition: background .12s; }
-  .notif-mark-all:hover { background: var(--accent-bg); }
-  .notif-list { max-height: 340px; overflow-y: auto; }
-  .notif-list::-webkit-scrollbar       { width: 4px; }
-  .notif-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
-  .notif-item {
-    display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
-    border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; position: relative;
-  }
-  .notif-item:last-child { border-bottom: none; }
-  .notif-item:hover   { background: var(--highlight); }
-  .notif-unread       { background: var(--accent-bg); }
-  .notif-unread:hover { background: var(--highlight); }
-  .notif-item-icon  { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-  .notif-item-body  { flex: 1; min-width: 0; }
-  .notif-item-title { font-size: .84rem; font-weight: 600; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .notif-item-msg   { font-size: .76rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px; }
-  .notif-item-time  { font-size: .68rem; color: var(--text-sub); font-family: var(--font-mono); }
-  .notif-dot        { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-  .notif-success.notif-unread { background: var(--success-bg); }
-  .notif-warning.notif-unread { background: var(--warning-bg); }
-  .notif-danger.notif-unread  { background: var(--danger-bg); }
-  .notif-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 20px; color: var(--text-muted); font-size: .85rem; }
+/* Profile pill */
+.nav-user {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 12px 5px 7px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 99px; text-decoration: none;
+  transition: border-color .15s, background .15s;
+}
+.nav-user:hover { background: rgba(255,255,255,.12); border-color: var(--accent); }
+.nav-avatar {
+  width: 26px; height: 26px; background: var(--accent); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; font-family: var(--font-mono);
+}
+.nav-username { font-size: .82rem; color: rgba(255,255,255,.85); font-weight: 500; }
 
-  /* ════════════════════ 🌐 Language Switcher ════════════════════ */
-  .lang-switcher { position: relative; }
-  .lang-trigger {
-    display: flex; align-items: center; gap: 5px; padding: 6px 11px;
-    border: 1.5px solid rgba(255,255,255,.15); border-radius: 99px;
-    background: rgba(255,255,255,.06); color: rgba(255,255,255,.75);
-    cursor: pointer; font-size: .75rem; font-weight: 700;
-    font-family: var(--font-mono); letter-spacing: .06em;
-    transition: all .18s; white-space: nowrap; outline: none;
-  }
-  .lang-trigger:hover,
-  .lang-switcher.open .lang-trigger {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(13,148,136,.15); box-shadow: 0 0 0 3px rgba(13,148,136,.12);
-  }
-  .lang-globe   { font-size: .9rem; }
-  .lang-current { font-size: .72rem; }
-  .lang-arrow   { width: 9px; height: 9px; transition: transform .22s; opacity: .65; }
-  .lang-switcher.open .lang-arrow { transform: rotate(180deg); opacity: 1; }
-  .lang-dropdown {
-    position: absolute; top: calc(100% + 12px); right: 0; z-index: 999;
-    opacity: 0; visibility: hidden; pointer-events: none;
-    transform: translateY(-8px) scale(.96);
-    transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1), visibility .18s;
-  }
-  .lang-switcher.open .lang-dropdown {
-    opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1);
-  }
-  .lang-dropdown::before {
-    content: ''; position: absolute; top: -6px; right: 14px;
-    width: 12px; height: 12px; background: var(--surface);
-    border: 1px solid var(--border); border-bottom: none; border-right: none;
-    transform: rotate(45deg); border-radius: 2px;
-  }
-  .lang-dropdown-inner {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 48px rgba(0,0,0,.2), 0 4px 14px rgba(0,0,0,.1);
-    padding: 8px; min-width: 168px; overflow: hidden;
-  }
-  .lang-dropdown-label {
-    font-family: var(--font-mono); font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--text-muted); padding: 4px 10px 8px; margin: 0 0 6px; border-bottom: 1px solid var(--border);
-  }
-  .lang-option {
-    display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px;
-    border: none; border-radius: var(--radius); background: transparent; cursor: pointer;
-    font-size: .85rem; color: var(--text); transition: background .12s; text-align: left; outline: none;
-  }
-  .lang-option:hover  { background: var(--highlight); }
-  .lang-option-active { background: var(--accent-bg) !important; color: var(--accent) !important; font-weight: 600; }
-  .lang-flag  { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
-  .lang-name  { flex: 1; font-weight: 500; }
-  .lang-check { font-size: .72rem; color: var(--accent); font-weight: 800; background: var(--accent-bg); border: 1px solid var(--accent-bgd); border-radius: 99px; padding: 1px 6px; }
-  .mobile-lang-btn {
-    flex: 1; padding: 8px 4px; border-radius: var(--radius);
-    border: 1.5px solid rgba(255,255,255,.15);
-    background: transparent; color: rgba(255,255,255,.6);
-    font-size: .78rem; font-weight: 700; cursor: pointer;
-    transition: all .15s; font-family: var(--font-mono);
-  }
-  .mobile-lang-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.15); }
-  .mobile-lang-active    { border-color: var(--accent) !important; background: rgba(13,148,136,.25) !important; color: var(--accent) !important; }
+#navbar .btn-ghost       { border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.7); background: transparent; }
+#navbar .btn-ghost:hover { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.25); }
+#navbar .theme-toggle       { border-color: rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .18s; font-size:.95rem; }
+#navbar .theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.15); }
+#navbar .hamburger {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06); color: rgba(255,255,255,.75);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; cursor: pointer; transition: all .18s;
+  display: none; /* hidden on desktop, shown on mobile via media query */
+}
+#navbar .hamburger:hover { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.15); }
+
+
+.notif-wrap { position: relative; }
+.notif-trigger {
+  position: relative; width: 36px; height: 36px;
+  border: 1.5px solid rgba(255,255,255,.15); border-radius: 50%;
+  background: rgba(255,255,255,.06); color: rgba(255,255,255,.75);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: all .18s; outline: none;
+}
+.notif-trigger:hover,
+.notif-wrap.open .notif-trigger {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(13,148,136,.15); box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+}
+.notif-trigger:has(.notif-badge) { animation: bellShake 4s ease-in-out infinite; }
+@keyframes bellShake {
+  0%,90%,100% { transform: rotate(0); }
+  92% { transform: rotate(-12deg); } 94% { transform: rotate(12deg); }
+  96% { transform: rotate(-8deg);  } 98% { transform: rotate(8deg);  }
+}
+.notif-badge {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 18px; height: 18px; background: #ef4444; color: #fff;
+  font-size: .62rem; font-weight: 800; font-family: var(--font-mono);
+  border-radius: 99px; display: flex; align-items: center; justify-content: center;
+  padding: 0 4px; border: 2px solid var(--nav-bg);
+  animation: badgePop .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
+.notif-dropdown {
+  position: absolute; top: calc(100% + 12px); right: -8px; z-index: 999;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(-8px) scale(.96);
+  transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1), visibility .18s;
+}
+.notif-wrap.open .notif-dropdown {
+  opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1);
+}
+.notif-dropdown::before {
+  content: ''; position: absolute; top: -6px; right: 18px;
+  width: 12px; height: 12px; background: var(--surface);
+  border: 1px solid var(--border); border-bottom: none; border-right: none;
+  transform: rotate(45deg); border-radius: 2px;
+}
+.notif-dropdown-inner {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 48px rgba(0,0,0,.2), 0 4px 14px rgba(0,0,0,.1);
+  width: 320px; overflow: hidden;
+}
+.notif-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg2);
+}
+.notif-header-title { font-size: .82rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+.notif-count-pill   { font-size: .62rem; font-weight: 800; background: #ef4444; color: #fff; border-radius: 99px; padding: 1px 6px; font-family: var(--font-mono); }
+.notif-mark-all     { font-size: .72rem; color: var(--accent); font-weight: 600; background: transparent; border: none; cursor: pointer; padding: 3px 8px; border-radius: var(--radius-sm); transition: background .12s; }
+.notif-mark-all:hover { background: var(--accent-bg); }
+.notif-list { max-height: 340px; overflow-y: auto; }
+.notif-list::-webkit-scrollbar       { width: 4px; }
+.notif-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+.notif-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
+  border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; position: relative;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover   { background: var(--highlight); }
+.notif-unread       { background: var(--accent-bg); }
+.notif-unread:hover { background: var(--highlight); }
+.notif-item-icon  { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.notif-item-body  { flex: 1; min-width: 0; }
+.notif-item-title { font-size: .84rem; font-weight: 600; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.notif-item-msg   { font-size: .76rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px; }
+.notif-item-time  { font-size: .68rem; color: var(--text-sub); font-family: var(--font-mono); }
+.notif-dot        { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.notif-success.notif-unread { background: var(--success-bg); }
+.notif-warning.notif-unread { background: var(--warning-bg); }
+.notif-danger.notif-unread  { background: var(--danger-bg); }
+.notif-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 20px; color: var(--text-muted); font-size: .85rem; }
+
+
+.lang-switcher { position: relative; }
+.lang-trigger {
+  display: flex; align-items: center; gap: 5px; padding: 6px 11px;
+  border: 1.5px solid rgba(255,255,255,.15); border-radius: 99px;
+  background: rgba(255,255,255,.06); color: rgba(255,255,255,.75);
+  cursor: pointer; font-size: .75rem; font-weight: 700;
+  font-family: var(--font-mono); letter-spacing: .06em;
+  transition: all .18s; white-space: nowrap; outline: none;
+}
+.lang-trigger:hover,
+.lang-switcher.open .lang-trigger {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(13,148,136,.15); box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+}
+.lang-globe   { font-size: .9rem; }
+.lang-current { font-size: .72rem; }
+.lang-arrow   { width: 9px; height: 9px; transition: transform .22s; opacity: .65; }
+.lang-switcher.open .lang-arrow { transform: rotate(180deg); opacity: 1; }
+.lang-dropdown {
+  position: absolute; top: calc(100% + 12px); right: 0; z-index: 999;
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transform: translateY(-8px) scale(.96);
+  transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1), visibility .18s;
+}
+.lang-switcher.open .lang-dropdown {
+  opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1);
+}
+.lang-dropdown::before {
+  content: ''; position: absolute; top: -6px; right: 14px;
+  width: 12px; height: 12px; background: var(--surface);
+  border: 1px solid var(--border); border-bottom: none; border-right: none;
+  transform: rotate(45deg); border-radius: 2px;
+}
+.lang-dropdown-inner {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 48px rgba(0,0,0,.2), 0 4px 14px rgba(0,0,0,.1);
+  padding: 8px; min-width: 168px; overflow: hidden;
+}
+.lang-dropdown-label {
+  font-family: var(--font-mono); font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted); padding: 4px 10px 8px; margin: 0 0 6px; border-bottom: 1px solid var(--border);
+}
+.lang-option {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px;
+  border: none; border-radius: var(--radius); background: transparent; cursor: pointer;
+  font-size: .85rem; color: var(--text); transition: background .12s; text-align: left; outline: none;
+}
+.lang-option:hover  { background: var(--highlight); }
+.lang-option-active { background: var(--accent-bg) !important; color: var(--accent) !important; font-weight: 600; }
+.lang-flag  { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
+.lang-name  { flex: 1; font-weight: 500; }
+.lang-check { font-size: .72rem; color: var(--accent); font-weight: 800; background: var(--accent-bg); border: 1px solid var(--accent-bgd); border-radius: 99px; padding: 1px 6px; }
+
+
+.drawer-overlay {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(0,0,0,.55);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .28s, visibility .28s;
+  backdrop-filter: blur(2px);
+}
+.drawer-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
+
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 500;
+  width: min(320px, 88vw);
+  background: var(--nav-bg);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow: -8px 0 32px rgba(0,0,0,.3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.drawer.open { transform: translateX(0); }
+
+/* Drawer header */
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.15);
+  flex-shrink: 0;
+}
+.drawer-user { display: flex; align-items: center; gap: 12px; }
+.drawer-avatar {
+  width: 40px; height: 40px; background: var(--accent); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 800; color: #fff; font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.drawer-username { font-size: .88rem; font-weight: 700; color: #fff; margin: 0 0 3px; }
+.drawer-user-info { display: flex; flex-direction: column; gap: 3px; }
+.drawer-close {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06); color: rgba(255,255,255,.7);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: .9rem; transition: all .15s; flex-shrink: 0;
+}
+.drawer-close:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,.12); }
+
+/* Drawer nav */
+.drawer-nav { padding: 10px 10px 0; flex: 1; }
+.drawer-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius-lg);
+  color: rgba(255,255,255,.65); font-size: .88rem; font-weight: 500;
+  text-decoration: none; transition: all .15s; margin-bottom: 2px;
+  position: relative;
+}
+.drawer-link i { font-size: 1rem; width: 20px; text-align: center; flex-shrink: 0; }
+.drawer-link:hover  { background: rgba(255,255,255,.08); color: #fff; }
+.drawer-link.active { background: rgba(13,148,136,.2); color: #fff; }
+
+.drawer-link-inbox { color: rgba(255,255,255,.75); }
+.drawer-inbox-badge {
+  margin-left: auto;
+  min-width: 20px; height: 20px;
+  background: #ef4444; color: #fff;
+  font-size: .62rem; font-weight: 800; font-family: var(--font-mono);
+  border-radius: 99px; display: flex; align-items: center; justify-content: center;
+  padding: 0 5px;
+}
+
+/* Drawer sections */
+.drawer-section {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  margin-top: 6px;
+}
+.drawer-section-label {
+  font-size: .62rem; font-family: var(--font-mono);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(255,255,255,.35); margin-bottom: 10px;
+}
+.drawer-lang-row { display: flex; gap: 6px; }
+.drawer-lang-btn {
+  flex: 1; padding: 8px 4px; border-radius: var(--radius);
+  border: 1.5px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.04); color: rgba(255,255,255,.55);
+  font-size: .78rem; font-weight: 700; cursor: pointer;
+  transition: all .15s; font-family: var(--font-mono);
+}
+.drawer-lang-btn:hover  { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.12); }
+.drawer-lang-active     { border-color: var(--accent) !important; background: rgba(13,148,136,.2) !important; color: var(--accent) !important; }
+
+.drawer-theme-btn {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 14px;
+  background: rgba(255,255,255,.05);
+  border: 1.5px solid rgba(255,255,255,.1);
+  border-radius: var(--radius-lg);
+  color: rgba(255,255,255,.7); font-size: .85rem; cursor: pointer;
+  transition: all .15s;
+}
+.drawer-theme-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.12); }
+
+/* Drawer footer */
+.drawer-footer {
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+.drawer-signout {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+  width: 100%; padding: 11px;
+  background: rgba(239,68,68,.1);
+  border: 1.5px solid rgba(239,68,68,.25);
+  border-radius: var(--radius-lg);
+  color: #f87171; font-size: .85rem; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.drawer-signout:hover { background: rgba(239,68,68,.2); border-color: #ef4444; color: #fff; }
+
+
+footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 16px 20px;
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+}
+.footer-brand { font-size: .78rem; color: var(--text-sub); }
+.footer-links { display: flex; align-items: center; gap: 16px; }
+.footer-link {
+  font-size: .76rem; color: var(--text-muted);
+  text-decoration: none; display: flex; align-items: center; gap: 5px;
+  transition: color .15s;
+}
+.footer-link:hover { color: var(--accent); }
+
+
+main { max-width: 1200px; margin: 0 auto; padding: 28px 20px; min-height: calc(100vh - 121px); }
+
+/* Hide on small screens */
+@media (max-width: 768px) {
+  .hide-sm        { display: none !important; }
+  #navbar .hamburger { display: flex !important; }
+  /* Notification dropdown goes full-width on mobile */
+  .notif-dropdown { right: -60px; }
+  .notif-dropdown-inner { width: calc(100vw - 32px); max-width: 320px; }
+  /* Footer stacks on mobile */
+  .footer-inner   { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+@media (min-width: 769px) {
+  .drawer, .drawer-overlay { display: none !important; }
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const toggle    = document.getElementById('theme-toggle');
   const burger    = document.getElementById('hamburger');
-  const menu      = document.getElementById('mobile-menu');
+  const drawer    = document.getElementById('drawer');
+  const overlay   = document.getElementById('drawer-overlay');
+  const closeBtn  = document.getElementById('drawer-close');
   const langBtn   = document.getElementById('lang-trigger');
   const langWrap  = document.getElementById('lang-switcher');
   const notifBtn  = document.getElementById('notif-trigger');
   const notifWrap = document.getElementById('notif-wrap');
-
-  // ── Read URLs once, pass via closure — no repeated DOM reads ─────────────
   const urlEl     = document.getElementById('js-urls');
   const NOTIF_ONE = urlEl?.dataset.notifReadUrl ?? null;
   const NOTIF_ALL = urlEl?.dataset.notifAllUrl  ?? null;
 
   // ── Theme ─────────────────────────────────────────────────────────────────
-  if (toggle) {
-    const applyTheme = t => {
-      document.documentElement.setAttribute('data-theme', t);
-      localStorage.setItem('theme', t);
-      toggle.textContent = t === 'dark' ? '☀️' : '🌙';
-    };
-    applyTheme(localStorage.getItem('theme') || 'light');
-    toggle.addEventListener('click', () =>
-      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
-    );
-  }
+  const applyTheme = t => {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+    const icon  = t === 'dark' ? '☀️' : '🌙';
+    const label = t === 'dark' ? 'Light mode' : 'Dark mode';
+    if (toggle)                                    toggle.textContent = icon;
+    const di = document.getElementById('drawer-theme-icon');
+    const dl = document.getElementById('drawer-theme-label');
+    if (di) di.textContent = icon;
+    if (dl) dl.textContent = label;
+  };
+  applyTheme(localStorage.getItem('theme') || 'light');
+  toggle?.addEventListener('click', () =>
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+  );
+  document.getElementById('drawer-theme-btn')?.addEventListener('click', () =>
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+  );
 
-  // ── Hamburger ─────────────────────────────────────────────────────────────
-  burger?.addEventListener('click', () => menu?.classList.toggle('open'));
+  // ── Mobile drawer ─────────────────────────────────────────────────────────
+  const openDrawer = () => {
+    drawer?.classList.add('open');
+    overlay?.classList.add('open');
+    burger?.setAttribute('aria-expanded', 'true');
+    drawer?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  const closeDrawer = () => {
+    drawer?.classList.remove('open');
+    overlay?.classList.remove('open');
+    burger?.setAttribute('aria-expanded', 'false');
+    drawer?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+  burger?.addEventListener('click',  openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  overlay?.addEventListener('click',  closeDrawer);
 
-  // ── Dropdown helper ───────────────────────────────────────────────────────
+  // ── Desktop dropdowns ─────────────────────────────────────────────────────
   const closeAll = () => {
     langWrap?.classList.remove('open');
     notifWrap?.classList.remove('open');
@@ -482,7 +743,9 @@ document.addEventListener('DOMContentLoaded', () => {
   notifBtn?.addEventListener('click', e => { e.stopPropagation(); toggleDrop(notifWrap, notifBtn); });
   langBtn?.addEventListener('click',  e => { e.stopPropagation(); toggleDrop(langWrap,  langBtn);  });
   document.addEventListener('click',   closeAll);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeAll(); closeDrawer(); }
+  });
 
   // ── Notification event delegation ─────────────────────────────────────────
   const notifList = document.getElementById('notif-list');
@@ -509,18 +772,21 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (_) {}
   }
 
-  // ── Active nav link ───────────────────────────────────────────────────────
-  document.querySelectorAll('.nav-link').forEach(l => {
-    if (l.href === location.href) l.classList.add('active');
+  // ── Active nav links ──────────────────────────────────────────────────────
+  const cur = location.pathname;
+  document.querySelectorAll('.nav-link, .drawer-link').forEach(l => {
+    try {
+      const lp = new URL(l.href).pathname;
+      if (lp === cur || (lp !== '/' && cur.startsWith(lp))) l.classList.add('active');
+    } catch(_) {}
   });
 });
 
-// ── Notification actions (URL passed in — no repeated DOM reads) ───────────
+// ── Notification actions ───────────────────────────────────────────────────
 function markRead(id, el, baseUrl) {
   if (!el.classList.contains('notif-unread') || !baseUrl) return;
   fetch(baseUrl.replace('/0/', `/${id}/`), {
-    method: 'POST',
-    headers: { 'X-CSRFToken': getCookie('csrftoken') }
+    method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') }
   })
   .then(r => { if (!r.ok) throw new Error(r.status); })
   .then(() => {
@@ -533,10 +799,7 @@ function markRead(id, el, baseUrl) {
 
 function markAllRead(url) {
   if (!url) return;
-  fetch(url, {
-    method: 'POST',
-    headers: { 'X-CSRFToken': getCookie('csrftoken') }
-  })
+  fetch(url, { method: 'POST', headers: { 'X-CSRFToken': getCookie('csrftoken') } })
   .then(r => { if (!r.ok) throw new Error(r.status); })
   .then(() => {
     document.querySelectorAll('.notif-unread').forEach(el => {
@@ -569,7 +832,7 @@ function _toast(msg, type = 'i') {
   const wrap = document.getElementById('toast-wrap');
   if (!wrap) return;
   const icons = { s: '✅', e: '❌', w: '⚠️', i: '💡' };
-  const el   = document.createElement('div');
+  const el = document.createElement('div');
   el.className = `toast toast-${type}`;
   const icon = document.createElement('span'); icon.textContent = icons[type] || '•';
   const text = document.createElement('span'); text.textContent = msg;

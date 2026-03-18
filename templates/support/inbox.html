@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Support Inbox" %}{% endblock %}
+{% block codemirror %}{% endblock codemirror %}
+
+{% block content %}
+<div class="inbox-wrap">
+
+  <div class="page-topbar">
+    <div>
+      <h1 class="page-title">📥 {% trans "Support Inbox" %}</h1>
+      <p class="page-sub">{% trans "All user support requests" %}</p>
+    </div>
+    <div class="inbox-counts">
+      <span class="icount icount-open">{{ counts.open }} {% trans "open" %}</span>
+      <span class="icount icount-prog">{{ counts.in_progress }} {% trans "in progress" %}</span>
+      <span class="icount icount-done">{{ counts.closed }} {% trans "closed" %}</span>
+    </div>
+  </div>
+
+  {# ── Filters ─────────────────────────────────────────────────────────── #}
+  <form method="get" class="filter-bar">
+    <select name="status" class="filter-select" onchange="this.form.submit()">
+      <option value="">{% trans "All statuses" %}</option>
+      {% for val, label in statuses %}
+      <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="category" class="filter-select" onchange="this.form.submit()">
+      <option value="">{% trans "All categories" %}</option>
+      {% for val, label in categories %}
+      <option value="{{ val }}" {% if filter_category == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    {% if filter_status or filter_category %}
+    <a href="{% url 'support:inbox' %}" class="filter-clear">✕ {% trans "Clear" %}</a>
+    {% endif %}
+  </form>
+
+  {# ── Ticket list ──────────────────────────────────────────────────────── #}
+  {% if tickets %}
+  <div class="ticket-list">
+    {% for t in tickets %}
+    <a href="{% url 'support:ticket_detail' pk=t.pk %}" class="ticket-row status-{{ t.status }}">
+      <div class="tr-left">
+        <div class="tr-top">
+          <span class="tr-cat">{{ t.get_category_display }}</span>
+          <span class="tr-title">{{ t.title }}</span>
+        </div>
+        <div class="tr-bottom">
+          <span class="tr-user"><i class="bi bi-person"></i> {{ t.sender.username }}
+            <span class="role-badge {% if t.sender.is_teacher %}role-teacher{% else %}role-student{% endif %}" style="font-size:.6rem;padding:1px 6px;">
+              {{ t.sender.get_role_display }}
+            </span>
+          </span>
+          <span class="tr-date">{{ t.created_at|timesince }} {% trans "ago" %}</span>
+        </div>
+      </div>
+      <div class="tr-right">
+        {% if t.reply %}<span class="tr-replied"><i class="bi bi-reply-fill"></i> {% trans "Replied" %}</span>{% endif %}
+        <span class="t-status t-status-{{ t.status }}">{{ t.get_status_display }}</span>
+        <i class="bi bi-chevron-right tr-arrow"></i>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <span style="font-size:2.5rem;">📭</span>
+    <h3>{% trans "No tickets found" %}</h3>
+    <p>{% trans "No messages match the current filter." %}</p>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+  .inbox-wrap  { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .page-topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .page-title  { font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0 0 4px; }
+  .page-sub    { font-size: .82rem; color: var(--text-muted); margin: 0; }
+
+  .inbox-counts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .icount { font-size: .72rem; font-weight: 700; font-family: var(--font-mono); border-radius: 99px; padding: 4px 12px; }
+  .icount-open { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .icount-prog { background: rgba(59,130,246,.15);  color: #3b82f6; }
+  .icount-done { background: rgba(34,197,94,.15);   color: #22c55e; }
+
+  .filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .filter-select {
+    padding: 7px 12px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-size: .82rem;
+    outline: none; cursor: pointer; transition: border-color .15s;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+  .filter-clear { font-size: .78rem; color: var(--text-muted); text-decoration: none; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius); transition: all .15s; }
+  .filter-clear:hover { color: #ef4444; border-color: #ef4444; }
+
+  .ticket-list { display: flex; flex-direction: column; gap: 6px; }
+  .ticket-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 18px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); text-decoration: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .ticket-row:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .ticket-row.status-closed { opacity: .65; }
+
+  .tr-left  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+  .tr-top   { display: flex; align-items: center; gap: 8px; }
+  .tr-bottom{ display: flex; align-items: center; gap: 12px; }
+  .tr-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .tr-cat   { font-size: .7rem; color: var(--text-muted); font-family: var(--font-mono); white-space: nowrap; }
+  .tr-title { font-size: .88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tr-user  { font-size: .73rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+  .tr-date  { font-size: .7rem; color: var(--text-sub); font-family: var(--font-mono); }
+  .tr-replied { font-size: .7rem; color: var(--accent); font-family: var(--font-mono); display: flex; align-items: center; gap: 4px; }
+  .tr-arrow { color: var(--text-muted); font-size: .8rem; }
+
+  .t-status { font-size: .7rem; font-weight: 700; font-family: var(--font-mono); border-radius: 99px; padding: 2px 10px; }
+  .t-status-open        { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .t-status-in_progress { background: rgba(59,130,246,.15);  color: #3b82f6; }
+  .t-status-closed      { background: rgba(34,197,94,.15);   color: #22c55e; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 60px 20px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg); color: var(--text-muted); }
+  .empty-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0; }
+  .empty-state p  { font-size: .84rem; margin: 0; }
+</style>
+{% endblock %}

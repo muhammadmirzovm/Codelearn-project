@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "My Tickets" %}{% endblock %}
+{% block codemirror %}{% endblock codemirror %}
+
+{% block content %}
+<div class="support-wrap">
+
+  <div class="page-topbar">
+    <div>
+      <h1 class="page-title">📋 {% trans "My Tickets" %}</h1>
+      <p class="page-sub">{% trans "Track the status of your support requests" %}</p>
+    </div>
+    <a href="{% url 'support:contact' %}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> {% trans "New ticket" %}
+    </a>
+  </div>
+
+  {% if tickets %}
+  <div class="ticket-list">
+    {% for t in tickets %}
+    <div class="ticket-row status-{{ t.status }}">
+      <div class="ticket-row-left">
+        <span class="ticket-cat">{{ t.get_category_display }}</span>
+        <span class="ticket-title">{{ t.title }}</span>
+      </div>
+      <div class="ticket-row-right">
+        <span class="ticket-date">{{ t.created_at|date:"d M Y" }}</span>
+        <span class="t-status t-status-{{ t.status }}">{{ t.get_status_display }}</span>
+        {% if t.reply %}
+        <span class="t-replied"><i class="bi bi-reply-fill"></i> {% trans "Replied" %}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if t.reply %}
+    <div class="ticket-reply-box">
+      <div class="ticket-reply-label"><i class="bi bi-person-badge"></i> {% trans "Support reply:" %}</div>
+      <p class="ticket-reply-text">{{ t.reply }}</p>
+    </div>
+    {% endif %}
+
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <span style="font-size:2.5rem;">📭</span>
+    <h3>{% trans "No tickets yet" %}</h3>
+    <p>{% trans "Submit a message if you need help." %}</p>
+    <a href="{% url 'support:contact' %}" class="btn btn-primary btn-sm">{% trans "Contact support" %}</a>
+  </div>
+  {% endif %}
+
+</div>
+
+<style>
+  .support-wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .page-topbar  { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .page-title   { font-size: 1.4rem; font-weight: 700; color: var(--text); margin: 0 0 4px; }
+  .page-sub     { font-size: .82rem; color: var(--text-muted); margin: 0; }
+
+  .ticket-list  { display: flex; flex-direction: column; gap: 2px; }
+
+  .ticket-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    padding: 14px 18px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    transition: border-color .15s;
+  }
+  .ticket-row:hover { border-color: var(--accent); }
+  .ticket-row.status-closed { opacity: .7; }
+
+  .ticket-row-left  { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .ticket-row-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+
+  .ticket-cat   { font-size: .72rem; font-family: var(--font-mono); color: var(--text-muted); white-space: nowrap; }
+  .ticket-title { font-size: .88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+  .ticket-date  { font-size: .72rem; color: var(--text-muted); font-family: var(--font-mono); }
+
+  .t-status { font-size: .7rem; font-weight: 700; font-family: var(--font-mono); border-radius: 99px; padding: 2px 10px; }
+  .t-status-open        { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .t-status-in_progress { background: rgba(59,130,246,.15);  color: #3b82f6; }
+  .t-status-closed      { background: rgba(34,197,94,.15);   color: #22c55e; }
+
+  .t-replied { font-size: .7rem; color: var(--accent); font-family: var(--font-mono); display: flex; align-items: center; gap: 4px; }
+
+  /* Reply box */
+  .ticket-reply-box {
+    margin-top: -2px;
+    padding: 12px 18px;
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-bgd);
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  }
+  .ticket-reply-label { font-size: .7rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+  .ticket-reply-text  { font-size: .84rem; color: var(--text); margin: 0; line-height: 1.5; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 60px 20px; text-align: center; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg); color: var(--text-muted); }
+  .empty-state h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 0; }
+  .empty-state p  { font-size: .84rem; margin: 0; }
+</style>
+{% endblock %}

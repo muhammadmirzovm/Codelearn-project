@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-18 23:02+0500\n"
-"PO-Revision-Date: 2026-03-18 23:19+0500\n"
+"POT-Creation-Date: 2026-03-19 02:26+0500\n"
+"PO-Revision-Date: 2026-03-19 02:45+0500\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,47 +19,115 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Translated-Using: django-rosetta 0.10.3\n"
 
-#: templates/base.html:8
+#: templates/admin/users/notification/change_list.html:8
+msgid "Send to All"
+msgstr "Отправить всем"
+
+#: templates/base.html:9
 msgid "CodeLearn"
 msgstr "CodeLearn"
 
-#: templates/base.html:40 templates/base.html:116
+#: templates/base.html:56 templates/base.html:221
 #: templates/tasks/task_list.html:9
 msgid "Challenges"
 msgstr "Испытания"
 
-#: templates/base.html:42 templates/base.html:118
+#: templates/base.html:58 templates/base.html:225
 #: templates/users/group_list.html:3
 msgid "Groups"
 msgstr "Группы"
 
-#: templates/base.html:57 templates/base.html:122
+#: templates/base.html:59 templates/base.html:228
+msgid "Support"
+msgstr "Поддержка"
+
+#: templates/base.html:62 templates/base.html:233
+msgid "Inbox"
+msgstr "Входящие"
+
+#: templates/base.html:77
+msgid "My profile"
+msgstr "Мой профиль"
+
+#: templates/base.html:87 templates/base.html:276
 msgid "Sign out"
 msgstr "Выйти"
 
-#: templates/base.html:60 templates/users/login.html:3
+#: templates/base.html:93 templates/base.html:101 templates/base.html:105
+#: templates/support/contact.html:70 templates/users/profile.html:62
+#| msgid "Actions"
+msgid "Notifications"
+msgstr "Уведомления"
+
+#: templates/base.html:109
+msgid "Mark all read"
+msgstr "Отметить всё как прочитанное"
+
+#: templates/base.html:126 templates/support/inbox.html:56
+msgid "ago"
+msgstr "назад"
+
+#: templates/base.html:133
+#| msgid "No submissions yet"
+msgid "No notifications yet"
+msgstr "Пока нет уведомлений"
+
+#: templates/base.html:142 templates/users/login.html:3
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:61 templates/users/login.html:37
+#: templates/base.html:143 templates/users/login.html:72
 msgid "Get started"
 msgstr "Начать"
 
-#: templates/base.html:67
-#, fuzzy
+#: templates/base.html:149
 #| msgid "Select Language"
 msgid "Change language"
 msgstr "Выберите язык"
 
-#: templates/base.html:80 templates/base.html:129
-#, fuzzy
+#: templates/base.html:161 templates/base.html:243
 #| msgid "Select Language"
 msgid "Language"
-msgstr "Выберите язык"
+msgstr "Язык"
 
-#: templates/base.html:107
+#: templates/base.html:182 templates/base.html:267
 msgid "Toggle theme"
 msgstr "Сменить тему"
+
+#: templates/base.html:183
+msgid "Open menu"
+msgstr "Открыть меню"
+
+#: templates/base.html:193
+msgid "Navigation menu"
+msgstr "Навигационное меню"
+
+#: templates/base.html:206
+#| msgid "Schedule Session"
+msgid "Close menu"
+msgstr "Закрыть меню"
+
+#: templates/base.html:214
+msgid "Home"
+msgstr "Главная"
+
+#: templates/base.html:217 templates/users/profile.html:4
+msgid "Profile"
+msgstr "Профиль"
+
+#: templates/base.html:264
+msgid "Theme"
+msgstr "Тема"
+
+#: templates/base.html:295 templates/support/contact.html:3
+#: templates/support/contact.html:11
+msgid "Contact Support"
+msgstr "Связаться с поддержкой"
+
+#: templates/base.html:298 templates/support/my_tickets.html:3
+#: templates/support/my_tickets.html:11
+msgid "My Tickets"
+msgstr "Мои обращения"
 
 #: templates/journals/journal_detail.html:3
 #: templates/journals/lesson_form.html:9
@@ -68,7 +136,6 @@ msgid "Journal"
 msgstr "Журнал"
 
 #: templates/journals/journal_detail.html:76
-#, fuzzy
 #| msgid "Journal"
 msgid "Academic Journal"
 msgstr "Журнал"
@@ -116,13 +183,14 @@ msgid "Student"
 msgstr "Студент"
 
 #: templates/journals/journal_detail.html:118
-#: templates/sessions/session_monitor.html:63
+#: templates/sessions/session_monitor.html:63 templates/users/profile.html:97
 msgid "Score"
 msgstr "Баллы"
 
 #: templates/journals/journal_detail.html:119
 #: templates/journals/journal_detail.html:173
-#: templates/journals/record_form.html:38
+#: templates/journals/record_form.html:38 templates/users/profile.html:110
+#: templates/users/profile.html:127
 msgid "Attendance"
 msgstr "Посещаемость"
 
@@ -143,7 +211,8 @@ msgstr "%(count)s студентов"
 
 #: templates/journals/journal_detail.html:160
 #: templates/journals/journal_detail.html:174
-#: templates/journals/record_form.html:3
+#: templates/journals/record_form.html:3 templates/users/profile.html:167
+#: templates/users/profile.html:189
 msgid "Grade"
 msgstr "Оценка"
 
@@ -152,11 +221,11 @@ msgstr "Оценка"
 msgid "Comment"
 msgstr "Комментарий"
 
-#: templates/journals/journal_detail.html:184
+#: templates/journals/journal_detail.html:184 templates/users/profile.html:233
 msgid "Present"
 msgstr "Присутствовал"
 
-#: templates/journals/journal_detail.html:186
+#: templates/journals/journal_detail.html:186 templates/users/profile.html:233
 msgid "Absent"
 msgstr "Отсутствовал"
 
@@ -165,20 +234,18 @@ msgid "No records for this lesson"
 msgstr "Нет записей для этого урока"
 
 #: templates/journals/journal_detail.html:217
-#, fuzzy
 #| msgid "No messages yet"
 msgid "No lessons yet"
-msgstr "Пока нет сообщений"
+msgstr "Пока нет уроков"
 
 #: templates/journals/journal_detail.html:218
 msgid "Add the first lesson to start keeping the journal"
 msgstr "Добавьте первый урок, чтобы начать ведение журнала"
 
 #: templates/journals/journal_detail.html:220
-#, fuzzy
 #| msgid "Add Test Case"
 msgid "Add lesson"
-msgstr "Добавить тест"
+msgstr "Добавить урок"
 
 #: templates/journals/lesson_form.html:12
 msgid "Add a lesson to the group journal"
@@ -205,10 +272,9 @@ msgid "Lesson Date"
 msgstr "Дата урока"
 
 #: templates/journals/lesson_form.html:55
-#, fuzzy
 #| msgid "Save Task"
 msgid "Save Lesson"
-msgstr "Сохранить задачу"
+msgstr "Сохранить урок"
 
 #: templates/journals/lesson_form.html:56
 #: templates/journals/record_form.html:76
@@ -237,18 +303,16 @@ msgid "Note..."
 msgstr "Заметка..."
 
 #: templates/journals/record_form.html:77
-#, fuzzy
 #| msgid "Save Task"
 msgid "Save Grades"
-msgstr "Сохранить задачу"
+msgstr "Сохранить оценки"
 
 #: templates/sessions/leaderboard.html:3 templates/sessions/leaderboard.html:9
 #: templates/sessions/session_join.html:39
 #: templates/sessions/session_monitor.html:25
-#, fuzzy
 #| msgid "Dashboard"
 msgid "Leaderboard"
-msgstr "Панель управления"
+msgstr "Таблица лидеров"
 
 #: templates/sessions/leaderboard.html:13
 #: templates/sessions/session_list.html:51
@@ -257,10 +321,9 @@ msgid "Live"
 msgstr "В прямом эфире"
 
 #: templates/sessions/leaderboard.html:14
-#, fuzzy
 #| msgid "Back to dashboard"
 msgid "Back to coding"
-msgstr "Вернуться на панель"
+msgstr "Вернуться к коду"
 
 #: templates/sessions/leaderboard.html:42
 #: templates/sessions/session_list.html:33
@@ -279,10 +342,9 @@ msgstr "Время"
 #: templates/sessions/leaderboard.html:60
 #: templates/sessions/leaderboard.html:85
 #: templates/sessions/session_monitor.html:41
-#, fuzzy
 #| msgid "Tests Passed"
 msgid "Passed"
-msgstr "Тесты пройдены"
+msgstr "Пройдено"
 
 #: templates/sessions/leaderboard.html:61
 #: templates/sessions/leaderboard.html:86
@@ -293,10 +355,9 @@ msgstr "Работает…"
 #: templates/sessions/leaderboard.html:87
 #: templates/sessions/session_monitor.html:83
 #: templates/sessions/session_monitor.html:125
-#, fuzzy
 #| msgid "Get started"
 msgid "Not started"
-msgstr "Начать"
+msgstr "Не начато"
 
 #: templates/sessions/leaderboard.html:75
 #: templates/sessions/session_join.html:153
@@ -365,16 +426,15 @@ msgstr "Пример вывода"
 msgid "Select Language"
 msgstr "Выберите язык"
 
-#: templates/sessions/session_join.html:104
+#: templates/sessions/session_join.html:104 templates/support/inbox.html:36
 msgid "Clear"
 msgstr "Очистить"
 
 #: templates/sessions/session_join.html:115
 #: templates/sessions/session_join.html:172
-#, fuzzy
 #| msgid "Your Code"
 msgid "Run Code"
-msgstr "Ваш код"
+msgstr "Запустить код"
 
 #: templates/sessions/session_join.html:117
 #: templates/sessions/session_join.html:176
@@ -383,10 +443,9 @@ msgstr "Уже пройдено!"
 
 #: templates/sessions/session_join.html:117
 #: templates/sessions/session_join.html:175
-#, fuzzy
 #| msgid "Submitted At"
 msgid "Submit"
-msgstr "Отправлено"
+msgstr "Отправить"
 
 #: templates/sessions/session_join.html:122
 msgid "Time's up! The session is now closed."
@@ -402,28 +461,24 @@ msgstr "История"
 
 #: templates/sessions/session_join.html:135
 #: templates/sessions/session_join.html:194
-#, fuzzy
 #| msgid "Ready to code today?"
 msgid "Ready to code!"
-msgstr "Готов кодить сегодня?"
+msgstr "Готов к кодированию!"
 
 #: templates/sessions/session_join.html:136
 msgid "Select a language, write your code"
 msgstr "Выберите язык, напишите свой код"
 
 #: templates/sessions/session_join.html:136
-#, fuzzy
 #| msgid ""
 #| "No test cases yet. Click <strong>＋ Add Test Case</strong> to start."
 msgid "then click <strong>Run Code</strong> to test"
-msgstr ""
-"Пока нет тестов. Нажмите <strong>＋ Добавить тест</strong>, чтобы начать."
+msgstr "затем нажмите <strong>Запустить код</strong>, чтобы протестировать"
 
 #: templates/sessions/session_join.html:143
-#, fuzzy
 #| msgid "Submission"
 msgid "Last Submission"
-msgstr "Отправка"
+msgstr "Последняя отправка"
 
 #: templates/sessions/session_join.html:147
 #, python-format
@@ -444,10 +499,9 @@ msgid "Evaluating…"
 msgstr "Оценка…"
 
 #: templates/sessions/session_join.html:177
-#, fuzzy
 #| msgid "Tests Passed"
 msgid "Passed!"
-msgstr "Тесты пройдены"
+msgstr "Пройдено!"
 
 #: templates/sessions/session_join.html:178
 msgid "Time is up! Submissions are now closed."
@@ -482,10 +536,9 @@ msgid "✓ Submit Results"
 msgstr "✓ Отправить результаты"
 
 #: templates/sessions/session_join.html:187
-#, fuzzy
 #| msgid "Tests Passed"
 msgid "All tests passed!"
-msgstr "Тесты пройдены"
+msgstr "Все тесты пройдены!"
 
 #: templates/sessions/session_join.html:188
 msgid "Network error:"
@@ -505,10 +558,9 @@ msgid "Input:"
 msgstr "Ввод:"
 
 #: templates/sessions/session_join.html:192
-#, fuzzy
 #| msgid "Expected Output"
 msgid "Expected:"
-msgstr "Ожидаемый вывод"
+msgstr "Ожидаемый вывод:"
 
 #: templates/sessions/session_join.html:193
 msgid "Got:"
@@ -516,22 +568,19 @@ msgstr "Получено"
 
 #: templates/sessions/session_list.html:3
 #: templates/sessions/session_list.html:9
-#, fuzzy
 #| msgid "Submission"
 msgid "Sessions"
-msgstr "Отправка"
+msgstr "Сессии"
 
 #: templates/sessions/session_list.html:12
-#, fuzzy
 #| msgid "Teacher Dashboard — run your live coding sessions"
 msgid "Schedule and run live coding sessions"
-msgstr "Панель учителя — проводите живые coding-сессии"
+msgstr "Планируйте и проводите живые coding-сессии"
 
 #: templates/sessions/session_list.html:14
-#, fuzzy
 #| msgid "No upcoming sessions"
 msgid "Your available coding sessions"
-msgstr "Нет предстоящих сессий"
+msgstr "Ваши доступные coding-сессии"
 
 #: templates/sessions/session_list.html:29
 #: templates/submissions/submission_detail.html:20
@@ -539,16 +588,14 @@ msgid "Task"
 msgstr "Задача"
 
 #: templates/sessions/session_list.html:30
-#, fuzzy
 #| msgid "Groups"
 msgid "Group"
-msgstr "Группы"
+msgstr "Группа"
 
 #: templates/sessions/session_list.html:31
-#, fuzzy
 #| msgid "Start Now"
 msgid "Start Time"
-msgstr "Начать сейчас"
+msgstr "Время начала"
 
 #: templates/sessions/session_list.html:32
 msgid "Duration"
@@ -559,20 +606,18 @@ msgid "Actions"
 msgstr "Действия"
 
 #: templates/sessions/session_list.html:47
-#, fuzzy
 #| msgid "Memory Limit"
 msgid "No limit"
-msgstr "Лимит памяти"
+msgstr "Без ограничений"
 
 #: templates/sessions/session_list.html:52
 msgid "Ended"
 msgstr "Завершено"
 
 #: templates/sessions/session_list.html:53
-#, fuzzy
 #| msgid "Schedule"
 msgid "Scheduled"
-msgstr "Запланировать"
+msgstr "Запланировано"
 
 #: templates/sessions/session_list.html:59
 #: templates/sessions/session_monitor.html:3
@@ -581,20 +626,18 @@ msgid "Monitor"
 msgstr "Контролировать"
 
 #: templates/sessions/session_list.html:62
-#, fuzzy
 #| msgid "Schedule Session"
 msgid "Close session?"
-msgstr "Запланировать сессию"
+msgstr "Закрыть сессию?"
 
 #: templates/sessions/session_list.html:62
 msgid "Close"
 msgstr "Закрыть"
 
 #: templates/sessions/session_list.html:67
-#, fuzzy
 #| msgid "Start Now"
 msgid "Start"
-msgstr "Начать сейчас"
+msgstr "Начать"
 
 #: templates/sessions/session_list.html:73
 #: templates/users/dashboard_student.html:51
@@ -602,10 +645,9 @@ msgid "Join"
 msgstr "Присоединиться"
 
 #: templates/sessions/session_list.html:88
-#, fuzzy
 #| msgid "No submissions yet"
 msgid "No sessions yet"
-msgstr "Пока нет отправок"
+msgstr "Сессий пока нет"
 
 #: templates/sessions/session_list.html:90
 msgid "Create a session to host a live coding challenge for your students"
@@ -613,10 +655,9 @@ msgstr ""
 "Создайте сессию, чтобы провести живой кодинг-челлендж для ваших студентов"
 
 #: templates/sessions/session_list.html:91
-#, fuzzy
 #| msgid "Schedule Session"
 msgid "Schedule first session"
-msgstr "Запланировать сессию"
+msgstr "Запланировать первую сессию"
 
 #: templates/sessions/session_list.html:93
 msgid "Join a group first, then your teacher will schedule sessions for you"
@@ -625,13 +666,11 @@ msgstr ""
 " сессии"
 
 #: templates/sessions/session_monitor.html:10
-#, fuzzy
 #| msgid "Monitor"
 msgid "Live Monitor"
-msgstr "Контролировать"
+msgstr "Мониторинг в реальном времени"
 
 #: templates/sessions/session_monitor.html:15
-#, fuzzy
 #| msgid "Connecting..."
 msgid "Connecting"
 msgstr "Подключение..."
@@ -641,13 +680,11 @@ msgid "Close this session?"
 msgstr "Закрыть эту сессию?"
 
 #: templates/sessions/session_monitor.html:28
-#, fuzzy
 #| msgid "Schedule Session"
 msgid "Close Session"
-msgstr "Запланировать сессию"
+msgstr "Закрыть сессию"
 
 #: templates/sessions/session_monitor.html:45
-#, fuzzy
 #| msgid "Submitted At"
 msgid "Submitted"
 msgstr "Отправлено"
@@ -665,10 +702,9 @@ msgid "Last Activity"
 msgstr "Последняя активность"
 
 #: templates/sessions/session_monitor.html:120
-#, fuzzy
 #| msgid "Connecting..."
 msgid "Reconnecting"
-msgstr "Подключение..."
+msgstr "Переподключение"
 
 #: templates/sessions/session_monitor.html:121
 msgid "▶ Running…"
@@ -679,10 +715,9 @@ msgid "⏳ Evaluating…"
 msgstr "⏳ Оценка…"
 
 #: templates/sessions/session_monitor.html:123
-#, fuzzy
 #| msgid "Tests Passed"
 msgid "✓ Passed"
-msgstr "Тесты пройдены"
+msgstr "✓ Пройдено"
 
 #: templates/sessions/session_monitor.html:124
 msgid "✗ Failed"
@@ -718,6 +753,180 @@ msgstr "%(passed)s/%(total)s пройдено"
 #, python-format
 msgid "Test %(num)s"
 msgstr "Пройдено %(passed)s из %(total)s"
+
+#: templates/support/contact.html:12
+msgid "Having trouble? Send us a message and we'll get back to you."
+msgstr "Возникли проблемы? Отправьте нам сообщение, и мы свяжемся с вами."
+
+#: templates/support/contact.html:21
+#| msgid "New Lesson"
+msgid "New Message"
+msgstr "Новое сообщение"
+
+#: templates/support/contact.html:27
+msgid "Category"
+msgstr "Категория"
+
+#: templates/support/contact.html:36
+msgid "Subject"
+msgstr "Тема"
+
+#: templates/support/contact.html:39
+msgid "Brief description of your issue"
+msgstr "Краткое описание вашей проблемы"
+
+#: templates/support/contact.html:44
+msgid "Message"
+msgstr "Сообщение"
+
+#: templates/support/contact.html:46
+msgid "Describe your issue in detail..."
+msgstr "Опишите вашу проблему подробно..."
+
+#: templates/support/contact.html:51
+msgid "Send Message"
+msgstr "Отправить сообщение"
+
+#: templates/support/contact.html:63
+msgid "Response time"
+msgstr "Время ответа"
+
+#: templates/support/contact.html:64
+msgid "Usually within 24 hours"
+msgstr "Обычно в течение 24 часов"
+
+#: templates/support/contact.html:71
+msgid "You'll be notified when we reply"
+msgstr "Вы получите уведомление, когда мы ответим"
+
+#: templates/support/contact.html:77
+msgid "Track your tickets"
+msgstr "Отслеживайте ваши обращения"
+
+#: templates/support/contact.html:79
+msgid "View my tickets"
+msgstr "Посмотреть мои обращения"
+
+#: templates/support/inbox.html:3 templates/support/inbox.html:11
+msgid "Support Inbox"
+msgstr "Входящие поддержки"
+
+#: templates/support/inbox.html:12
+msgid "All user support requests"
+msgstr "Все обращения пользователей"
+
+#: templates/support/inbox.html:15
+msgid "open"
+msgstr "открытые"
+
+#: templates/support/inbox.html:16
+#| msgid "Progress"
+msgid "in progress"
+msgstr "В процессе"
+
+#: templates/support/inbox.html:17
+#| msgid "Close"
+msgid "closed"
+msgstr "Закрыто"
+
+#: templates/support/inbox.html:24
+#| msgid "Tests Passed"
+msgid "All statuses"
+msgstr "Все статусы"
+
+#: templates/support/inbox.html:30
+msgid "All categories"
+msgstr "Все категории"
+
+#: templates/support/inbox.html:60 templates/support/my_tickets.html:31
+msgid "Replied"
+msgstr "Отвечено"
+
+#: templates/support/inbox.html:71
+msgid "No tickets found"
+msgstr "Обращения не найдены"
+
+#: templates/support/inbox.html:72
+msgid "No messages match the current filter."
+msgstr "Нет сообщений, соответствующих текущему фильтру."
+
+#: templates/support/my_tickets.html:12
+msgid "Track the status of your support requests"
+msgstr "Отслеживайте статус ваших обращений в поддержку"
+
+#: templates/support/my_tickets.html:15
+msgid "New ticket"
+msgstr "Новое обращение"
+
+#: templates/support/my_tickets.html:38
+msgid "Support reply:"
+msgstr "Ответ поддержки:"
+
+#: templates/support/my_tickets.html:49
+#| msgid "No tasks yet"
+msgid "No tickets yet"
+msgstr "Пока нет обращений"
+
+#: templates/support/my_tickets.html:50
+msgid "Submit a message if you need help."
+msgstr "Отправьте сообщение, если вам нужна помощь."
+
+#: templates/support/my_tickets.html:51
+msgid "Contact support"
+msgstr "Связаться с поддержкой"
+
+#: templates/support/ticket_detail.html:3
+msgid "Ticket"
+msgstr "Обращение"
+
+#: templates/support/ticket_detail.html:12
+#| msgid "Back to dashboard"
+msgid "Back to inbox"
+msgstr "Вернуться во входящие"
+
+#: templates/support/ticket_detail.html:39
+#| msgid "Your Code"
+msgid "Your reply"
+msgstr "Ваш ответ"
+
+#: templates/support/ticket_detail.html:49
+msgid "Update Reply"
+msgstr "Обновить ответ"
+
+#: templates/support/ticket_detail.html:49
+msgid "Write Reply"
+msgstr "Написать ответ"
+
+#: templates/support/ticket_detail.html:57
+#| msgid "Earlier messages"
+msgid "Reply message"
+msgstr "Сообщение ответа"
+
+#: templates/support/ticket_detail.html:59
+msgid "Write your reply..."
+msgstr "Напишите ваш ответ..."
+
+#: templates/support/ticket_detail.html:65
+#| msgid "Status"
+msgid "Set status"
+msgstr "Установить статус"
+
+#: templates/support/ticket_detail.html:74
+msgid "Update"
+msgstr "Обновить"
+
+#: templates/support/ticket_detail.html:74
+msgid "Send Reply"
+msgstr "Отправить ответ"
+
+#: templates/support/ticket_detail.html:86
+#| msgid "Send"
+msgid "Sender"
+msgstr "Отправитель"
+
+#: templates/support/ticket_detail.html:106
+msgid "Quick status"
+msgstr "Быстрый статус"
 
 #: templates/tasks/task_confirm_delete.html:3
 msgid "Delete Task"
@@ -1165,13 +1374,127 @@ msgstr "С возвращением!"
 msgid "Sign in to continue to CodeLearn"
 msgstr "Войдите, чтобы продолжить в CodeLearn"
 
-#: templates/users/login.html:33 templates/users/register.html:50
+#: templates/users/login.html:32 templates/users/login.html:124
+#: templates/users/register.html:52 templates/users/register.html:137
+msgid "Show password"
+msgstr "Показать пароль"
+
+#: templates/users/login.html:68 templates/users/register.html:84
 msgid "Sign in"
 msgstr "Войти"
 
-#: templates/users/login.html:37
+#: templates/users/login.html:72
 msgid "Don't have an account?"
 msgstr "Нет аккаунта?"
+
+#: templates/users/login.html:124 templates/users/register.html:137
+msgid "Hide password"
+msgstr "Скрыть пароль"
+
+#: templates/users/profile.html:26
+#| msgid "Join"
+msgid "Joined"
+msgstr "Присоединился"
+
+#: templates/users/profile.html:43
+#| msgid "Groups"
+msgid "Groups taught"
+msgstr "Преподаваемые группы"
+
+#: templates/users/profile.html:43
+#| msgid "Groups"
+msgid "Groups joined"
+msgstr "Преподаваемые группы"
+
+#: templates/users/profile.html:50
+#| msgid "shown to students"
+msgid "Total students"
+msgstr "Всего студентов"
+
+#: templates/users/profile.html:56
+#| msgid "Submission"
+msgid "Submissions"
+msgstr "Отправки"
+
+#: templates/users/profile.html:64
+msgid "unread"
+msgstr "непрочитанные"
+
+#: templates/users/profile.html:71 templates/users/profile.html:258
+#| msgid "Journal"
+msgid "My Academic Progress"
+msgstr "Мой академический прогресс"
+
+#: templates/users/profile.html:87
+msgid "overall"
+msgstr "общий"
+
+#: templates/users/profile.html:103
+#| msgid "Attendance"
+msgid "Attended"
+msgstr "Посещаемость"
+
+#: templates/users/profile.html:119
+#| msgid "Add Test Case"
+msgid "Grade per lesson"
+msgstr "Оценка за урок"
+
+#: templates/users/profile.html:188
+#| msgid "Grade"
+msgid "No grade"
+msgstr "Нет оценки"
+
+#: templates/users/profile.html:261
+msgid "No journal records yet. Join a group to see your progress."
+msgstr ""
+"Записей журнала пока нет. Присоединитесь к группе, чтобы видеть свой "
+"прогресс."
+
+#: templates/users/profile.html:266
+msgid "Account Settings"
+msgstr "Настройки аккаунта"
+
+#: templates/users/profile.html:272
+msgid "Edit Profile"
+msgstr "Редактировать профиль"
+
+#: templates/users/profile.html:278 templates/users/profile.html:280
+msgid "First name"
+msgstr "Имя"
+
+#: templates/users/profile.html:284 templates/users/profile.html:286
+msgid "Last name"
+msgstr "Фамилия"
+
+#: templates/users/profile.html:290
+msgid "Email"
+msgstr "Электронная почта"
+
+#: templates/users/profile.html:296
+#| msgid "Save Task"
+msgid "Save changes"
+msgstr "Сохранить изменения"
+
+#: templates/users/profile.html:304
+msgid "Change Password"
+msgstr "Изменить пароль"
+
+#: templates/users/profile.html:310 templates/users/profile.html:313
+msgid "Current password"
+msgstr "Текущий пароль"
+
+#: templates/users/profile.html:319 templates/users/profile.html:322
+#| msgid "New Lesson"
+msgid "New password"
+msgstr "Новый пароль"
+
+#: templates/users/profile.html:328 templates/users/profile.html:331
+msgid "Confirm new password"
+msgstr "Подтвердите новый пароль"
+
+#: templates/users/profile.html:337
+msgid "Update password"
+msgstr "Обновить пароль"
 
 #: templates/users/register.html:3
 msgid "Register"
@@ -1185,18 +1508,18 @@ msgstr "Создайте аккаунт"
 msgid "Join CodeLearn as a teacher or student"
 msgstr "Присоединяйтесь к CodeLearn как учитель или студент"
 
-#: templates/users/register.html:27
+#: templates/users/register.html:29
 msgid "Create & manage groups"
 msgstr "Создавайте и управляйте группами"
 
-#: templates/users/register.html:29
+#: templates/users/register.html:31
 msgid "Join & solve tasks"
 msgstr "Присоединяйтесь и решайте задачи"
 
-#: templates/users/register.html:46
+#: templates/users/register.html:80
 msgid "Create Account"
 msgstr "Создать аккаунт"
 
-#: templates/users/register.html:50
+#: templates/users/register.html:84
 msgid "Already have an account?"
 msgstr "Уже есть аккаунт?"

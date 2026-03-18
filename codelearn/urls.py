@@ -22,4 +22,5 @@ urlpatterns += i18n_patterns(
     path('submissions/', include('apps.submissions.urls', namespace='submissions')),
     path('api/', include('apps.submissions.api_urls', namespace='api')),
     path('journals/', include('apps.journals.urls')),
+    path('support/', include('apps.support.urls')),
 )

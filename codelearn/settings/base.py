@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'apps.submissions',
     'apps.runner',
     'apps.journals',
+    'apps.support',
 ]
 
 MIDDLEWARE = [

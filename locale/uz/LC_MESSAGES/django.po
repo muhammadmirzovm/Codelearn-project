@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-18 23:02+0500\n"
-"PO-Revision-Date: 2026-03-18 23:18+0500\n"
+"POT-Creation-Date: 2026-03-19 02:39+0500\n"
+"PO-Revision-Date: 2026-03-19 02:47+0500\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,47 +19,112 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Translated-Using: django-rosetta 0.10.3\n"
 
-#: templates/base.html:8
+#: templates/admin/users/notification/change_list.html:8
+msgid "Send to All"
+msgstr "Barchaga yuborish"
+
+#: templates/base.html:9
 msgid "CodeLearn"
 msgstr "CodeLearn"
 
-#: templates/base.html:40 templates/base.html:116
+#: templates/base.html:56 templates/base.html:221
 #: templates/tasks/task_list.html:9
 msgid "Challenges"
 msgstr "Sinovlar"
 
-#: templates/base.html:42 templates/base.html:118
+#: templates/base.html:58 templates/base.html:225
 #: templates/users/group_list.html:3
 msgid "Groups"
 msgstr "Guruhlar"
 
-#: templates/base.html:57 templates/base.html:122
+#: templates/base.html:59 templates/base.html:228
+msgid "Support"
+msgstr "Yordam"
+
+#: templates/base.html:62 templates/base.html:233
+msgid "Inbox"
+msgstr "Kiruvchi xabarlar"
+
+#: templates/base.html:77
+msgid "My profile"
+msgstr "Mening profilim"
+
+#: templates/base.html:87 templates/base.html:276
 msgid "Sign out"
 msgstr "Chiqish"
 
-#: templates/base.html:60 templates/users/login.html:3
+#: templates/base.html:93 templates/base.html:101 templates/base.html:105
+#: templates/support/contact.html:70 templates/users/profile.html:62
+msgid "Notifications"
+msgstr "Xabarnomalar"
+
+#: templates/base.html:109
+msgid "Mark all read"
+msgstr "Hammasini o‘qilgan deb belgilash"
+
+#: templates/base.html:126 templates/support/inbox.html:56
+msgid "ago"
+msgstr "oldin"
+
+#: templates/base.html:133
+#| msgid "No submissions yet"
+msgid "No notifications yet"
+msgstr "Hali bildirishnomalar yo‘q"
+
+#: templates/base.html:142 templates/users/login.html:3
 msgid "Login"
 msgstr "Kirish"
 
-#: templates/base.html:61 templates/users/login.html:37
+#: templates/base.html:143 templates/users/login.html:72
 msgid "Get started"
 msgstr "Boshlash"
 
-#: templates/base.html:67
-#, fuzzy
+#: templates/base.html:149
 #| msgid "Select Language"
 msgid "Change language"
 msgstr "Tilni tanlang"
 
-#: templates/base.html:80 templates/base.html:129
-#, fuzzy
-#| msgid "Select Language"
+#: templates/base.html:161 templates/base.html:243
 msgid "Language"
-msgstr "Tilni tanlang"
+msgstr "Til"
 
-#: templates/base.html:107
+#: templates/base.html:182 templates/base.html:267
 msgid "Toggle theme"
 msgstr "Mavzuni almashtirish"
+
+#: templates/base.html:183
+msgid "Open menu"
+msgstr "Menyuni ochish"
+
+#: templates/base.html:193
+msgid "Navigation menu"
+msgstr "Navigatsiya menyusi"
+
+#: templates/base.html:206
+msgid "Close menu"
+msgstr "Menuni yopish"
+
+#: templates/base.html:214
+msgid "Home"
+msgstr "Bosh sahifa"
+
+#: templates/base.html:217 templates/users/profile.html:4
+msgid "Profile"
+msgstr "Profil"
+
+#: templates/base.html:264
+msgid "Theme"
+msgstr "Mavzu"
+
+#: templates/base.html:295 templates/support/contact.html:3
+#: templates/support/contact.html:11
+msgid "Contact Support"
+msgstr "Yordam bilan bog‘lanish"
+
+#: templates/base.html:298 templates/support/my_tickets.html:3
+#: templates/support/my_tickets.html:11
+msgid "My Tickets"
+msgstr "Mening murojaatlarim"
 
 #: templates/journals/journal_detail.html:3
 #: templates/journals/lesson_form.html:9
@@ -68,10 +133,8 @@ msgid "Journal"
 msgstr "Jurnal"
 
 #: templates/journals/journal_detail.html:76
-#, fuzzy
-#| msgid "Journal"
 msgid "Academic Journal"
-msgstr "Jurnal"
+msgstr "Akademik Jurnal"
 
 #: templates/journals/journal_detail.html:79
 #: templates/users/dashboard_student.html:67
@@ -116,13 +179,14 @@ msgid "Student"
 msgstr "Talaba"
 
 #: templates/journals/journal_detail.html:118
-#: templates/sessions/session_monitor.html:63
+#: templates/sessions/session_monitor.html:63 templates/users/profile.html:97
 msgid "Score"
 msgstr "Ballar"
 
 #: templates/journals/journal_detail.html:119
 #: templates/journals/journal_detail.html:173
-#: templates/journals/record_form.html:38
+#: templates/journals/record_form.html:38 templates/users/profile.html:110
+#: templates/users/profile.html:127
 msgid "Attendance"
 msgstr "Davomat"
 
@@ -143,7 +207,8 @@ msgstr "%(count) talabalar"
 
 #: templates/journals/journal_detail.html:160
 #: templates/journals/journal_detail.html:174
-#: templates/journals/record_form.html:3
+#: templates/journals/record_form.html:3 templates/users/profile.html:167
+#: templates/users/profile.html:189
 msgid "Grade"
 msgstr "Ball"
 
@@ -152,11 +217,11 @@ msgstr "Ball"
 msgid "Comment"
 msgstr "Izoh"
 
-#: templates/journals/journal_detail.html:184
+#: templates/journals/journal_detail.html:184 templates/users/profile.html:233
 msgid "Present"
 msgstr "Davomatda"
 
-#: templates/journals/journal_detail.html:186
+#: templates/journals/journal_detail.html:186 templates/users/profile.html:233
 msgid "Absent"
 msgstr "Yo‘q"
 
@@ -165,17 +230,15 @@ msgid "No records for this lesson"
 msgstr "Bu dars uchun yozuvlar yo‘q"
 
 #: templates/journals/journal_detail.html:217
-#, fuzzy
 #| msgid "No messages yet"
 msgid "No lessons yet"
-msgstr "Hali xabarlar yo‘q"
+msgstr "Hali darslar yo‘q"
 
 #: templates/journals/journal_detail.html:218
 msgid "Add the first lesson to start keeping the journal"
 msgstr "Jurnalni yuritishni boshlash uchun birinchi darsni qo‘shing"
 
 #: templates/journals/journal_detail.html:220
-#| msgid "Add Test Case"
 msgid "Add lesson"
 msgstr "Dars qo'shish"
 
@@ -204,7 +267,6 @@ msgid "Lesson Date"
 msgstr "Dars sanasi"
 
 #: templates/journals/lesson_form.html:55
-#| msgid "Save Task"
 msgid "Save Lesson"
 msgstr "Darsni saqlash"
 
@@ -235,14 +297,12 @@ msgid "Note..."
 msgstr "Izoh..."
 
 #: templates/journals/record_form.html:77
-#| msgid "Save Task"
 msgid "Save Grades"
 msgstr "Baholarni saqlash"
 
 #: templates/sessions/leaderboard.html:3 templates/sessions/leaderboard.html:9
 #: templates/sessions/session_join.html:39
 #: templates/sessions/session_monitor.html:25
-#| msgid "Dashboard"
 msgid "Leaderboard"
 msgstr "Yetakchilar jadvali"
 
@@ -253,7 +313,6 @@ msgid "Live"
 msgstr "Jonli"
 
 #: templates/sessions/leaderboard.html:14
-#| msgid "Back to dashboard"
 msgid "Back to coding"
 msgstr "Kodga qaytish"
 
@@ -274,7 +333,6 @@ msgstr "Vaqt"
 #: templates/sessions/leaderboard.html:60
 #: templates/sessions/leaderboard.html:85
 #: templates/sessions/session_monitor.html:41
-#| msgid "Tests Passed"
 msgid "Passed"
 msgstr "O'tgan"
 
@@ -287,7 +345,6 @@ msgstr "Ishlayapti…"
 #: templates/sessions/leaderboard.html:87
 #: templates/sessions/session_monitor.html:83
 #: templates/sessions/session_monitor.html:125
-#| msgid "Get started"
 msgid "Not started"
 msgstr "Boshlanmabdi"
 
@@ -357,13 +414,12 @@ msgstr "Namuna chiqish"
 msgid "Select Language"
 msgstr "Tilni tanlang"
 
-#: templates/sessions/session_join.html:104
+#: templates/sessions/session_join.html:104 templates/support/inbox.html:36
 msgid "Clear"
 msgstr "Tozalash"
 
 #: templates/sessions/session_join.html:115
 #: templates/sessions/session_join.html:172
-#| msgid "Your Code"
 msgid "Run Code"
 msgstr "Run"
 
@@ -374,7 +430,6 @@ msgstr "Allaqachon o‘tildi!"
 
 #: templates/sessions/session_join.html:117
 #: templates/sessions/session_join.html:175
-#| msgid "Submitted At"
 msgid "Submit"
 msgstr "Yuborish"
 
@@ -392,24 +447,20 @@ msgstr "Tarix"
 
 #: templates/sessions/session_join.html:135
 #: templates/sessions/session_join.html:194
-#, fuzzy
 #| msgid "Ready to code today?"
 msgid "Ready to code!"
-msgstr "Bugun kod yozishga tayyormisiz?"
+msgstr "Kod yozishga tayyormisiz!"
 
 #: templates/sessions/session_join.html:136
 msgid "Select a language, write your code"
 msgstr "Tilni tanlang, kod yozing"
 
 #: templates/sessions/session_join.html:136
-#| msgid ""
-#| "No test cases yet. Click <strong>＋ Add Test Case</strong> to start."
 msgid "then click <strong>Run Code</strong> to test"
 msgstr ""
 "keyin sinab ko‘rish uchun <strong>Kodni ishga tushirish</strong> ni bosing"
 
 #: templates/sessions/session_join.html:143
-#| msgid "Submission"
 msgid "Last Submission"
 msgstr "Oxirgi topshiriq"
 
@@ -432,7 +483,6 @@ msgid "Evaluating…"
 msgstr "Baholash…"
 
 #: templates/sessions/session_join.html:177
-#| msgid "Tests Passed"
 msgid "Passed!"
 msgstr "Testlar bajarildi"
 
@@ -469,7 +519,6 @@ msgid "✓ Submit Results"
 msgstr "✓ Natijalarni yuborish"
 
 #: templates/sessions/session_join.html:187
-#| msgid "Tests Passed"
 msgid "All tests passed!"
 msgstr "Hamma testlar bajarildi"
 
@@ -491,7 +540,6 @@ msgid "Input:"
 msgstr "Kiritish:"
 
 #: templates/sessions/session_join.html:192
-#| msgid "Expected Output"
 msgid "Expected:"
 msgstr "Kutilgan chiqish"
 
@@ -501,17 +549,14 @@ msgstr "Olingan:"
 
 #: templates/sessions/session_list.html:3
 #: templates/sessions/session_list.html:9
-#| msgid "Submission"
 msgid "Sessions"
 msgstr "Sessiyalar"
 
 #: templates/sessions/session_list.html:12
-#| msgid "Teacher Dashboard — run your live coding sessions"
 msgid "Schedule and run live coding sessions"
 msgstr "Jonli kod yozish sessiyalarini rejalashtiring va boshqaring"
 
 #: templates/sessions/session_list.html:14
-#| msgid "No upcoming sessions"
 msgid "Your available coding sessions"
 msgstr "Siz uchun mavjud kodlash sessiyalari"
 
@@ -521,12 +566,10 @@ msgid "Task"
 msgstr "Vazifa"
 
 #: templates/sessions/session_list.html:30
-#| msgid "Groups"
 msgid "Group"
 msgstr "Guruh"
 
 #: templates/sessions/session_list.html:31
-#| msgid "Start Now"
 msgid "Start Time"
 msgstr "Boshlash vaqti"
 
@@ -539,7 +582,6 @@ msgid "Actions"
 msgstr "Amallar"
 
 #: templates/sessions/session_list.html:47
-#| msgid "Memory Limit"
 msgid "No limit"
 msgstr "Limit yo'q"
 
@@ -548,7 +590,6 @@ msgid "Ended"
 msgstr "Tugadi"
 
 #: templates/sessions/session_list.html:53
-#| msgid "Schedule"
 msgid "Scheduled"
 msgstr "Rejalashtirilgan"
 
@@ -559,7 +600,6 @@ msgid "Monitor"
 msgstr "Nazorat qilish"
 
 #: templates/sessions/session_list.html:62
-#| msgid "Schedule Session"
 msgid "Close session?"
 msgstr "Sessiyani tugatish ?"
 
@@ -568,7 +608,6 @@ msgid "Close"
 msgstr "Yopish"
 
 #: templates/sessions/session_list.html:67
-#| msgid "Start Now"
 msgid "Start"
 msgstr "Boshlash"
 
@@ -578,7 +617,6 @@ msgid "Join"
 msgstr "Qo‘shilish"
 
 #: templates/sessions/session_list.html:88
-#| msgid "No submissions yet"
 msgid "No sessions yet"
 msgstr "Hali sessiyalar yo‘q"
 
@@ -589,7 +627,6 @@ msgstr ""
 "yarating"
 
 #: templates/sessions/session_list.html:91
-#| msgid "Schedule Session"
 msgid "Schedule first session"
 msgstr "Birinchi sessiyani rejalashtir"
 
@@ -600,12 +637,10 @@ msgstr ""
 "rejalashtiradi"
 
 #: templates/sessions/session_monitor.html:10
-#| msgid "Monitor"
 msgid "Live Monitor"
 msgstr "Jonli monitor"
 
 #: templates/sessions/session_monitor.html:15
-#| msgid "Connecting..."
 msgid "Connecting"
 msgstr "Ulanmoqda..."
 
@@ -614,12 +649,10 @@ msgid "Close this session?"
 msgstr "Ushbu sessiyani yopish?"
 
 #: templates/sessions/session_monitor.html:28
-#| msgid "Schedule Session"
 msgid "Close Session"
 msgstr "Sessiyani tugatish"
 
 #: templates/sessions/session_monitor.html:45
-#| msgid "Submitted At"
 msgid "Submitted"
 msgstr "Yuborilgan"
 
@@ -636,7 +669,6 @@ msgid "Last Activity"
 msgstr "So‘nggi faoliyat"
 
 #: templates/sessions/session_monitor.html:120
-#| msgid "Connecting..."
 msgid "Reconnecting"
 msgstr "Qayta ulanmoqda…"
 
@@ -649,7 +681,6 @@ msgid "⏳ Evaluating…"
 msgstr "⏳ Baholash…"
 
 #: templates/sessions/session_monitor.html:123
-#| msgid "Tests Passed"
 msgid "✓ Passed"
 msgstr "O'tildi"
 
@@ -687,6 +718,180 @@ msgstr "%(total)s ta testdan %(passed)s tasi bajarildi"
 #, python-format
 msgid "Test %(num)s"
 msgstr "%(num)s-test"
+
+#: templates/support/contact.html:12
+msgid "Having trouble? Send us a message and we'll get back to you."
+msgstr "Muammo bormi? Bizga xabar yuboring, va biz sizga javob beramiz."
+
+#: templates/support/contact.html:21
+#| msgid "New Lesson"
+msgid "New Message"
+msgstr "Yangi xabar"
+
+#: templates/support/contact.html:27
+msgid "Category"
+msgstr "Kategoriya"
+
+#: templates/support/contact.html:36
+msgid "Subject"
+msgstr "Mavzu"
+
+#: templates/support/contact.html:39
+msgid "Brief description of your issue"
+msgstr "Muammoning qisqacha tavsifi"
+
+#: templates/support/contact.html:44
+msgid "Message"
+msgstr "Xabar"
+
+#: templates/support/contact.html:46
+msgid "Describe your issue in detail..."
+msgstr "Muammoni batafsil tushuntiring..."
+
+#: templates/support/contact.html:51
+msgid "Send Message"
+msgstr "Xabar yuborish"
+
+#: templates/support/contact.html:63
+msgid "Response time"
+msgstr "Javob vaqti"
+
+#: templates/support/contact.html:64
+msgid "Usually within 24 hours"
+msgstr "Odatda 24 soat ichida"
+
+#: templates/support/contact.html:71
+msgid "You'll be notified when we reply"
+msgstr "Biz javob berganimizda sizga bildirishnoma yuboriladi"
+
+#: templates/support/contact.html:77
+msgid "Track your tickets"
+msgstr "Murojaatlaringizni kuzatib boring"
+
+#: templates/support/contact.html:79
+msgid "View my tickets"
+msgstr "Mening murojaatlarimni ko‘rish"
+
+#: templates/support/inbox.html:3 templates/support/inbox.html:11
+msgid "Support Inbox"
+msgstr "Yordam kiruvchi xabarlari"
+
+#: templates/support/inbox.html:12
+msgid "All user support requests"
+msgstr "Foydalanuvchilarning barcha murojaatlari"
+
+#: templates/support/inbox.html:15
+msgid "open"
+msgstr "ochiq"
+
+#: templates/support/inbox.html:16
+#| msgid "Progress"
+msgid "in progress"
+msgstr "Rivojlanmoqda"
+
+#: templates/support/inbox.html:17
+#| msgid "Close"
+msgid "closed"
+msgstr "Yopilgan"
+
+#: templates/support/inbox.html:24
+#| msgid "All tests passed!"
+msgid "All statuses"
+msgstr "Barcha holatlar"
+
+#: templates/support/inbox.html:30
+msgid "All categories"
+msgstr "Barcha kategoriyalar"
+
+#: templates/support/inbox.html:60 templates/support/my_tickets.html:31
+msgid "Replied"
+msgstr "Javob berilgan"
+
+#: templates/support/inbox.html:71
+msgid "No tickets found"
+msgstr "Murojaatlar topilmadi"
+
+#: templates/support/inbox.html:72
+msgid "No messages match the current filter."
+msgstr "Joriy filtrlarga mos xabarlar yo‘q."
+
+#: templates/support/my_tickets.html:12
+msgid "Track the status of your support requests"
+msgstr "Yordam so‘rovlaringiz holatini kuzatib boring"
+
+#: templates/support/my_tickets.html:15
+msgid "New ticket"
+msgstr "Yangi murojaat"
+
+#: templates/support/my_tickets.html:38
+msgid "Support reply:"
+msgstr "Yordam javobi:"
+
+#: templates/support/my_tickets.html:49
+#| msgid "No tasks yet"
+msgid "No tickets yet"
+msgstr "Hali murojaatlar yo‘q"
+
+#: templates/support/my_tickets.html:50
+msgid "Submit a message if you need help."
+msgstr "Yordam kerak bo‘lsa xabar yuboring."
+
+#: templates/support/my_tickets.html:51
+msgid "Contact support"
+msgstr "Yordam bilan bog‘lanish"
+
+#: templates/support/ticket_detail.html:3
+msgid "Ticket"
+msgstr "Murojaat"
+
+#: templates/support/ticket_detail.html:12
+#| msgid "Back to coding"
+msgid "Back to inbox"
+msgstr "Kiruvchi xabarlarga qaytish"
+
+#: templates/support/ticket_detail.html:39
+#| msgid "Your Code"
+msgid "Your reply"
+msgstr "Sizning javobingiz"
+
+#: templates/support/ticket_detail.html:49
+msgid "Update Reply"
+msgstr "Javobni yangilash"
+
+#: templates/support/ticket_detail.html:49
+msgid "Write Reply"
+msgstr "Javob yozish"
+
+#: templates/support/ticket_detail.html:57
+#| msgid "Earlier messages"
+msgid "Reply message"
+msgstr "Javob xabari"
+
+#: templates/support/ticket_detail.html:59
+msgid "Write your reply..."
+msgstr "Javob yozing..."
+
+#: templates/support/ticket_detail.html:65
+#| msgid "Status"
+msgid "Set status"
+msgstr "Holatni o‘rnatish"
+
+#: templates/support/ticket_detail.html:74
+msgid "Update"
+msgstr "Yangilash"
+
+#: templates/support/ticket_detail.html:74
+msgid "Send Reply"
+msgstr "Javob yuborish"
+
+#: templates/support/ticket_detail.html:86
+#| msgid "Send"
+msgid "Sender"
+msgstr "Yuboruvchi"
+
+#: templates/support/ticket_detail.html:106
+msgid "Quick status"
+msgstr "Tezkor holat"
 
 #: templates/tasks/task_confirm_delete.html:3
 msgid "Delete Task"
@@ -1134,13 +1339,127 @@ msgstr "Yana xush kelibsiz!"
 msgid "Sign in to continue to CodeLearn"
 msgstr "CodeLearn’ga davom etish uchun tizimga kiring"
 
-#: templates/users/login.html:33 templates/users/register.html:50
+#: templates/users/login.html:32 templates/users/login.html:124
+#: templates/users/register.html:52 templates/users/register.html:137
+msgid "Show password"
+msgstr "Parolni ko‘rsatish"
+
+#: templates/users/login.html:68 templates/users/register.html:84
 msgid "Sign in"
 msgstr "Kirish"
 
-#: templates/users/login.html:37
+#: templates/users/login.html:72
 msgid "Don't have an account?"
 msgstr "Akkauntingiz yo‘qmi?"
+
+#: templates/users/login.html:124 templates/users/register.html:137
+msgid "Hide password"
+msgstr "Parolni yashirish"
+
+#: templates/users/profile.html:26
+#| msgid "Join"
+msgid "Joined"
+msgstr "Qo‘shildi"
+
+#: templates/users/profile.html:43
+#| msgid "Groups"
+msgid "Groups taught"
+msgstr "O‘qitilgan guruhlar"
+
+#: templates/users/profile.html:43
+#| msgid "Groups"
+msgid "Groups joined"
+msgstr "Qo‘shilgan guruhlar"
+
+#: templates/users/profile.html:50
+#| msgid "shown to students"
+msgid "Total students"
+msgstr "Jami talabalar"
+
+#: templates/users/profile.html:56
+#| msgid "Submission"
+msgid "Submissions"
+msgstr "Yuborishlar"
+
+#: templates/users/profile.html:64
+msgid "unread"
+msgstr "o‘qilmagan"
+
+#: templates/users/profile.html:71 templates/users/profile.html:258
+#| msgid "Journal"
+msgid "My Academic Progress"
+msgstr "Mening akademik rivojlanishim"
+
+#: templates/users/profile.html:87
+msgid "overall"
+msgstr "umumiy"
+
+#: templates/users/profile.html:103
+#| msgid "Attendance"
+msgid "Attended"
+msgstr "Davomat"
+
+#: templates/users/profile.html:119
+#| msgid "Add lesson"
+msgid "Grade per lesson"
+msgstr "Dars bo‘yicha baho"
+
+#: templates/users/profile.html:188
+#| msgid "Grade"
+msgid "No grade"
+msgstr "Baho yo‘q"
+
+#: templates/users/profile.html:261
+msgid "No journal records yet. Join a group to see your progress."
+msgstr ""
+"Hali jurnal yozuvlari yo‘q. O‘zingizni rivojlantirishni ko‘rish uchun "
+"guruhga qo‘shiling."
+
+#: templates/users/profile.html:266
+msgid "Account Settings"
+msgstr "Hisob sozlamalari"
+
+#: templates/users/profile.html:272
+msgid "Edit Profile"
+msgstr "Profilni tahrirlash"
+
+#: templates/users/profile.html:278 templates/users/profile.html:280
+msgid "First name"
+msgstr "Ism"
+
+#: templates/users/profile.html:284 templates/users/profile.html:286
+msgid "Last name"
+msgstr "Familiya"
+
+#: templates/users/profile.html:290
+msgid "Email"
+msgstr "Email"
+
+#: templates/users/profile.html:296
+#| msgid "Save Grades"
+msgid "Save changes"
+msgstr "O‘zgarishlarni saqlash"
+
+#: templates/users/profile.html:304
+msgid "Change Password"
+msgstr "Parolni o‘zgartirish"
+
+#: templates/users/profile.html:310 templates/users/profile.html:313
+msgid "Current password"
+msgstr "Joriy parol"
+
+#: templates/users/profile.html:319 templates/users/profile.html:322
+#| msgid "New Lesson"
+msgid "New password"
+msgstr "Yangi parol"
+
+#: templates/users/profile.html:328 templates/users/profile.html:331
+msgid "Confirm new password"
+msgstr "Yangi parolni tasdiqlang"
+
+#: templates/users/profile.html:337
+msgid "Update password"
+msgstr "Parolni yangilash"
 
 #: templates/users/register.html:3
 msgid "Register"
@@ -1154,18 +1473,18 @@ msgstr "Akkaunt yarating"
 msgid "Join CodeLearn as a teacher or student"
 msgstr "CodeLearn’ga o‘qituvchi yoki talaba sifatida qo‘shiling"
 
-#: templates/users/register.html:27
+#: templates/users/register.html:29
 msgid "Create & manage groups"
 msgstr "Guruhlar yarating va boshqaring"
 
-#: templates/users/register.html:29
+#: templates/users/register.html:31
 msgid "Join & solve tasks"
 msgstr "Qo‘shiling va vazifalarni yeching"
 
-#: templates/users/register.html:46
+#: templates/users/register.html:80
 msgid "Create Account"
 msgstr "Akkaunt yaratish"
 
-#: templates/users/register.html:50
+#: templates/users/register.html:84
 msgid "Already have an account?"
 msgstr "Allaqachon hisobingiz bormi?"

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Contact Support" %}{% endblock %}
+{% block codemirror %}{% endblock codemirror %}
+
+{% block content %}
+<div class="support-wrap">
+
+  <div class="support-hero">
+    <div class="support-hero-icon">💬</div>
+    <h1 class="support-hero-title">{% trans "Contact Support" %}</h1>
+    <p class="support-hero-sub">{% trans "Having trouble? Send us a message and we'll get back to you." %}</p>
+  </div>
+
+  <div class="support-grid">
+
+    {# ── Form ──────────────────────────────────────────────────────────── #}
+    <div class="support-card">
+      <div class="support-card-header">
+        <i class="bi bi-send"></i>
+        <h2>{% trans "New Message" %}</h2>
+      </div>
+      <form method="post" class="support-form" novalidate>
+        {% csrf_token %}
+
+        <div class="field-group">
+          <label for="id_category">{% trans "Category" %}</label>
+          <select id="id_category" name="category" class="support-select">
+            {% for val, label in categories %}
+            <option value="{{ val }}" {% if post.category == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="id_title">{% trans "Subject" %}</label>
+          <input type="text" id="id_title" name="title"
+                 value="{{ post.title|default:'' }}"
+                 placeholder="{% trans 'Brief description of your issue' %}"
+                 maxlength="200" required>
+        </div>
+
+        <div class="field-group">
+          <label for="id_message">{% trans "Message" %}</label>
+          <textarea id="id_message" name="message" rows="6"
+                    placeholder="{% trans 'Describe your issue in detail...' %}"
+                    required>{{ post.message|default:'' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;">
+          <i class="bi bi-send-fill"></i> {% trans "Send Message" %}
+        </button>
+      </form>
+    </div>
+
+    {# ── Sidebar info + my tickets ─────────────────────────────────────── #}
+    <div class="support-side">
+
+      <div class="support-info-card">
+        <div class="sinfo-item">
+          <span class="sinfo-icon">⏱️</span>
+          <div>
+            <p class="sinfo-title">{% trans "Response time" %}</p>
+            <p class="sinfo-sub">{% trans "Usually within 24 hours" %}</p>
+          </div>
+        </div>
+        <div class="sinfo-item">
+          <span class="sinfo-icon">🔔</span>
+          <div>
+            <p class="sinfo-title">{% trans "Notifications" %}</p>
+            <p class="sinfo-sub">{% trans "You'll be notified when we reply" %}</p>
+          </div>
+        </div>
+        <div class="sinfo-item">
+          <span class="sinfo-icon">📋</span>
+          <div>
+            <p class="sinfo-title">{% trans "Track your tickets" %}</p>
+            <p class="sinfo-sub">
+              <a href="{% url 'support:my_tickets' %}" class="sinfo-link">{% trans "View my tickets" %} →</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .support-wrap  { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+
+  .support-hero  { text-align: center; padding: 20px 0 4px; }
+  .support-hero-icon  { font-size: 2.4rem; margin-bottom: 10px; }
+  .support-hero-title { font-size: 1.6rem; font-weight: 700; color: var(--text); margin: 0 0 8px; }
+  .support-hero-sub   { font-size: .88rem; color: var(--text-muted); margin: 0; }
+
+  .support-grid { display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start; }
+
+  .support-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .support-card-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+  .support-card-header i  { color: var(--accent); font-size: 1rem; }
+  .support-card-header h2 { font-size: .9rem; font-weight: 700; color: var(--text); margin: 0; }
+
+  .support-form { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .field-group  { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label { font-size: .75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .field-group input,
+  .field-group textarea,
+  .support-select {
+    width: 100%; padding: 9px 12px;
+    background: var(--input-bg, var(--bg)); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-size: .88rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+    box-sizing: border-box; font-family: inherit;
+  }
+  .field-group input:focus,
+  .field-group textarea:focus,
+  .support-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .field-group textarea { resize: vertical; min-height: 120px; }
+
+  /* Sidebar */
+  .support-info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .sinfo-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .sinfo-item:last-child { border-bottom: none; }
+  .sinfo-icon  { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+  .sinfo-title { font-size: .82rem; font-weight: 600; color: var(--text); margin: 0 0 3px; }
+  .sinfo-sub   { font-size: .75rem; color: var(--text-muted); margin: 0; }
+  .sinfo-link  { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .sinfo-link:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .support-grid { grid-template-columns: 1fr; }
+  }
+</style>
+{% endblock %}

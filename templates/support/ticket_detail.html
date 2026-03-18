@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Ticket" %} #{{ ticket.pk }}{% endblock %}
+{% block codemirror %}{% endblock codemirror %}
+
+{% block content %}
+<div class="td-wrap">
+
+  {# ── Back + header ────────────────────────────────────────────────────── #}
+  <div class="td-topbar">
+    <a href="{% url 'support:inbox' %}" class="td-back">
+      <i class="bi bi-arrow-left"></i> {% trans "Back to inbox" %}
+    </a>
+    <div class="td-status-row">
+      <span class="t-status t-status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+      <span class="td-date">{{ ticket.created_at|date:"d M Y, H:i" }}</span>
+    </div>
+  </div>
+
+  <div class="td-grid">
+
+    {# ── Main: message + reply form ───────────────────────────────────── #}
+    <div class="td-main">
+
+      {# Ticket message #}
+      <div class="td-card">
+        <div class="td-card-header">
+          <div class="td-card-header-left">
+            <span class="td-cat">{{ ticket.get_category_display }}</span>
+            <h1 class="td-title">{{ ticket.title }}</h1>
+          </div>
+        </div>
+        <div class="td-message">{{ ticket.message|linebreaks }}</div>
+      </div>
+
+      {# Existing reply #}
+      {% if ticket.reply %}
+      <div class="td-reply-box">
+        <div class="td-reply-label"><i class="bi bi-reply-fill"></i> {% trans "Your reply" %}</div>
+        <p class="td-reply-text">{{ ticket.reply|linebreaks }}</p>
+      </div>
+      {% endif %}
+
+      {# Reply form #}
+      <div class="td-card">
+        <div class="td-card-header">
+          <i class="bi bi-pencil-square" style="color:var(--accent);"></i>
+          <h2 style="font-size:.9rem;font-weight:700;color:var(--text);margin:0;">
+            {% if ticket.reply %}{% trans "Update Reply" %}{% else %}{% trans "Write Reply" %}{% endif %}
+          </h2>
+        </div>
+        <form method="post" class="td-form">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="reply">
+
+          <div class="field-group">
+            <label for="id_reply">{% trans "Reply message" %}</label>
+            <textarea id="id_reply" name="reply" rows="5"
+                      placeholder="{% trans 'Write your reply...' %}"
+                      required>{{ ticket.reply }}</textarea>
+          </div>
+
+          <div class="td-form-footer">
+            <div class="field-group" style="flex:1;">
+              <label for="id_status">{% trans "Set status" %}</label>
+              <select id="id_status" name="status" class="filter-select">
+                {% for val, label in statuses %}
+                <option value="{{ val }}" {% if ticket.status == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-send-fill"></i>
+              {% if ticket.reply %}{% trans "Update" %}{% else %}{% trans "Send Reply" %}{% endif %}
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+
+    {# ── Sidebar: user info + quick status ────────────────────────────── #}
+    <div class="td-side">
+
+      <div class="td-info-card">
+        <div class="td-info-header">👤 {% trans "Sender" %}</div>
+        <div class="td-info-body">
+          <div class="td-user-avatar">{{ ticket.sender.username|first|upper }}</div>
+          <div class="td-user-name">{{ ticket.sender.get_full_name|default:ticket.sender.username }}</div>
+          <div class="td-user-meta">
+            <span>@{{ ticket.sender.username }}</span>
+            <span class="role-badge {% if ticket.sender.is_teacher %}role-teacher{% else %}role-student{% endif %}" style="font-size:.62rem;">
+              {{ ticket.sender.get_role_display }}
+            </span>
+          </div>
+          {% if ticket.sender.email %}
+          <a href="mailto:{{ ticket.sender.email }}" class="td-user-email">
+            <i class="bi bi-envelope"></i> {{ ticket.sender.email }}
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Quick status change #}
+      <div class="td-info-card">
+        <div class="td-info-header">⚡ {% trans "Quick status" %}</div>
+        <div style="padding:12px;">
+          {% for val, label in statuses %}
+          <form method="post" style="margin-bottom:6px;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="status">
+            <input type="hidden" name="status" value="{{ val }}">
+            <button type="submit"
+                    class="qstatus-btn {% if ticket.status == val %}qstatus-active-{{ val }}{% endif %}">
+              {{ label }}
+            </button>
+          </form>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .td-wrap  { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  .td-topbar{ display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .td-back  { font-size: .82rem; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color .15s; }
+  .td-back:hover { color: var(--accent); }
+  .td-status-row { display: flex; align-items: center; gap: 10px; }
+  .td-date  { font-size: .72rem; color: var(--text-muted); font-family: var(--font-mono); }
+
+  .td-grid  { display: grid; grid-template-columns: 1fr 220px; gap: 20px; align-items: start; }
+  .td-main  { display: flex; flex-direction: column; gap: 14px; }
+  .td-side  { display: flex; flex-direction: column; gap: 14px; }
+
+  .td-card  { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .td-card-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg2); }
+  .td-card-header-left { display: flex; flex-direction: column; gap: 4px; }
+  .td-cat   { font-size: .7rem; color: var(--text-muted); font-family: var(--font-mono); }
+  .td-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 0; }
+  .td-message { padding: 20px; font-size: .88rem; color: var(--text); line-height: 1.65; }
+
+  .td-reply-box { background: var(--accent-bg); border: 1px solid var(--accent-bgd); border-radius: var(--radius-lg); padding: 14px 18px; }
+  .td-reply-label { font-size: .7rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+  .td-reply-text  { font-size: .85rem; color: var(--text); margin: 0; line-height: 1.6; }
+
+  .td-form  { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .td-form-footer { display: flex; align-items: flex-end; gap: 12px; }
+
+  .field-group      { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label{ font-size: .75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+  .field-group textarea,
+  .filter-select {
+    width: 100%; padding: 9px 12px;
+    background: var(--input-bg,var(--bg)); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); font-size: .88rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+    box-sizing: border-box; font-family: inherit;
+  }
+  .field-group textarea:focus,
+  .filter-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .field-group textarea { resize: vertical; min-height: 100px; }
+
+  /* Sidebar info cards */
+  .td-info-card  { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .td-info-header{ padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--bg2); font-size: .75rem; font-weight: 700; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; }
+  .td-info-body  { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+  .td-user-avatar{ width: 44px; height: 44px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: #fff; font-family: var(--font-mono); }
+  .td-user-name  { font-size: .88rem; font-weight: 700; color: var(--text); }
+  .td-user-meta  { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; font-size: .72rem; color: var(--text-muted); }
+  .td-user-email { font-size: .72rem; color: var(--accent); text-decoration: none; display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+  .td-user-email:hover { text-decoration: underline; }
+
+  .qstatus-btn {
+    width: 100%; padding: 7px 12px; text-align: left;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text-muted);
+    font-size: .78rem; cursor: pointer; transition: all .12s;
+  }
+  .qstatus-btn:hover        { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+  .qstatus-active-open        { background: rgba(245,158,11,.12) !important; color: #f59e0b !important; border-color: #f59e0b !important; }
+  .qstatus-active-in_progress { background: rgba(59,130,246,.12)  !important; color: #3b82f6 !important; border-color: #3b82f6 !important; }
+  .qstatus-active-closed      { background: rgba(34,197,94,.12)   !important; color: #22c55e !important; border-color: #22c55e !important; }
+
+  .t-status { font-size: .7rem; font-weight: 700; font-family: var(--font-mono); border-radius: 99px; padding: 2px 10px; }
+  .t-status-open        { background: rgba(245,158,11,.15); color: #f59e0b; }
+  .t-status-in_progress { background: rgba(59,130,246,.15);  color: #3b82f6; }
+  .t-status-closed      { background: rgba(34,197,94,.15);   color: #22c55e; }
+
+  @media (max-width: 640px) {
+    .td-grid { grid-template-columns: 1fr; }
+    .td-form-footer { flex-direction: column; align-items: stretch; }
+  }
+</style>
+{% endblock %}
