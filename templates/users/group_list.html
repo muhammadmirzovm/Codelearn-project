@@ -62,7 +62,10 @@
       {% endif %}
 
       <div style="display:flex;gap:8px;margin-bottom:{% if user.is_teacher %}12px{% else %}0{% endif %};">
-        <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm">💬 {% trans "Chat" %}</a>
+        <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm" style="position:relative;display:inline-flex;align-items:center;gap:5px;">
+          💬 {% trans "Chat" %}
+          <span class="chat-unread-badge" data-group="{{ g.id }}" style="display:none;"></span>
+        </a>
         {% if user.is_teacher %}
         <a href="{% url 'users:group_edit' g.pk %}" class="btn btn-ghost btn-sm">{% trans "Edit" %}</a>
         <a href="{% url 'users:group_delete' g.pk %}" class="btn btn-red-soft btn-sm">{% trans "Delete" %}</a>
@@ -92,7 +95,7 @@
 </div>
 
 {% else %}
-<div class="card card-p" style="text-align:center;padding:64px;" class="fade-up">
+<div class="card card-p" style="text-align:center;padding:64px;">
   <p style="font-size:4rem;margin-bottom:12px;">{% if user.is_teacher %}📁{% else %}🎒{% endif %}</p>
   <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">{% trans "No groups yet" %}</p>
   {% if user.is_teacher %}
@@ -104,4 +107,12 @@
   {% endif %}
 </div>
 {% endif %}
+
+<script>
+const unreadCounts = {{ unread_counts|default:"{}" }};
+document.querySelectorAll('.chat-unread-badge[data-group]').forEach(el => {
+  const cnt = unreadCounts[parseInt(el.dataset.group)];
+  if (cnt) { el.textContent = cnt; el.style.display = 'inline-flex'; }
+});
+</script>
 {% endblock %}

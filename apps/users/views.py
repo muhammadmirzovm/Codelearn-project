@@ -55,12 +55,24 @@ def teacher_required(view_func):
 
 @login_required
 def group_list(request):
+    from django.core.cache import cache
+
     if request.user.is_teacher:
         groups = Group.objects.filter(teacher=request.user).prefetch_related('students')
     else:
         groups = request.user.student_groups.all().prefetch_related('students')
-    return render(request, 'users/group_list.html', {'groups': groups})
 
+    unread_counts = {}
+    for g in groups:
+        key = f'chat_unread_{g.id}_{request.user.username}'
+        cnt = cache.get(key) or 0
+        if cnt:
+            unread_counts[g.id] = cnt
+
+    return render(request, 'users/group_list.html', {
+        'groups':        groups,
+        'unread_counts': unread_counts,
+    })
 
 @teacher_required
 def group_create(request):

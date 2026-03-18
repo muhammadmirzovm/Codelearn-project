@@ -41,7 +41,6 @@
 
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;" class="fade-up-3">
 
-  <!-- MY GROUPS CARD -->
   <div class="card">
     <div class="card-header">
       <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{% trans "My Groups" %}</span>
@@ -57,8 +56,11 @@
               {% blocktrans with count=g.students.count %}{{ count }} student{% endblocktrans %}
             </p>
           </div>
-          <div style="display:flex;gap:6px;">
-            <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm">{% trans "Chat" %}</a>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm" style="position:relative;display:inline-flex;align-items:center;gap:5px;">
+              💬 {% trans "Chat" %}
+              <span class="chat-unread-badge" data-group="{{ g.id }}" style="display:none;"></span>
+            </a>
             <a href="{% url 'users:group_edit' g.pk %}" class="btn btn-ghost btn-sm">{% trans "Edit" %}</a>
           </div>
         </div>
@@ -73,7 +75,6 @@
     {% endif %}
   </div>
 
-  <!-- UPCOMING SESSIONS CARD -->
   <div class="card">
     <div class="card-header">
       <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{% trans "Upcoming Sessions" %}</span>
@@ -97,4 +98,12 @@
   </div>
 
 </div>
+
+<script>
+const unreadCounts = {{ unread_counts|default:"{}" }};
+document.querySelectorAll('.chat-unread-badge[data-group]').forEach(el => {
+  const cnt = unreadCounts[parseInt(el.dataset.group)];
+  if (cnt) { el.textContent = cnt; el.style.display = 'inline-flex'; }
+});
+</script>
 {% endblock %}

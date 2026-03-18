@@ -225,3 +225,24 @@ input[type=radio]    { accent-color: var(--accent); width: 15px; height: 15px; }
   .page-hero { padding: 20px; }
   .section-title { font-size: 1.5rem; }
 }
+
+
+.chat-btn-wrap { position: relative; }
+
+.chat-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  background: #ef4444;
+  color: #fff;
+  font-size: .6rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  border-radius: 99px;
+  padding: 0 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: badgePop .3s cubic-bezier(.34,1.56,.64,1);
+}

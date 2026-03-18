@@ -3,219 +3,396 @@
 {% load i18n %}
 {% block title %}{{ group.name }} — {% trans "Chat" %}{% endblock %}
 
+{% block codemirror %}{% endblock codemirror %}
+
 {% block extra_head %}
 <style>
-.chat-layout { display:grid; grid-template-columns:1fr 260px; gap:20px; height:calc(100vh - 160px); min-height:500px; }
-@media(max-width:768px) { .chat-layout { grid-template-columns:1fr; } .chat-sidebar { display:none; } }
-.chat-panel { background:var(--white); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); display:flex; flex-direction:column; overflow:hidden; }
-.chat-panel-header { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:var(--white); }
-.ch-title { display:flex; align-items:center; gap:10px; font-weight:700; font-size:.95rem; color:var(--text); }
-.ch-hash { width:30px; height:30px; border-radius:8px; background:var(--brand-bg); color:var(--brand); display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:700; }
-.messages-area { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:2px; background:var(--bg); }
-.messages-area::-webkit-scrollbar { width:5px; }
-.messages-area::-webkit-scrollbar-thumb { background:var(--border2); border-radius:99px; }
-.empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:var(--text-muted); padding:40px; text-align:center; }
-.empty-state .icon { font-size:2.5rem; }
-.empty-state p { font-size:.875rem; }
-.date-sep { display:flex; align-items:center; gap:10px; margin:12px 0 8px; }
-.date-sep::before, .date-sep::after { content:''; flex:1; height:1px; background:var(--border); }
-.date-sep span { font-size:.7rem; font-weight:700; color:var(--text-sub); white-space:nowrap; text-transform:uppercase; letter-spacing:.06em; }
-.msg-row { display:flex; gap:10px; align-items:flex-end; animation:fadeUp .2s ease-out both; padding:1px 0; }
-.msg-row.self { flex-direction:row-reverse; }
-.msg-avatar { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.78rem; font-weight:800; flex-shrink:0; color:#fff; }
-.msg-avatar.hidden { visibility:hidden; }
-.bubble-wrap { display:flex; flex-direction:column; gap:2px; max-width:65%; }
-.msg-row.self .bubble-wrap { align-items:flex-end; }
-.sender-name { font-size:.68rem; font-weight:700; color:var(--brand); padding:0 4px; text-transform:uppercase; letter-spacing:.04em; }
-.bubble { padding:9px 13px; border-radius:12px; font-size:.875rem; line-height:1.5; word-break:break-word; }
-.bubble.other { background:var(--white); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:3px; box-shadow:var(--shadow); }
-.bubble.self { background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff; border-bottom-right-radius:3px; box-shadow:0 4px 14px rgba(99,102,241,.3); }
-.bubble-time { font-size:.62rem; color:var(--text-sub); padding:0 4px; }
-.typing-bar { height:26px; padding:0 20px; display:flex; align-items:center; gap:8px; font-size:.75rem; color:var(--text-muted); background:var(--bg); border-top:1px solid var(--border); }
-.typing-dots span { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--brand-l); animation:tdots .9s ease-in-out infinite; }
-.typing-dots span:nth-child(2) { animation-delay:.15s; }
-.typing-dots span:nth-child(3) { animation-delay:.3s; }
-@keyframes tdots { 0%,80%,100% { transform:translateY(0); opacity:.4; } 40% { transform:translateY(-4px); opacity:1; } }
-.input-area { padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:10px; align-items:center; background:var(--white); }
-.chat-input { flex:1; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; padding:10px 14px; font-size:.875rem; font-family:'Outfit',sans-serif; color:var(--text); outline:none; transition:border-color .18s,box-shadow .18s; }
-.chat-input:focus { border-color:var(--brand-l); box-shadow:0 0 0 3px rgba(99,102,241,.12); background:var(--white); }
-.chat-input::placeholder { color:#c4c3e0; }
-.chat-input:disabled { opacity:.5; cursor:not-allowed; }
-.chat-sidebar { display:flex; flex-direction:column; gap:16px; }
-.sidebar-card { background:var(--white); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); overflow:hidden; }
-.sidebar-card-header { padding:14px 16px 10px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
-.sidebar-card-header h3 { font-size:.72rem; font-weight:800; color:var(--brand); text-transform:uppercase; letter-spacing:.07em; }
-.online-badge { font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:99px; background:var(--green-bg); color:var(--green); border:1px solid var(--green-brd); }
-.offline-badge { font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:99px; background:var(--bg); color:var(--text-muted); border:1px solid var(--border); }
-.member-list { padding:8px; max-height:260px; overflow-y:auto; }
-.member-list::-webkit-scrollbar { width:3px; }
-.member-list::-webkit-scrollbar-thumb { background:var(--border2); }
-.member-item { display:flex; align-items:center; gap:10px; padding:7px 8px; border-radius:9px; cursor:default; transition:background .12s; }
-.member-item:hover { background:var(--brand-bg); }
-.member-avatar { width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:800; flex-shrink:0; color:#fff; position:relative; }
-.member-avatar .sdot { position:absolute; bottom:-1px; right:-1px; width:9px; height:9px; border-radius:50%; border:2px solid var(--white); }
-.sdot.online { background:var(--green-l); }
-.sdot.offline { background:var(--text-sub); }
-.member-name { font-size:.82rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1; }
-.member-name.online { color:var(--text); }
-.member-name.offline { color:var(--text-muted); }
-.you-tag { font-size:.62rem; color:var(--brand); font-weight:700; flex-shrink:0; }
-.admin-tag { font-size:.6rem; font-weight:700; padding:1px 7px; border-radius:99px; background:var(--brand-bgd); color:var(--brand); border:1px solid var(--brand-ll); flex-shrink:0; }
-.conn-badge { display:inline-flex; align-items:center; gap:5px; font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:99px; transition:all .3s; }
-.conn-badge.connected { background:var(--green-bg); color:var(--green); border:1px solid var(--green-brd); }
-.conn-badge.disconnected { background:var(--red-bg); color:var(--red); border:1px solid var(--red-brd); }
-.conn-badge .cdot { width:6px; height:6px; border-radius:50%; background:currentColor; animation:blink 2s ease-in-out infinite; }
-.ac-0 { background:linear-gradient(135deg,#6366f1,#4338ca); }
-.ac-1 { background:linear-gradient(135deg,#10b981,#047857); }
-.ac-2 { background:linear-gradient(135deg,#f59e0b,#b45309); }
-.ac-3 { background:linear-gradient(135deg,#ef4444,#b91c1c); }
-.ac-4 { background:linear-gradient(135deg,#8b5cf6,#6d28d9); }
-.ac-5 { background:linear-gradient(135deg,#ec4899,#be185d); }
-.ac-6 { background:linear-gradient(135deg,#06b6d4,#0e7490); }
-.ac-7 { background:linear-gradient(135deg,#84cc16,#4d7c0f); }
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  margin: -28px -20px 0;
+  overflow: hidden;
+}
+.chat-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 10px;
+  min-height: 56px;
+}
+.chat-topbar-left  { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.chat-topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.chat-back {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  background: transparent;
+  text-decoration: none;
+  font-size: .9rem;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.chat-back:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.chat-group-info { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.chat-group-icon {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 800; font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+.chat-group-name { font-size: .92rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-group-sub  { font-size: .7rem; color: var(--text-muted); margin-top: 1px; }
+.conn-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .7rem; font-weight: 700; font-family: var(--font-mono);
+  padding: 4px 10px; border-radius: 99px; transition: all .3s;
+  white-space: nowrap;
+}
+.conn-badge.connected    { background: rgba(34,197,94,.12);  color: #22c55e; border: 1px solid rgba(34,197,94,.25); }
+.conn-badge.disconnected { background: rgba(239,68,68,.12);  color: #ef4444; border: 1px solid rgba(239,68,68,.25); }
+.conn-badge .cdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+.chat-members-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted); background: transparent;
+  cursor: pointer; font-size: .9rem; transition: all .15s;
+}
+.chat-members-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.chat-body { display: flex; flex: 1; overflow: hidden; position: relative; }
+.chat-main { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.messages-area {
+  flex: 1; overflow-y: auto;
+  padding: 14px 14px 8px;
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--bg);
+  -webkit-overflow-scrolling: touch;
+}
+.messages-area::-webkit-scrollbar       { width: 4px; }
+.messages-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+.chat-empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; color: var(--text-muted);
+  padding: 40px 20px; text-align: center;
+}
+.chat-empty-icon  { font-size: 2.5rem; }
+.chat-empty-title { font-size: .9rem; font-weight: 700; color: var(--text); }
+.chat-empty-sub   { font-size: .8rem; }
+.date-sep {
+  display: flex; align-items: center; gap: 10px;
+  margin: 14px 0 8px;
+}
+.date-sep::before,
+.date-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.date-sep span   { font-size: .65rem; font-weight: 700; color: var(--text-sub); white-space: nowrap; text-transform: uppercase; letter-spacing: .08em; }
+.msg-row {
+  display: flex; gap: 8px; align-items: flex-end;
+  animation: msgIn .2s ease-out both;
+  padding: 1px 0;
+}
+.msg-row.self { flex-direction: row-reverse; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.msg-avatar {
+  width: 30px; height: 30px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 800; flex-shrink: 0; color: #fff;
+}
+.msg-avatar.hidden { visibility: hidden; }
+.bubble-wrap { display: flex; flex-direction: column; gap: 2px; max-width: min(68%, 340px); }
+.msg-row.self .bubble-wrap { align-items: flex-end; }
+.sender-name { font-size: .66rem; font-weight: 700; color: var(--accent); padding: 0 4px; text-transform: uppercase; letter-spacing: .04em; }
+.bubble { padding: 9px 12px; border-radius: 12px; font-size: .875rem; line-height: 1.5; word-break: break-word; }
+.bubble.other { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 3px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.bubble.self  { background: var(--accent); color: #fff; border-bottom-right-radius: 3px; box-shadow: 0 2px 10px rgba(13,148,136,.3); }
+.bubble-time { font-size: .62rem; color: var(--text-sub); padding: 0 4px; font-family: var(--font-mono); }
+.msg-row.self .bubble-time { text-align: right; }
+.typing-bar {
+  min-height: 28px; padding: 4px 16px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: .75rem; color: var(--text-muted);
+  background: var(--bg); border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.typing-dots span {
+  display: inline-block; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--accent);
+  animation: tdot .9s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: .15s; }
+.typing-dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes tdot { 0%,80%,100% { transform: translateY(0); opacity: .4; } 40% { transform: translateY(-4px); opacity: 1; } }
+.input-area {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px; align-items: flex-end;
+  background: var(--surface);
+  flex-shrink: 0;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+.chat-input {
+  flex: 1; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 10px 16px; font-size: .875rem; font-family: inherit;
+  color: var(--text); outline: none; resize: none;
+  max-height: 120px; overflow-y: auto; line-height: 1.4;
+  transition: border-color .15s, box-shadow .15s;
+  -webkit-appearance: none;
+}
+.chat-input:focus      { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+.chat-input::placeholder { color: var(--text-sub); }
+.chat-input:disabled   { opacity: .5; cursor: not-allowed; }
+.send-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem; flex-shrink: 0;
+  transition: transform .12s, box-shadow .12s;
+  box-shadow: 0 2px 8px rgba(13,148,136,.3);
+}
+.send-btn:hover   { transform: scale(1.06); box-shadow: 0 4px 14px rgba(13,148,136,.4); }
+.send-btn:active  { transform: scale(.95); }
+.send-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.chat-sidebar {
+  width: 240px; flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-section { display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-section + .sidebar-section { border-top: 1px solid var(--border); }
+.sidebar-section-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; flex-shrink: 0; }
+.sidebar-section-title  { font-size: .65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; }
+.sidebar-count { font-size: .65rem; font-weight: 700; font-family: var(--font-mono); padding: 2px 7px; border-radius: 99px; }
+.sidebar-count.online  { background: rgba(34,197,94,.12); color: #22c55e; }
+.sidebar-count.offline { background: var(--bg2); color: var(--text-muted); border: 1px solid var(--border); }
+.member-list { overflow-y: auto; flex: 1; padding: 4px 8px 8px; }
+.member-list::-webkit-scrollbar       { width: 3px; }
+.member-list::-webkit-scrollbar-thumb { background: var(--border2); }
+.member-item { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 9px; cursor: default; transition: background .12s; }
+.member-item:hover { background: var(--highlight); }
+.member-avatar { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; flex-shrink: 0; color: #fff; position: relative; }
+.sdot { position: absolute; bottom: -1px; right: -1px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--surface); }
+.sdot.online  { background: #22c55e; }
+.sdot.offline { background: var(--text-sub); }
+.member-name         { font-size: .8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.member-name.online  { color: var(--text); }
+.member-name.offline { color: var(--text-muted); }
+.you-tag   { font-size: .6rem; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+.admin-tag { font-size: .58rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; background: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-bgd); flex-shrink: 0; }
+.ac-0 { background: linear-gradient(135deg,#0d9488,#0f766e); }
+.ac-1 { background: linear-gradient(135deg,#10b981,#047857); }
+.ac-2 { background: linear-gradient(135deg,#f59e0b,#b45309); }
+.ac-3 { background: linear-gradient(135deg,#ef4444,#b91c1c); }
+.ac-4 { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+.ac-5 { background: linear-gradient(135deg,#ec4899,#be185d); }
+.ac-6 { background: linear-gradient(135deg,#06b6d4,#0e7490); }
+.ac-7 { background: linear-gradient(135deg,#84cc16,#4d7c0f); }
+.members-drawer-overlay {
+  display: none; position: fixed; inset: 0; z-index: 350;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(2px);
+}
+.members-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 360;
+  width: min(280px, 85vw); background: var(--surface);
+  transform: translateX(100%);
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0,0,0,.2);
+}
+.members-drawer.open { transform: translateX(0); }
+.members-drawer-overlay.open { display: block; }
+.members-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.members-drawer-title { font-size: .88rem; font-weight: 700; color: var(--text); }
+.members-drawer-close { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-size: .85rem; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.members-drawer-close:hover { border-color: #ef4444; color: #ef4444; }
+@media (max-width: 768px) {
+  .chat-page    { height: calc(100vh - 60px); }
+  .chat-sidebar { display: none; }
+  .bubble-wrap  { max-width: min(78%, 300px); }
+}
+@media (min-width: 769px) {
+  .chat-members-btn { display: none; }
+  .members-drawer, .members-drawer-overlay { display: none !important; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="chat-page">
 
-<div class="page-hero fade-up" style="margin-bottom:20px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-    <div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
-        <a href="{% url 'dashboard:home' %}" class="btn btn-ghost btn-sm">← {% trans "Back" %}</a>
-        <span style="color:var(--text-sub);font-size:.85rem;">/ {{ group.name }}</span>
-      </div>
-      <h1 style="font-size:1.4rem;font-weight:800;color:var(--text);">👥 {{ group.name }} <span style="color:var(--text-muted);font-weight:500;font-size:1rem;"># general</span></h1>
-      <p class="section-sub">{% trans "Real-time group chat" %}</p>
-    </div>
-    <div id="conn-badge" class="conn-badge disconnected">
-      <div class="cdot"></div>
-      <span id="conn-text">{% trans "Connecting..." %}</span>
-    </div>
-  </div>
-</div>
-
-<div class="chat-layout fade-up-2">
-
-  <div class="chat-panel">
-    <div class="chat-panel-header">
-      <div class="ch-title">
-        <div class="ch-hash">#</div>
-        <span>general</span>
-      </div>
-      <span style="font-size:.78rem;color:var(--text-muted);">
-        {% blocktrans with name=group.name count=group.students.count %}{{ name }} · {{ count }} members{% endblocktrans %}
-      </span>
-    </div>
-
-    <div class="messages-area" id="chat-messages">
-      {% if previous_messages %}
-        <div class="date-sep"><span>{% trans "Earlier messages" %}</span></div>
-        {% for msg in previous_messages %}
-          {% if msg.sender == request.user %}
-            <div class="msg-row self">
-              <div class="bubble-wrap">
-                <div class="bubble self">{{ msg.message }}</div>
-                <div class="bubble-time" style="text-align:right;">{{ msg.created_at|time:"H:i" }}</div>
-              </div>
-              <div class="msg-avatar ac-0">{{ msg.sender.username|first|upper }}</div>
-            </div>
-          {% else %}
-            <div class="msg-row">
-              <div class="msg-avatar ac-{{ forloop.counter0 }}">{{ msg.sender.username|first|upper }}</div>
-              <div class="bubble-wrap">
-                <div class="sender-name">{{ msg.sender.username }}</div>
-                <div class="bubble other">{{ msg.message }}</div>
-                <div class="bubble-time">{{ msg.created_at|time:"H:i" }}</div>
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-      {% else %}
-        <div class="empty-state">
-          <div class="icon">💬</div>
-          <p style="font-weight:700;color:var(--text);margin-bottom:4px;">{% trans "No messages yet" %}</p>
-          <p>{% blocktrans with name=group.name %}Be the first to say hello in <strong>{{ name }}</strong>!{% endblocktrans %}</p>
+  <div class="chat-topbar">
+    <div class="chat-topbar-left">
+      <a href="{% url 'dashboard:home' %}" class="chat-back" aria-label="{% trans 'Back' %}">
+        <i class="bi bi-arrow-left"></i>
+      </a>
+      <div class="chat-group-info">
+        <div class="chat-group-icon">{{ group.name|first|upper }}</div>
+        <div>
+          <div class="chat-group-name">{{ group.name }}</div>
+          <div class="chat-group-sub">
+            {% blocktrans with count=group.students.count|add:1 %}{{ count }} members{% endblocktrans %}
+          </div>
         </div>
-      {% endif %}
+      </div>
     </div>
-
-    <div class="typing-bar" id="typing-bar" style="display:none;">
-      <div class="typing-dots"><span></span><span></span><span></span></div>
-      <span id="typing-text" style="font-size:.78rem;"></span>
-    </div>
-
-    <div class="input-area">
-      <input id="chat-input" class="chat-input" type="text"
-        placeholder="{% blocktrans with name=group.name %}Message {{ name }}...{% endblocktrans %}"
-        maxlength="1000" autocomplete="off"/>
-      <button id="send-btn" class="btn btn-primary">
-        <i class="bi bi-send-fill"></i> {% trans "Send" %}
+    <div class="chat-topbar-right">
+      <div id="conn-badge" class="conn-badge disconnected">
+        <div class="cdot"></div>
+        <span id="conn-text">{% trans "Connecting..." %}</span>
+      </div>
+      <button class="chat-members-btn" id="members-btn" aria-label="{% trans 'Members' %}">
+        <i class="bi bi-people"></i>
       </button>
     </div>
   </div>
 
-  <div class="chat-sidebar">
-    <div class="sidebar-card fade-up-3">
-      <div class="sidebar-card-header">
-        <h3>🟢 {% trans "Online" %}</h3>
-        <span class="online-badge" id="online-count">0</span>
+  <div class="chat-body">
+    <div class="chat-main">
+      <div class="messages-area" id="chat-messages">
+        {% if previous_messages %}
+          <div class="date-sep"><span>{% trans "Earlier messages" %}</span></div>
+          {% for msg in previous_messages %}
+          {% if msg.sender == request.user %}
+          <div class="msg-row self">
+            <div class="bubble-wrap">
+              <div class="bubble self">{{ msg.message }}</div>
+              <div class="bubble-time">{{ msg.created_at|date:"d M" }} {{ msg.created_at|time:"H:i" }}</div>
+            </div>
+            <div class="msg-avatar ac-0 {% if not forloop.first %}{% ifchanged msg.sender %}{% else %}hidden{% endifchanged %}{% endif %}">
+              {{ msg.sender.username|first|upper }}
+            </div>
+          </div>
+          {% else %}
+          <div class="msg-row">
+            <div class="msg-avatar ac-{{ forloop.counter0 }} {% if not forloop.first %}{% ifchanged msg.sender %}{% else %}hidden{% endifchanged %}{% endif %}">
+              {{ msg.sender.username|first|upper }}
+            </div>
+            <div class="bubble-wrap">
+              {% ifchanged msg.sender %}<div class="sender-name">{{ msg.sender.username }}</div>{% endifchanged %}
+              <div class="bubble other">{{ msg.message }}</div>
+              <div class="bubble-time">{{ msg.created_at|date:"d M" }} {{ msg.created_at|time:"H:i" }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        {% else %}
+        <div class="chat-empty">
+          <div class="chat-empty-icon">💬</div>
+          <p class="chat-empty-title">{% trans "No messages yet" %}</p>
+          <p class="chat-empty-sub">{% blocktrans with name=group.name %}Be the first to say hello in {{ name }}!{% endblocktrans %}</p>
+        </div>
+        {% endif %}
       </div>
-      <div class="member-list" id="online-list"></div>
+
+      <div class="typing-bar" id="typing-bar" style="display:none;">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+        <span id="typing-text"></span>
+      </div>
+
+      <div class="input-area">
+        <textarea id="chat-input" class="chat-input" rows="1"
+          placeholder="{% blocktrans with name=group.name %}Message {{ name }}...{% endblocktrans %}"
+          maxlength="1000" autocomplete="off"></textarea>
+        <button id="send-btn" class="send-btn" aria-label="{% trans 'Send' %}">
+          <i class="bi bi-send-fill"></i>
+        </button>
+      </div>
     </div>
-    <div class="sidebar-card fade-up-3">
-      <div class="sidebar-card-header">
-        <h3>👥 {% trans "Members" %}</h3>
-        <span class="offline-badge" id="offline-count">{{ group.students.count|add:1 }}</span>
-      </div>
-      <div class="member-list" id="offline-list">
-        <div class="member-item" data-username="{{ group.teacher.username }}">
-          <div class="member-avatar ac-0">
-            {{ group.teacher.username|first|upper }}
-            <div class="sdot offline"></div>
-          </div>
-          <div class="member-name offline">{{ group.teacher.username }}</div>
-          <span class="admin-tag">{% trans "Admin" %}</span>
+
+    <aside class="chat-sidebar">
+      <div class="sidebar-section" style="flex:0 0 auto;">
+        <div class="sidebar-section-header">
+          <span class="sidebar-section-title">🟢 {% trans "Online" %}</span>
+          <span class="sidebar-count online" id="online-count">0</span>
         </div>
-        {% for student in group.students.all %}
-        <div class="member-item" data-username="{{ student.username }}">
-          <div class="member-avatar ac-{{ forloop.counter0|add:1 }}">
-            {{ student.username|first|upper }}
-            <div class="sdot offline"></div>
-          </div>
-          <div class="member-name offline">{{ student.username }}</div>
-        </div>
-        {% endfor %}
+        <div class="member-list" id="online-list"></div>
       </div>
+      <div class="sidebar-section" style="flex:1;overflow:hidden;">
+        <div class="sidebar-section-header">
+          <span class="sidebar-section-title">👥 {% trans "Members" %}</span>
+          <span class="sidebar-count offline" id="offline-count">{{ group.students.count|add:1 }}</span>
+        </div>
+        <div class="member-list" id="offline-list">
+          <div class="member-item" data-username="{{ group.teacher.username }}">
+            <div class="member-avatar ac-0">{{ group.teacher.username|first|upper }}<div class="sdot offline"></div></div>
+            <div class="member-name offline">{{ group.teacher.get_full_name|default:group.teacher.username }}</div>
+            <span class="admin-tag">{% trans "Admin" %}</span>
+          </div>
+          {% for student in group.students.all %}
+          <div class="member-item" data-username="{{ student.username }}">
+            <div class="member-avatar ac-{{ forloop.counter }}">{{ student.username|first|upper }}<div class="sdot offline"></div></div>
+            <div class="member-name offline">{{ student.get_full_name|default:student.username }}</div>
+            {% if student == request.user %}<span class="you-tag">{% trans "you" %}</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="members-drawer-overlay" id="members-overlay"></div>
+<div class="members-drawer" id="members-drawer" aria-label="{% trans 'Members' %}">
+  <div class="members-drawer-header">
+    <span class="members-drawer-title">👥 {% trans "Members" %}</span>
+    <button class="members-drawer-close" id="members-drawer-close" aria-label="{% trans 'Close' %}">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+  <div style="padding:10px 14px 4px;border-bottom:1px solid var(--border);">
+    <div class="sidebar-section-header" style="padding:0 0 8px;">
+      <span class="sidebar-section-title">🟢 {% trans "Online" %}</span>
+      <span class="sidebar-count online" id="m-online-count">0</span>
+    </div>
+    <div class="member-list" id="m-online-list" style="max-height:160px;"></div>
+  </div>
+  <div style="padding:10px 14px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div class="sidebar-section-header" style="padding:0 0 8px;flex-shrink:0;">
+      <span class="sidebar-section-title">👥 {% trans "All members" %}</span>
+      <span class="sidebar-count offline" id="m-offline-count">{{ group.students.count|add:1 }}</span>
+    </div>
+    <div class="member-list" id="m-offline-list" style="flex:1;max-height:none;">
+      <div class="member-item" data-username="{{ group.teacher.username }}">
+        <div class="member-avatar ac-0">{{ group.teacher.username|first|upper }}<div class="sdot offline"></div></div>
+        <div class="member-name offline">{{ group.teacher.get_full_name|default:group.teacher.username }}</div>
+        <span class="admin-tag">{% trans "Admin" %}</span>
+      </div>
+      {% for student in group.students.all %}
+      <div class="member-item" data-username="{{ student.username }}">
+        <div class="member-avatar ac-{{ forloop.counter }}">{{ student.username|first|upper }}<div class="sdot offline"></div></div>
+        <div class="member-name offline">{{ student.get_full_name|default:student.username }}</div>
+        {% if student == request.user %}<span class="you-tag">{% trans "you" %}</span>{% endif %}
+      </div>
+      {% endfor %}
     </div>
   </div>
-
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-const groupId = {{ group.id }};
-const currentUser = "{{ request.user.username }}";
+const groupId         = {{ group.id }};
+const currentUser     = "{{ request.user.username }}";
 const teacherUsername = "{{ group.teacher.username }}";
-const wsScheme = location.protocol === "https:" ? "wss" : "ws";
-const allMembers = [
-  { username: "{{ group.teacher.username }}", isAdmin: true },
-  {% for student in group.students.all %}{ username: "{{ student.username }}", isAdmin: false },{% endfor %}
-];
-const messagesDiv = document.getElementById('chat-messages');
-const input       = document.getElementById('chat-input');
-const sendBtn     = document.getElementById('send-btn');
-const connBadge   = document.getElementById('conn-badge');
-const connText    = document.getElementById('conn-text');
-const typingBar   = document.getElementById('typing-bar');
-const typingText  = document.getElementById('typing-text');
-const onlineList  = document.getElementById('online-list');
-const offlineList = document.getElementById('offline-list');
-const onlineCount = document.getElementById('online-count');
-const offlineCount= document.getElementById('offline-count');
+const wsScheme        = location.protocol === "https:" ? "wss" : "ws";
 
-// i18n strings for JS
+const allMembers = [
+  { username: "{{ group.teacher.username }}", displayName: "{{ group.teacher.get_full_name|default:group.teacher.username|escapejs }}", isAdmin: true },
+  {% for student in group.students.all %}
+  { username: "{{ student.username|escapejs }}", displayName: "{{ student.get_full_name|default:student.username|escapejs }}", isAdmin: false },
+  {% endfor %}
+];
+
 const i18n = {
   connected:    "{% trans 'Connected' %}",
   disconnected: "{% trans 'Disconnected' %}",
@@ -224,77 +401,162 @@ const i18n = {
   admin:        "{% trans 'Admin' %}",
 };
 
+const msgsDiv       = document.getElementById('chat-messages');
+const input         = document.getElementById('chat-input');
+const sendBtn       = document.getElementById('send-btn');
+const connBadge     = document.getElementById('conn-badge');
+const connText      = document.getElementById('conn-text');
+const typingBar     = document.getElementById('typing-bar');
+const typingText    = document.getElementById('typing-text');
+const onlineList    = document.getElementById('online-list');
+const offlineList   = document.getElementById('offline-list');
+const onlineCount   = document.getElementById('online-count');
+const offlineCount  = document.getElementById('offline-count');
+const mOnlineList   = document.getElementById('m-online-list');
+const mOfflineList  = document.getElementById('m-offline-list');
+const mOnlineCount  = document.getElementById('m-online-count');
+const mOfflineCount = document.getElementById('m-offline-count');
+
 const AC = ['ac-0','ac-1','ac-2','ac-3','ac-4','ac-5','ac-6','ac-7'];
 function ac(u) { let h=0; for(let c of u) h=(h*31+c.charCodeAt(0))&0xffff; return AC[h%AC.length]; }
-function scrollToBottom() { messagesDiv.scrollTop = messagesDiv.scrollHeight; }
-scrollToBottom();
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function nowTime() { const d=new Date(); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function nowFull() {
+  const d = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+}
+function scrollBottom() { msgsDiv.scrollTop = msgsDiv.scrollHeight; }
+scrollBottom();
 
-function setConnected(yes) {
-  connBadge.className='conn-badge '+(yes?'connected':'disconnected');
-  connText.textContent=yes ? i18n.connected : i18n.disconnected;
-  input.disabled=!yes; sendBtn.disabled=!yes;
+function setConnected(state) {
+  connBadge.className = 'conn-badge ' + (state === 'on' ? 'connected' : 'disconnected');
+  connText.textContent = state === 'on' ? i18n.connected : i18n.disconnected;
+  input.disabled   = state !== 'on';
+  sendBtn.disabled = state !== 'on';
+}
+
+function buildMemberHTML(m, isOnline) {
+  const color = ac(m.username);
+  const isYou = m.username === currentUser;
+  return `<div class="member-item">
+    <div class="member-avatar ${color}">${esc(m.username[0].toUpperCase())}<div class="sdot ${isOnline?'online':'offline'}"></div></div>
+    <div class="member-name ${isOnline?'online':'offline'}">${esc(m.displayName)}</div>
+    ${isYou ? `<span class="you-tag">${i18n.you}</span>` : ''}
+    ${m.isAdmin ? `<span class="admin-tag">${i18n.admin}</span>` : ''}
+  </div>`;
 }
 
 function renderMembers(onlineUsers) {
-  const s=new Set(onlineUsers); onlineList.innerHTML=''; offlineList.innerHTML=''; let o=0,f=0;
+  const s = new Set(onlineUsers);
+  let onlineHTML = '', offlineHTML = '', o = 0, f = 0;
   allMembers.forEach(m => {
-    const isOnline=s.has(m.username),isYou=m.username===currentUser,color=ac(m.username);
-    const item=document.createElement('div'); item.className='member-item';
-    item.innerHTML=`<div class="member-avatar ${color}">${m.username[0].toUpperCase()}<div class="sdot ${isOnline?'online':'offline'}"></div></div><div class="member-name ${isOnline?'online':'offline'}">${escHtml(m.username)}</div>${isYou?`<span class="you-tag">${i18n.you}</span>`:''}${m.isAdmin?`<span class="admin-tag">${i18n.admin}</span>`:''}`;
-    if(isOnline){onlineList.appendChild(item);o++;}else{offlineList.appendChild(item);f++;}
+    if (s.has(m.username)) { onlineHTML  += buildMemberHTML(m, true);  o++; }
+    else                   { offlineHTML += buildMemberHTML(m, false); f++; }
   });
-  onlineCount.textContent=o; offlineCount.textContent=f;
+  onlineList.innerHTML   = onlineHTML;
+  offlineList.innerHTML  = offlineHTML;
+  mOnlineList.innerHTML  = onlineHTML;
+  mOfflineList.innerHTML = offlineHTML;
+  onlineCount.textContent  = o; mOnlineCount.textContent  = o;
+  offlineCount.textContent = f; mOfflineCount.textContent = f;
 }
 
-let lastSender=null;
-function appendMessage(sender,message,time,isSelf) {
-  const empty=messagesDiv.querySelector('.empty-state'); if(empty) empty.remove();
-  const color=ac(sender),isFirst=sender!==lastSender; lastSender=sender;
-  const row=document.createElement('div'); row.className='msg-row'+(isSelf?' self':'');
-  if(isSelf) {
-    row.innerHTML=`<div class="bubble-wrap"><div class="bubble self">${escHtml(message)}</div><div class="bubble-time" style="text-align:right;">${time}</div></div><div class="msg-avatar ${color} ${isFirst?'':'hidden'}">${sender[0].toUpperCase()}</div>`;
+let lastSender = null;
+function appendMessage(sender, message, timeStr, isSelf) {
+  const empty   = msgsDiv.querySelector('.chat-empty');
+  if (empty) empty.remove();
+  const color   = ac(sender);
+  const isFirst = sender !== lastSender;
+  lastSender = sender;
+  const row = document.createElement('div');
+  row.className = 'msg-row' + (isSelf ? ' self' : '');
+  if (isSelf) {
+    row.innerHTML = `
+      <div class="bubble-wrap">
+        <div class="bubble self">${esc(message)}</div>
+        <div class="bubble-time">${esc(timeStr)}</div>
+      </div>
+      <div class="msg-avatar ${color} ${isFirst?'':'hidden'}">${esc(sender[0].toUpperCase())}</div>`;
   } else {
-    row.innerHTML=`<div class="msg-avatar ${color} ${isFirst?'':'hidden'}">${sender[0].toUpperCase()}</div><div class="bubble-wrap">${isFirst?`<div class="sender-name">${escHtml(sender)}${sender===teacherUsername?` <span class="admin-tag" style="vertical-align:middle;">${i18n.admin}</span>`:''}</div>`:''}<div class="bubble other">${escHtml(message)}</div><div class="bubble-time">${time}</div></div>`;
+    row.innerHTML = `
+      <div class="msg-avatar ${color} ${isFirst?'':'hidden'}">${esc(sender[0].toUpperCase())}</div>
+      <div class="bubble-wrap">
+        ${isFirst ? `<div class="sender-name">${esc(sender)}${sender===teacherUsername?` <span class="admin-tag">${i18n.admin}</span>`:''}</div>` : ''}
+        <div class="bubble other">${esc(message)}</div>
+        <div class="bubble-time">${esc(timeStr)}</div>
+      </div>`;
   }
-  messagesDiv.appendChild(row); scrollToBottom();
+  msgsDiv.appendChild(row);
+  scrollBottom();
 }
 
-let typingTimer=null,isTyping=false;
-input.addEventListener('input',()=>{
-  if(!socket||socket.readyState!==WebSocket.OPEN) return;
-  if(!isTyping){isTyping=true;socket.send(JSON.stringify({type:'typing',is_typing:true}));}
+let typingTimer = null, isTyping = false;
+input.addEventListener('input', () => {
+  autoResize();
+  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+  if (!isTyping) { isTyping = true; socket.send(JSON.stringify({ type:'typing', is_typing:true })); }
   clearTimeout(typingTimer);
-  typingTimer=setTimeout(()=>{isTyping=false;socket.send(JSON.stringify({type:'typing',is_typing:false}));},1500);
+  typingTimer = setTimeout(() => {
+    isTyping = false;
+    socket.send(JSON.stringify({ type:'typing', is_typing:false }));
+  }, 1500);
 });
+
+function autoResize() {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+}
 
 let socket;
 function connect() {
-  socket=new WebSocket(`${wsScheme}://${location.host}/ws/chat/${groupId}/`);
-  socket.onopen=()=>setConnected(true);
-  socket.onmessage=(e)=>{
-    const data=JSON.parse(e.data);
-    if(data.type==='chat_message') appendMessage(data.sender,data.message,data.time||nowTime(),data.sender===currentUser);
-    if(data.type==='online_users') renderMembers(data.users);
-    if(data.type==='typing'&&data.sender!==currentUser){
-      if(data.is_typing){typingText.textContent=`${data.sender} ${i18n.isTyping}`;typingBar.style.display='flex';}
-      else{typingBar.style.display='none';}
+  setConnected('off');
+  socket = new WebSocket(`${wsScheme}://${location.host}/ws/chat/${groupId}/`);
+
+  socket.onopen = () => {
+    setConnected('on');
+    if (typeof window.updateChatBadge === 'function') {
+      window.updateChatBadge(groupId, 0);
     }
   };
-  socket.onclose=()=>{setConnected(false);renderMembers([]);setTimeout(connect,3000);};
-  socket.onerror=()=>socket.close();
+
+  socket.onclose = () => { setConnected('off'); renderMembers([]); setTimeout(connect, 3000); };
+  socket.onerror = () => socket.close();
+  socket.onmessage = e => {
+    const data = JSON.parse(e.data);
+    if (data.type === 'chat_message') appendMessage(data.sender, data.message, data.time || nowFull(), data.sender === currentUser);
+    if (data.type === 'online_users') renderMembers(data.users);
+    if (data.type === 'typing' && data.sender !== currentUser) {
+      if (data.is_typing) { typingText.textContent = `${data.sender} ${i18n.isTyping}`; typingBar.style.display = 'flex'; }
+      else                { typingBar.style.display = 'none'; }
+    }
+  };
 }
 connect();
 
 function sendMessage() {
-  const msg=input.value.trim();
-  if(!msg||!socket||socket.readyState!==WebSocket.OPEN) return;
-  socket.send(JSON.stringify({type:'chat_message',message:msg}));
-  input.value=''; isTyping=false; clearTimeout(typingTimer);
-  socket.send(JSON.stringify({type:'typing',is_typing:false}));
+  const msg = input.value.trim();
+  if (!msg || !socket || socket.readyState !== WebSocket.OPEN) return;
+  socket.send(JSON.stringify({ type:'chat_message', message:msg }));
+  input.value = '';
+  input.style.height = 'auto';
+  isTyping = false;
+  clearTimeout(typingTimer);
+  socket.send(JSON.stringify({ type:'typing', is_typing:false }));
 }
-sendBtn.onclick=sendMessage;
-input.addEventListener('keydown',e=>{if(e.key==='Enter') sendMessage();});
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+const membersBtn     = document.getElementById('members-btn');
+const membersDrawer  = document.getElementById('members-drawer');
+const membersOverlay = document.getElementById('members-overlay');
+const membersClose   = document.getElementById('members-drawer-close');
+
+function openMembers()  { membersDrawer.classList.add('open'); membersOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeMembers() { membersDrawer.classList.remove('open'); membersOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+
+membersBtn?.addEventListener('click',    openMembers);
+membersClose?.addEventListener('click',  closeMembers);
+membersOverlay?.addEventListener('click', closeMembers);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMembers(); });
 </script>
 {% endblock %}

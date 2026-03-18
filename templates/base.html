@@ -852,6 +852,39 @@ function copyText(txt, btn) {
   });
 }
 </script>
+{% if user.is_authenticated %}
+<script>
+(function () {
+  const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+  let ws, retryTimer;
+
+  window.updateChatBadge = function (groupId, count) {
+    document.querySelectorAll(`.chat-unread-badge[data-group="${groupId}"]`).forEach(el => {
+      if (count > 0) {
+        el.textContent   = count;
+        el.style.display = 'inline-flex';
+      } else {
+        el.textContent   = '';
+        el.style.display = 'none';
+      }
+    });
+  };
+
+  function connect() {
+    ws = new WebSocket(`${scheme}://${location.host}/ws/presence/`);
+    ws.onmessage = e => {
+      const data = JSON.parse(e.data);
+      if (data.type === 'badge_update') window.updateChatBadge(data.group_id, data.count);
+    };
+    ws.onclose = () => { retryTimer = setTimeout(connect, 5000); };
+    ws.onerror = () => ws.close();
+  }
+
+  connect();
+  window.addEventListener('beforeunload', () => { clearTimeout(retryTimer); ws && ws.close(); });
+})();
+</script>
+{% endif %}
 {% block extra_js %}{% endblock %}
 </body>
 </html>
