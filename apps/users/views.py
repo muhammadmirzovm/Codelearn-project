@@ -21,6 +21,9 @@ from .models import Notification
 
 from django.http import JsonResponse
 
+from django.contrib.auth import update_session_auth_hash
+from .forms import ProfileForm, PasswordChangeForm
+
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -153,3 +156,61 @@ def mark_one_read(request, pk):
 def mark_all_read(request):
     request.user.notifications.filter(is_read=False).update(is_read=True)
     return JsonResponse({'ok': True})
+
+
+@login_required
+def profile(request):
+    user = request.user
+ 
+    if request.method == 'POST':
+        action = request.POST.get('action')
+ 
+        if action == 'update_info':
+            form = ProfileForm(request.POST, instance=user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, '✅ Profile updated successfully!')
+                return redirect('users:profile')
+            else:
+                messages.error(request, '❌ Please fix the errors below.')
+ 
+        elif action == 'change_password':
+            pw_form = PasswordChangeForm(user, request.POST)
+            if pw_form.is_valid():
+                pw_form.save()
+                update_session_auth_hash(request, pw_form.user)  # keep session alive
+                messages.success(request, '✅ Password changed successfully!')
+                return redirect('users:profile')
+            else:
+                messages.error(request, '❌ Please fix the password errors.')
+ 
+    # Stats
+    if user.is_teacher:
+        groups_count = user.taught_groups.count()
+        students_count = User.objects.filter(
+            student_groups__teacher=user
+        ).distinct().count()
+        submissions_count = None
+    else:
+        groups_count = user.student_groups.count()
+        students_count = None
+        # Import here to avoid circular imports
+        try:
+            from apps.submissions.models import Submission
+            submissions_count = Submission.objects.filter(student=user).count()
+        except Exception:
+            submissions_count = 0
+ 
+    notifications_count = user.notifications.count()
+    unread_notif_count  = user.notifications.filter(is_read=False).count()
+ 
+    context = {
+        'form':              ProfileForm(instance=user),
+        'pw_form':           PasswordChangeForm(user),
+        'groups_count':      groups_count,
+        'students_count':    students_count,
+        'submissions_count': submissions_count,
+        'notifications_count': notifications_count,
+        'unread_notif_count':  unread_notif_count,
+    }
+    return render(request, 'users/profile.html', context)

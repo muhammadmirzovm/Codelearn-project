@@ -10,7 +10,7 @@
   <link rel="shortcut icon" href="{% static 'images/code-slash.svg' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-  {# ─── CodeMirror: only load on pages that need it ─────────────────────── #}
+  {# ── CodeMirror: override with empty block on pages that don't need it ── #}
   {% block codemirror %}
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/nord.min.css"/>
@@ -23,13 +23,8 @@
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
   {% block extra_head %}{% endblock %}
 
-  {# ─── FIX: Apply saved theme BEFORE paint to prevent flash ────────────── #}
-  <script>
-    (function () {
-      const t = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', t);
-    })();
-  </script>
+  {# ── Apply saved theme before first paint — prevents flash ────────────── #}
+  <script>(function(){document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');})();</script>
 </head>
 <body>
 
@@ -41,11 +36,13 @@
 </script>
 {% endif %}
 
-{# ─── Pass Django URLs to JS via data attributes (no hardcoding) ──────── #}
+{# ── Django URLs → JS (single source of truth, no hardcoding in JS) ───── #}
+{% if user.is_authenticated %}
 <div id="js-urls" hidden
   data-notif-read-url="{% url 'users:notif_mark_one' pk=0 %}"
   data-notif-all-url="{% url 'users:notif_mark_read' %}">
 </div>
+{% endif %}
 
 <nav id="navbar">
   <div class="nav-inner">
@@ -66,19 +63,22 @@
 
     <div class="nav-right">
       {% if user.is_authenticated %}
-      <div class="nav-user hide-sm">
+
+      {# ── Profile pill — now a link ──────────────────────────────────── #}
+      <a href="{% url 'users:profile' %}" class="nav-user hide-sm" title="{% trans 'My profile' %}">
         <div class="nav-avatar">{{ user.username|first|upper }}</div>
         <span class="nav-username">{{ user.get_full_name|default:user.username }}</span>
         <span class="role-badge {% if user.is_teacher %}role-teacher{% else %}role-student{% endif %}">
           {{ user.get_role_display }}
         </span>
-      </div>
+      </a>
+
       <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
         {% csrf_token %}
         <button type="submit" class="btn btn-ghost btn-sm">{% trans 'Sign out' %}</button>
       </form>
 
-      {# ─── Notification Bell ──────────────────────────────────────────── #}
+      {# ── Notification Bell ──────────────────────────────────────────── #}
       <div class="notif-wrap" id="notif-wrap">
         <button class="notif-trigger" id="notif-trigger"
                 aria-label="{% trans 'Notifications' %}"
@@ -134,9 +134,13 @@
           </div>
         </div>
       </div>
+
+      {% else %}
+      <a href="{% url 'users:login' %}" class="btn btn-ghost btn-sm">{% trans 'Login' %}</a>
+      <a href="{% url 'users:register' %}" class="btn btn-primary btn-sm">{% trans 'Get started' %}</a>
       {% endif %}
 
-      {# ─── Language Switcher ──────────────────────────────────────────── #}
+      {# ── Language Switcher ──────────────────────────────────────────── #}
       <div class="lang-switcher" id="lang-switcher">
         <button class="lang-trigger" id="lang-trigger"
                 aria-label="{% trans 'Change language' %}"
@@ -188,6 +192,9 @@
 
 {% if user.is_authenticated %}
 <div class="mobile-menu" id="mobile-menu" aria-label="{% trans 'Mobile navigation' %}">
+  <a href="{% url 'users:profile' %}" class="nav-link">
+    <i class="bi bi-person-circle"></i> {% trans 'Profile' %}
+  </a>
   {% if user.is_teacher %}
   <a href="{% url 'tasks:task_list' %}" class="nav-link">{% trans 'Challenges' %}</a>
   {% endif %}
@@ -199,26 +206,20 @@
       {% trans 'Sign out' %}
     </button>
   </form>
+
   <div style="padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);margin-top:4px;">
     <p style="font-size:.62rem;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:8px;">
       🌐 {% trans "Language" %}
     </p>
-    {# Note: LANGUAGE_CODE already set at top of file — no second {% get_current_language %} needed #}
     <form action="{% url 'set_language' %}" method="post" style="display:flex;gap:6px;">
       {% csrf_token %}
       <input name="next" type="hidden" value="{{ request.get_full_path }}">
       <button type="submit" name="language" value="en"
-              class="mobile-lang-btn {% if LANGUAGE_CODE == 'en' %}mobile-lang-active{% endif %}">
-        🇬🇧 EN
-      </button>
+              class="mobile-lang-btn {% if LANGUAGE_CODE == 'en' %}mobile-lang-active{% endif %}">🇬🇧 EN</button>
       <button type="submit" name="language" value="ru"
-              class="mobile-lang-btn {% if LANGUAGE_CODE == 'ru' %}mobile-lang-active{% endif %}">
-        🇷🇺 RU
-      </button>
+              class="mobile-lang-btn {% if LANGUAGE_CODE == 'ru' %}mobile-lang-active{% endif %}">🇷🇺 RU</button>
       <button type="submit" name="language" value="uz"
-              class="mobile-lang-btn {% if LANGUAGE_CODE == 'uz' %}mobile-lang-active{% endif %}">
-        🇺🇿 UZ
-      </button>
+              class="mobile-lang-btn {% if LANGUAGE_CODE == 'uz' %}mobile-lang-active{% endif %}">🇺🇿 UZ</button>
     </form>
   </div>
 </div>
@@ -236,25 +237,18 @@
   #navbar {
     background: var(--nav-bg);
     border-bottom: 1px solid rgba(255,255,255,.06);
-    position: sticky;
-    top: 0;
-    z-index: 200;
+    position: sticky; top: 0; z-index: 200;
   }
   .nav-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    max-width: 1200px; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; justify-content: space-between;
     height: 60px;
   }
   .nav-left  { display: flex; align-items: center; gap: 24px; }
   .nav-right { display: flex; align-items: center; gap: 10px; }
   .nav-brand { display: flex; align-items: center; gap: 9px; }
   .nav-logo {
-    width: 32px; height: 32px;
-    background: var(--accent);
+    width: 32px; height: 32px; background: var(--accent);
     border-radius: var(--radius);
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 16px;
@@ -265,284 +259,184 @@
   #navbar .nav-link        { color: rgba(255,255,255,.6); }
   #navbar .nav-link:hover  { color: #fff; background: rgba(255,255,255,.08); }
   #navbar .nav-link.active { color: #fff; background: rgba(13,148,136,.25); }
+
+  /* ── Profile pill (now <a>) ─────────────────────────────────────────────── */
   .nav-user {
     display: flex; align-items: center; gap: 8px;
     padding: 5px 12px 5px 7px;
     background: rgba(255,255,255,.07);
     border: 1px solid rgba(255,255,255,.1);
     border-radius: 99px;
+    text-decoration: none;
+    transition: border-color .15s, background .15s;
+  }
+  .nav-user:hover {
+    background: rgba(255,255,255,.12);
+    border-color: var(--accent);
   }
   .nav-avatar {
-    width: 26px; height: 26px;
-    background: var(--accent);
-    border-radius: 50%;
+    width: 26px; height: 26px; background: var(--accent); border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: white;
-    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 700; color: white; font-family: var(--font-mono);
   }
-  .nav-username            { font-size: .82rem; color: rgba(255,255,255,.85); font-weight: 500; }
+  .nav-username { font-size: .82rem; color: rgba(255,255,255,.85); font-weight: 500; }
+
   #navbar .btn-ghost       { border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.7); background: transparent; }
   #navbar .btn-ghost:hover { background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.25); }
   #navbar .theme-toggle       { border-color: rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); }
   #navbar .theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.15); }
-  #navbar .hamburger       { border-color: rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); }
+  #navbar .hamburger { border-color: rgba(255,255,255,.15); background: transparent; color: rgba(255,255,255,.7); }
+
   main   { max-width: 1200px; margin: 0 auto; padding: 28px 20px; min-height: calc(100vh - 121px); }
   footer { text-align: center; padding: 20px; font-size: .78rem; color: var(--text-sub); border-top: 1px solid var(--border); background: var(--surface); }
 
-  /* ════════════════════════════
-     🔔 Notification Bell
-  ════════════════════════════ */
+  /* ════════════════════ 🔔 Notification Bell ════════════════════ */
   .notif-wrap { position: relative; }
-
   .notif-trigger {
-    position: relative;
-    width: 36px; height: 36px;
-    border: 1.5px solid rgba(255,255,255,.15);
-    border-radius: 50%;
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.75);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem;
-    transition: all .18s;
-    outline: none;
+    position: relative; width: 36px; height: 36px;
+    border: 1.5px solid rgba(255,255,255,.15); border-radius: 50%;
+    background: rgba(255,255,255,.06); color: rgba(255,255,255,.75);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; transition: all .18s; outline: none;
   }
   .notif-trigger:hover,
   .notif-wrap.open .notif-trigger {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(13,148,136,.15);
-    box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(13,148,136,.15); box-shadow: 0 0 0 3px rgba(13,148,136,.12);
   }
   .notif-trigger:has(.notif-badge) { animation: bellShake 4s ease-in-out infinite; }
   @keyframes bellShake {
     0%,90%,100% { transform: rotate(0); }
-    92%  { transform: rotate(-12deg); }
-    94%  { transform: rotate(12deg); }
-    96%  { transform: rotate(-8deg); }
-    98%  { transform: rotate(8deg); }
+    92% { transform: rotate(-12deg); } 94% { transform: rotate(12deg); }
+    96% { transform: rotate(-8deg);  } 98% { transform: rotate(8deg);  }
   }
-
   .notif-badge {
-    position: absolute;
-    top: -4px; right: -4px;
-    min-width: 18px; height: 18px;
-    background: #ef4444;
-    color: #fff;
-    font-size: .62rem; font-weight: 800;
-    font-family: var(--font-mono);
-    border-radius: 99px;
-    display: flex; align-items: center; justify-content: center;
-    padding: 0 4px;
-    border: 2px solid var(--nav-bg);
+    position: absolute; top: -4px; right: -4px;
+    min-width: 18px; height: 18px; background: #ef4444; color: #fff;
+    font-size: .62rem; font-weight: 800; font-family: var(--font-mono);
+    border-radius: 99px; display: flex; align-items: center; justify-content: center;
+    padding: 0 4px; border: 2px solid var(--nav-bg);
     animation: badgePop .3s cubic-bezier(.34,1.56,.64,1);
   }
-  @keyframes badgePop {
-    from { transform: scale(0); }
-    to   { transform: scale(1); }
-  }
-
-  /* FIX: use opacity+visibility so animation replays every open */
+  @keyframes badgePop { from { transform: scale(0); } to { transform: scale(1); } }
   .notif-dropdown {
-    position: absolute;
-    top: calc(100% + 12px);
-    right: -8px;
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    position: absolute; top: calc(100% + 12px); right: -8px; z-index: 999;
+    opacity: 0; visibility: hidden; pointer-events: none;
     transform: translateY(-8px) scale(.96);
     transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1), visibility .18s;
   }
   .notif-wrap.open .notif-dropdown {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
+    opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1);
   }
   .notif-dropdown::before {
-    content: '';
-    position: absolute;
-    top: -6px; right: 18px;
-    width: 12px; height: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-bottom: none; border-right: none;
-    transform: rotate(45deg);
-    border-radius: 2px;
+    content: ''; position: absolute; top: -6px; right: 18px;
+    width: 12px; height: 12px; background: var(--surface);
+    border: 1px solid var(--border); border-bottom: none; border-right: none;
+    transform: rotate(45deg); border-radius: 2px;
   }
   .notif-dropdown-inner {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: 0 20px 48px rgba(0,0,0,.2), 0 4px 14px rgba(0,0,0,.1);
-    width: 320px;
-    overflow: hidden;
+    width: 320px; overflow: hidden;
   }
   .notif-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
+    padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg2);
   }
-  .notif-header-title {
-    font-size: .82rem; font-weight: 700; color: var(--text);
-    display: flex; align-items: center; gap: 6px;
-  }
-  .notif-count-pill {
-    font-size: .62rem; font-weight: 800;
-    background: #ef4444; color: #fff;
-    border-radius: 99px; padding: 1px 6px;
-    font-family: var(--font-mono);
-  }
-  .notif-mark-all {
-    font-size: .72rem; color: var(--accent); font-weight: 600;
-    background: transparent; border: none; cursor: pointer;
-    padding: 3px 8px; border-radius: var(--radius-sm); transition: background .12s;
-  }
+  .notif-header-title { font-size: .82rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+  .notif-count-pill   { font-size: .62rem; font-weight: 800; background: #ef4444; color: #fff; border-radius: 99px; padding: 1px 6px; font-family: var(--font-mono); }
+  .notif-mark-all     { font-size: .72rem; color: var(--accent); font-weight: 600; background: transparent; border: none; cursor: pointer; padding: 3px 8px; border-radius: var(--radius-sm); transition: background .12s; }
   .notif-mark-all:hover { background: var(--accent-bg); }
-
   .notif-list { max-height: 340px; overflow-y: auto; }
   .notif-list::-webkit-scrollbar       { width: 4px; }
   .notif-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
-
   .notif-item {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background .12s;
-    position: relative;
+    display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px;
+    border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; position: relative;
   }
-  .notif-item:last-child  { border-bottom: none; }
-  .notif-item:hover       { background: var(--highlight); }
-  .notif-unread           { background: var(--accent-bg); }
-  .notif-unread:hover     { background: var(--highlight); }
-
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item:hover   { background: var(--highlight); }
+  .notif-unread       { background: var(--accent-bg); }
+  .notif-unread:hover { background: var(--highlight); }
   .notif-item-icon  { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
   .notif-item-body  { flex: 1; min-width: 0; }
-  .notif-item-title {
-    font-size: .84rem; font-weight: 600; color: var(--text);
-    margin-bottom: 2px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .notif-item-msg  { font-size: .76rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px; }
-  .notif-item-time { font-size: .68rem; color: var(--text-sub); font-family: var(--font-mono); }
-  .notif-dot {
-    width: 8px; height: 8px;
-    background: var(--accent); border-radius: 50%;
-    flex-shrink: 0; margin-top: 5px;
-  }
-  /* Type colors only apply when unread */
+  .notif-item-title { font-size: .84rem; font-weight: 600; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .notif-item-msg   { font-size: .76rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 4px; }
+  .notif-item-time  { font-size: .68rem; color: var(--text-sub); font-family: var(--font-mono); }
+  .notif-dot        { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
   .notif-success.notif-unread { background: var(--success-bg); }
   .notif-warning.notif-unread { background: var(--warning-bg); }
   .notif-danger.notif-unread  { background: var(--danger-bg); }
+  .notif-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 20px; color: var(--text-muted); font-size: .85rem; }
 
-  .notif-empty {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    padding: 40px 20px; color: var(--text-muted); font-size: .85rem;
-  }
-
-  /* ════════════════════════════
-     🌐 Language Switcher
-  ════════════════════════════ */
+  /* ════════════════════ 🌐 Language Switcher ════════════════════ */
   .lang-switcher { position: relative; }
   .lang-trigger {
-    display: flex; align-items: center; gap: 5px;
-    padding: 6px 11px;
-    border: 1.5px solid rgba(255,255,255,.15);
-    border-radius: 99px;
-    background: rgba(255,255,255,.06);
-    color: rgba(255,255,255,.75);
-    cursor: pointer;
-    font-size: .75rem; font-weight: 700;
+    display: flex; align-items: center; gap: 5px; padding: 6px 11px;
+    border: 1.5px solid rgba(255,255,255,.15); border-radius: 99px;
+    background: rgba(255,255,255,.06); color: rgba(255,255,255,.75);
+    cursor: pointer; font-size: .75rem; font-weight: 700;
     font-family: var(--font-mono); letter-spacing: .06em;
     transition: all .18s; white-space: nowrap; outline: none;
   }
   .lang-trigger:hover,
   .lang-switcher.open .lang-trigger {
     border-color: var(--accent); color: var(--accent);
-    background: rgba(13,148,136,.15);
-    box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+    background: rgba(13,148,136,.15); box-shadow: 0 0 0 3px rgba(13,148,136,.12);
   }
   .lang-globe   { font-size: .9rem; }
   .lang-current { font-size: .72rem; }
   .lang-arrow   { width: 9px; height: 9px; transition: transform .22s; opacity: .65; }
   .lang-switcher.open .lang-arrow { transform: rotate(180deg); opacity: 1; }
-
-  /* Same opacity/visibility pattern as notif-dropdown */
   .lang-dropdown {
-    position: absolute;
-    top: calc(100% + 12px); right: 0;
-    z-index: 999;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+    position: absolute; top: calc(100% + 12px); right: 0; z-index: 999;
+    opacity: 0; visibility: hidden; pointer-events: none;
     transform: translateY(-8px) scale(.96);
     transition: opacity .18s, transform .18s cubic-bezier(.34,1.56,.64,1), visibility .18s;
   }
   .lang-switcher.open .lang-dropdown {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
+    opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1);
   }
   .lang-dropdown::before {
-    content: '';
-    position: absolute;
-    top: -6px; right: 14px;
-    width: 12px; height: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-bottom: none; border-right: none;
+    content: ''; position: absolute; top: -6px; right: 14px;
+    width: 12px; height: 12px; background: var(--surface);
+    border: 1px solid var(--border); border-bottom: none; border-right: none;
     transform: rotate(45deg); border-radius: 2px;
   }
   .lang-dropdown-inner {
-    background: var(--surface);
-    border: 1px solid var(--border);
+    background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: 0 20px 48px rgba(0,0,0,.2), 0 4px 14px rgba(0,0,0,.1);
     padding: 8px; min-width: 168px; overflow: hidden;
   }
   .lang-dropdown-label {
-    font-family: var(--font-mono);
-    font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--text-muted);
-    padding: 4px 10px 8px; margin: 0 0 6px;
-    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: .58rem; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--text-muted); padding: 4px 10px 8px; margin: 0 0 6px; border-bottom: 1px solid var(--border);
   }
   .lang-option {
-    display: flex; align-items: center; gap: 10px;
-    width: 100%; padding: 9px 10px;
-    border: none; border-radius: var(--radius);
-    background: transparent; cursor: pointer;
-    font-size: .85rem; color: var(--text);
-    transition: background .12s; text-align: left; outline: none;
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px;
+    border: none; border-radius: var(--radius); background: transparent; cursor: pointer;
+    font-size: .85rem; color: var(--text); transition: background .12s; text-align: left; outline: none;
   }
-  .lang-option:hover          { background: var(--highlight); }
-  .lang-option-active         { background: var(--accent-bg) !important; color: var(--accent) !important; font-weight: 600; }
+  .lang-option:hover  { background: var(--highlight); }
+  .lang-option-active { background: var(--accent-bg) !important; color: var(--accent) !important; font-weight: 600; }
   .lang-flag  { font-size: 1.15rem; line-height: 1; flex-shrink: 0; }
   .lang-name  { flex: 1; font-weight: 500; }
-  .lang-check {
-    font-size: .72rem; color: var(--accent); font-weight: 800;
-    background: var(--accent-bg); border: 1px solid var(--accent-bgd);
-    border-radius: 99px; padding: 1px 6px;
-  }
+  .lang-check { font-size: .72rem; color: var(--accent); font-weight: 800; background: var(--accent-bg); border: 1px solid var(--accent-bgd); border-radius: 99px; padding: 1px 6px; }
   .mobile-lang-btn {
-    flex: 1; padding: 8px 4px;
-    border-radius: var(--radius);
+    flex: 1; padding: 8px 4px; border-radius: var(--radius);
     border: 1.5px solid rgba(255,255,255,.15);
     background: transparent; color: rgba(255,255,255,.6);
     font-size: .78rem; font-weight: 700; cursor: pointer;
     transition: all .15s; font-family: var(--font-mono);
   }
-  .mobile-lang-btn:hover  { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.15); }
-  .mobile-lang-active     { border-color: var(--accent) !important; background: rgba(13,148,136,.25) !important; color: var(--accent) !important; }
+  .mobile-lang-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(13,148,136,.15); }
+  .mobile-lang-active    { border-color: var(--accent) !important; background: rgba(13,148,136,.25) !important; color: var(--accent) !important; }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // ── Cached elements ────────────────────────────────────────────────────────
   const toggle    = document.getElementById('theme-toggle');
   const burger    = document.getElementById('hamburger');
   const menu      = document.getElementById('mobile-menu');
@@ -551,23 +445,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const notifBtn  = document.getElementById('notif-trigger');
   const notifWrap = document.getElementById('notif-wrap');
 
-  // Read Django-injected URLs (avoids hardcoding URL patterns in JS)
-  const urlEl        = document.getElementById('js-urls');
-  const NOTIF_ONE    = urlEl ? urlEl.dataset.notifReadUrl : '/users/notify/0/read/';
-  const NOTIF_ALL    = urlEl ? urlEl.dataset.notifAllUrl  : '/users/notify/mark-read/';
+  // ── Read URLs once, pass via closure — no repeated DOM reads ─────────────
+  const urlEl     = document.getElementById('js-urls');
+  const NOTIF_ONE = urlEl?.dataset.notifReadUrl ?? null;
+  const NOTIF_ALL = urlEl?.dataset.notifAllUrl  ?? null;
 
-  // ── Theme toggle (initial apply happens in <head> IIFE) ───────────────────
+  // ── Theme ─────────────────────────────────────────────────────────────────
   if (toggle) {
-    const applyTheme = (t) => {
+    const applyTheme = t => {
       document.documentElement.setAttribute('data-theme', t);
       localStorage.setItem('theme', t);
       toggle.textContent = t === 'dark' ? '☀️' : '🌙';
     };
-    // Sync button icon on load
     applyTheme(localStorage.getItem('theme') || 'light');
-    toggle.addEventListener('click', () => {
-      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    });
+    toggle.addEventListener('click', () =>
+      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+    );
   }
 
   // ── Hamburger ─────────────────────────────────────────────────────────────
@@ -580,44 +473,30 @@ document.addEventListener('DOMContentLoaded', () => {
     langBtn?.setAttribute('aria-expanded', 'false');
     notifBtn?.setAttribute('aria-expanded', 'false');
   };
-
-  notifBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const opening = !notifWrap.classList.contains('open');
+  const toggleDrop = (wrap, btn) => {
+    const opening = !wrap.classList.contains('open');
     closeAll();
-    if (opening) {
-      notifWrap.classList.add('open');
-      notifBtn.setAttribute('aria-expanded', 'true');
-    }
-  });
+    if (opening) { wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
+  };
 
-  langBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const opening = !langWrap.classList.contains('open');
-    closeAll();
-    if (opening) {
-      langWrap.classList.add('open');
-      langBtn.setAttribute('aria-expanded', 'true');
-    }
-  });
-
+  notifBtn?.addEventListener('click', e => { e.stopPropagation(); toggleDrop(notifWrap, notifBtn); });
+  langBtn?.addEventListener('click',  e => { e.stopPropagation(); toggleDrop(langWrap,  langBtn);  });
   document.addEventListener('click',   closeAll);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
 
-  // ── Notification: event delegation (one listener, not N inline onclick) ───
-  document.getElementById('notif-list')?.addEventListener('click', (e) => {
+  // ── Notification event delegation ─────────────────────────────────────────
+  const notifList = document.getElementById('notif-list');
+  notifList?.addEventListener('click', e => {
     const item = e.target.closest('.notif-item[data-id]');
-    if (item) markRead(parseInt(item.dataset.id), item);
+    if (item) markRead(parseInt(item.dataset.id), item, NOTIF_ONE);
   });
-  // Keyboard support for notif items
-  document.getElementById('notif-list')?.addEventListener('keydown', (e) => {
+  notifList?.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') {
       const item = e.target.closest('.notif-item[data-id]');
-      if (item) markRead(parseInt(item.dataset.id), item);
+      if (item) markRead(parseInt(item.dataset.id), item, NOTIF_ONE);
     }
   });
-
-  document.getElementById('notif-mark-all')?.addEventListener('click', markAllRead);
+  document.getElementById('notif-mark-all')?.addEventListener('click', () => markAllRead(NOTIF_ALL));
 
   // ── Django messages → toasts ──────────────────────────────────────────────
   const msgs = document.getElementById('django-messages');
@@ -636,20 +515,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ── Notification actions ───────────────────────────────────────────────────
-function markRead(id, el) {
-  if (!el.classList.contains('notif-unread')) return;
-  const urlEl = document.getElementById('js-urls');
-  const base  = urlEl ? urlEl.dataset.notifReadUrl : '/users/notify/0/read/';
-  const url   = base.replace('/0/', `/${id}/`);
-
-  fetch(url, {
+// ── Notification actions (URL passed in — no repeated DOM reads) ───────────
+function markRead(id, el, baseUrl) {
+  if (!el.classList.contains('notif-unread') || !baseUrl) return;
+  fetch(baseUrl.replace('/0/', `/${id}/`), {
     method: 'POST',
     headers: { 'X-CSRFToken': getCookie('csrftoken') }
   })
   .then(r => { if (!r.ok) throw new Error(r.status); })
   .then(() => {
-    // FIX: only remove notif-unread — type classes stay (they control icon & text, not just bg)
     el.classList.remove('notif-unread');
     el.querySelector('.notif-dot')?.remove();
     updateBadge(-1);
@@ -657,10 +531,8 @@ function markRead(id, el) {
   .catch(() => _toast('Could not mark as read', 'e'));
 }
 
-function markAllRead() {
-  const urlEl = document.getElementById('js-urls');
-  const url   = urlEl ? urlEl.dataset.notifAllUrl : '/users/notify/mark-read/';
-
+function markAllRead(url) {
+  if (!url) return;
   fetch(url, {
     method: 'POST',
     headers: { 'X-CSRFToken': getCookie('csrftoken') }
@@ -688,7 +560,6 @@ function updateBadge(delta, reset = false) {
   }
 }
 
-// ── Utilities ─────────────────────────────────────────────────────────────
 function getCookie(name) {
   const m = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
   return m ? m[2] : null;
@@ -698,13 +569,10 @@ function _toast(msg, type = 'i') {
   const wrap = document.getElementById('toast-wrap');
   if (!wrap) return;
   const icons = { s: '✅', e: '❌', w: '⚠️', i: '💡' };
-  const el = document.createElement('div');
+  const el   = document.createElement('div');
   el.className = `toast toast-${type}`;
-  // Use textContent for each part to avoid potential XSS
-  const icon = document.createElement('span');
-  icon.textContent = icons[type] || '•';
-  const text = document.createElement('span');
-  text.textContent = msg;
+  const icon = document.createElement('span'); icon.textContent = icons[type] || '•';
+  const text = document.createElement('span'); text.textContent = msg;
   el.append(icon, text);
   wrap.appendChild(el);
   setTimeout(() => {

@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Profile" %} – {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="profile-wrap">
+
+  {# ── Hero card ─────────────────────────────────────────────────────────── #}
+  <div class="profile-hero">
+    <div class="profile-avatar-lg">{{ user.username|first|upper }}</div>
+    <div class="profile-hero-info">
+      <h1 class="profile-name">
+        {{ user.get_full_name|default:user.username }}
+      </h1>
+      <div class="profile-meta">
+        <span class="role-badge {% if user.is_teacher %}role-teacher{% else %}role-student{% endif %}">
+          {{ user.get_role_display }}
+        </span>
+        <span class="profile-since">
+          <i class="bi bi-calendar3"></i>
+          {% trans "Joined" %} {{ user.date_joined|date:"N Y" }}
+        </span>
+        {% if user.email %}
+        <span class="profile-email">
+          <i class="bi bi-envelope"></i> {{ user.email }}
+        </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Stats row ─────────────────────────────────────────────────────────── #}
+  <div class="profile-stats">
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <span class="stat-value">{{ groups_count }}</span>
+      <span class="stat-label">
+        {% if user.is_teacher %}{% trans "Groups taught" %}{% else %}{% trans "Groups joined" %}{% endif %}
+      </span>
+    </div>
+
+    {% if user.is_teacher %}
+    <div class="stat-card">
+      <span class="stat-icon">🎓</span>
+      <span class="stat-value">{{ students_count }}</span>
+      <span class="stat-label">{% trans "Total students" %}</span>
+    </div>
+    {% else %}
+    <div class="stat-card">
+      <span class="stat-icon">📝</span>
+      <span class="stat-value">{{ submissions_count|default:"0" }}</span>
+      <span class="stat-label">{% trans "Submissions" %}</span>
+    </div>
+    {% endif %}
+
+    <div class="stat-card">
+      <span class="stat-icon">🔔</span>
+      <span class="stat-value">{{ notifications_count }}</span>
+      <span class="stat-label">{% trans "Notifications" %}</span>
+      {% if unread_notif_count %}
+      <span class="stat-badge">{{ unread_notif_count }} {% trans "unread" %}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Two-column forms ──────────────────────────────────────────────────── #}
+  <div class="profile-grid">
+
+    {# Edit info #}
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="bi bi-person-gear"></i>
+        <h2>{% trans "Edit Profile" %}</h2>
+      </div>
+      <form method="post" class="profile-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_info">
+
+        <div class="field-group">
+          <label for="id_first_name">{% trans "First name" %}</label>
+          <input type="text" id="id_first_name" name="first_name"
+                 value="{{ form.first_name.value|default:'' }}"
+                 placeholder="{% trans 'First name' %}">
+          {% if form.first_name.errors %}
+          <span class="field-error">{{ form.first_name.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="field-group">
+          <label for="id_last_name">{% trans "Last name" %}</label>
+          <input type="text" id="id_last_name" name="last_name"
+                 value="{{ form.last_name.value|default:'' }}"
+                 placeholder="{% trans 'Last name' %}">
+          {% if form.last_name.errors %}
+          <span class="field-error">{{ form.last_name.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="field-group">
+          <label for="id_email">{% trans "Email" %}</label>
+          <input type="email" id="id_email" name="email"
+                 value="{{ form.email.value|default:'' }}"
+                 placeholder="email@example.com">
+          {% if form.email.errors %}
+          <span class="field-error">{{ form.email.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm" style="width:100%;margin-top:4px;">
+          <i class="bi bi-check2"></i> {% trans "Save changes" %}
+        </button>
+      </form>
+    </div>
+
+    {# Change password #}
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <i class="bi bi-shield-lock"></i>
+        <h2>{% trans "Change Password" %}</h2>
+      </div>
+      <form method="post" class="profile-form" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="action" value="change_password">
+
+        <div class="field-group">
+          <label for="id_old_password">{% trans "Current password" %}</label>
+          <div class="input-eye">
+            <input type="password" id="id_old_password" name="old_password"
+                   placeholder="{% trans 'Current password' %}" autocomplete="current-password">
+            <button type="button" class="eye-btn" onclick="togglePw('id_old_password', this)">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% if pw_form.old_password.errors %}
+          <span class="field-error">{{ pw_form.old_password.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="field-group">
+          <label for="id_new_password1">{% trans "New password" %}</label>
+          <div class="input-eye">
+            <input type="password" id="id_new_password1" name="new_password1"
+                   placeholder="{% trans 'New password' %}" autocomplete="new-password">
+            <button type="button" class="eye-btn" onclick="togglePw('id_new_password1', this)">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% if pw_form.new_password1.errors %}
+          <span class="field-error">{{ pw_form.new_password1.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="field-group">
+          <label for="id_new_password2">{% trans "Confirm new password" %}</label>
+          <div class="input-eye">
+            <input type="password" id="id_new_password2" name="new_password2"
+                   placeholder="{% trans 'Confirm new password' %}" autocomplete="new-password">
+            <button type="button" class="eye-btn" onclick="togglePw('id_new_password2', this)">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% if pw_form.new_password2.errors %}
+          <span class="field-error">{{ pw_form.new_password2.errors.0 }}</span>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-sm" style="width:100%;margin-top:4px;">
+          <i class="bi bi-lock"></i> {% trans "Update password" %}
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  /* ── Layout ─────────────────────────────────────────────────────────────── */
+  .profile-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* ── Hero ────────────────────────────────────────────────────────────────── */
+  .profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 28px 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  }
+  .profile-avatar-lg {
+    width: 72px; height: 72px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; font-weight: 800; color: #fff;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 4px var(--accent-bg);
+  }
+  .profile-name {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--text); margin: 0 0 8px;
+  }
+  .profile-meta {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    font-size: .8rem; color: var(--text-muted);
+  }
+  .profile-since, .profile-email {
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  /* ── Stats ───────────────────────────────────────────────────────────────── */
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; text-align: center;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .stat-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+  .stat-icon  { font-size: 1.6rem; }
+  .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--text); font-family: var(--font-mono); }
+  .stat-label { font-size: .75rem; color: var(--text-muted); font-weight: 500; }
+  .stat-badge {
+    font-size: .65rem; font-weight: 700;
+    background: #ef4444; color: #fff;
+    border-radius: 99px; padding: 2px 8px;
+    margin-top: 4px;
+  }
+
+  /* ── Forms grid ──────────────────────────────────────────────────────────── */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .profile-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .profile-card-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .profile-card-header i  { font-size: 1rem; color: var(--accent); }
+  .profile-card-header h2 { font-size: .9rem; font-weight: 700; color: var(--text); margin: 0; }
+  .profile-form { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+  /* ── Fields ──────────────────────────────────────────────────────────────── */
+  .field-group { display: flex; flex-direction: column; gap: 5px; }
+  .field-group label {
+    font-size: .75rem; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em;
+  }
+  .field-group input {
+    width: 100%; padding: 9px 12px;
+    background: var(--input-bg, var(--bg));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text); font-size: .88rem;
+    outline: none; transition: border-color .15s, box-shadow .15s;
+    box-sizing: border-box;
+  }
+  .field-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg);
+  }
+  .field-error {
+    font-size: .72rem; color: #ef4444; font-weight: 500;
+  }
+
+  /* ── Password eye toggle ─────────────────────────────────────────────────── */
+  .input-eye { position: relative; }
+  .input-eye input { padding-right: 38px; }
+  .eye-btn {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: transparent; border: none; cursor: pointer;
+    color: var(--text-muted); font-size: .9rem; padding: 2px;
+    transition: color .12s;
+  }
+  .eye-btn:hover { color: var(--accent); }
+
+  /* ── Responsive ──────────────────────────────────────────────────────────── */
+  @media (max-width: 680px) {
+    .profile-hero   { flex-direction: column; text-align: center; padding: 20px; }
+    .profile-meta   { justify-content: center; }
+    .profile-stats  { grid-template-columns: repeat(3, 1fr); }
+    .profile-grid   { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 420px) {
+    .profile-stats  { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+function togglePw(fieldId, btn) {
+  const input = document.getElementById(fieldId);
+  const icon  = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}
