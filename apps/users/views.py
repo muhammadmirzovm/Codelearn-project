@@ -14,6 +14,13 @@ from .models import User, Group
 from apps.users.models import ChatMessage
 
 
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import redirect
+from django.contrib.auth import get_user_model
+from .models import Notification
+
+from django.http import JsonResponse
+
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -133,3 +140,16 @@ def group_detail(request, group_id):
         'group': group,
         'previous_messages': previous_messages,
     })
+    
+@login_required
+@require_POST                          # auto-returns 405 for non-POST
+def mark_one_read(request, pk):
+    Notification.objects.filter(pk=pk, recipient=request.user).update(is_read=True)
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_POST
+def mark_all_read(request):
+    request.user.notifications.filter(is_read=False).update(is_read=True)
+    return JsonResponse({'ok': True})

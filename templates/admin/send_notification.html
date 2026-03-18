@@ -1,0 +1,155 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Send Notification to All Users{% endblock %}
+
+{% block content_title %}
+<h1>📢 Send Notification to Users</h1>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+  {# ── Breadcrumb ───────────────────────────────────────────────── #}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a> ›
+    <a href="{% url 'admin:app_list' app_label='users' %}">Users</a> ›
+    <a href="{% url 'admin:users_notification_changelist' %}">Notifications</a> ›
+    Send to All
+  </div>
+
+  {# ── Django messages (success / error) ───────────────────────── #}
+  {% if messages %}
+  <ul class="messagelist">
+    {% for m in messages %}
+    <li class="{{ m.tags }}">{{ m }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {# ── Form ─────────────────────────────────────────────────────── #}
+  <form method="post" id="notif-form">
+    {% csrf_token %}
+
+    <fieldset class="module aligned">
+      <h2>Notification Details</h2>
+
+      <div class="form-row">
+        <label for="id_title" class="required">Title:</label>
+        <input
+          type="text"
+          id="id_title"
+          name="title"
+          maxlength="255"
+          required
+          autofocus
+          placeholder="e.g. System maintenance scheduled"
+          style="width:100%;max-width:600px;"
+        >
+      </div>
+
+      <div class="form-row">
+        <label for="id_message">Message <span class="help">(optional)</span>:</label>
+        <textarea
+          id="id_message"
+          name="message"
+          rows="4"
+          placeholder="Additional details shown below the title…"
+          style="width:100%;max-width:600px;resize:vertical;"
+        ></textarea>
+      </div>
+
+      <div class="form-row">
+        <label for="id_notif_type" class="required">Type:</label>
+        <select id="id_notif_type" name="notif_type" style="min-width:180px;">
+          {% for value, label in type_choices %}
+          <option value="{{ value }}" {% if value == 'info' %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="id_target" class="required">Send To:</label>
+        <select id="id_target" name="target" style="min-width:180px;">
+          <option value="all">👥 All active users</option>
+          <option value="teachers">👨‍🏫 Teachers only</option>
+          <option value="students">🎓 Students only</option>
+        </select>
+      </div>
+    </fieldset>
+
+    {# ── Preview box (updates live) ───────────────────────────────── #}
+    <fieldset class="module" id="preview-box" style="display:none;">
+      <h2>Preview</h2>
+      <div id="preview-item" style="
+        display:flex;align-items:flex-start;gap:12px;
+        padding:14px 16px;
+        background:var(--darkened-bg,#f8f8f8);
+        border:1px solid var(--border-color,#ddd);
+        border-radius:4px;max-width:380px;">
+        <span id="preview-icon" style="font-size:1.2rem;flex-shrink:0;margin-top:2px;">💡</span>
+        <div>
+          <p id="preview-title" style="font-weight:600;margin:0 0 4px;font-size:.9rem;"></p>
+          <p id="preview-msg"   style="color:#666;font-size:.8rem;margin:0 0 6px;line-height:1.4;"></p>
+          <p style="font-size:.7rem;color:#999;margin:0;">Just now</p>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="submit-row">
+      <input
+        type="submit"
+        value="📤 Send Notification"
+        class="default"
+        id="submit-btn"
+      >
+      <a href="{% url 'admin:users_notification_changelist' %}" class="closelink">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{# ── Inline JS: live preview + confirm dialog ─────────────────── #}
+<script>
+(function () {
+  const titleEl   = document.getElementById('id_title');
+  const msgEl     = document.getElementById('id_message');
+  const typeEl    = document.getElementById('id_notif_type');
+  const targetEl  = document.getElementById('id_target');
+  const submitBtn = document.getElementById('submit-btn');
+  const preview   = document.getElementById('preview-box');
+  const pIcon     = document.getElementById('preview-icon');
+  const pTitle    = document.getElementById('preview-title');
+  const pMsg      = document.getElementById('preview-msg');
+
+  const ICONS = { info: '💡', success: '✅', warning: '⚠️', danger: '❌' };
+
+  function updatePreview() {
+    const t = titleEl.value.trim();
+    if (!t) { preview.style.display = 'none'; return; }
+    preview.style.display = '';
+    pIcon.textContent  = ICONS[typeEl.value] || '💡';
+    pTitle.textContent = t;
+    pMsg.textContent   = msgEl.value.trim();
+    pMsg.style.display = msgEl.value.trim() ? '' : 'none';
+  }
+
+  titleEl.addEventListener('input',  updatePreview);
+  msgEl.addEventListener('input',    updatePreview);
+  typeEl.addEventListener('change',  updatePreview);
+
+  // Confirm before sending
+  document.getElementById('notif-form').addEventListener('submit', function (e) {
+    const target = targetEl.options[targetEl.selectedIndex].text;
+    const title  = titleEl.value.trim();
+    if (!confirm(`Send "${title}" to: ${target}?\n\nThis cannot be undone.`)) {
+      e.preventDefault();
+    } else {
+      submitBtn.value    = '⏳ Sending…';
+      submitBtn.disabled = true;
+    }
+  });
+})();
+</script>
+{% endblock %}

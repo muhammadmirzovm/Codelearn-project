@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+  {% if send_to_all_url %}
+  <li>
+    <a href="{{ send_to_all_url }}" class="addlink" style="background:#417690;">
+      📢 {% trans "Send to All" %}
+    </a>
+  </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

@@ -15,4 +15,6 @@ urlpatterns = [
     path('groups/<int:pk>/delete/', views.group_delete, name='group_delete'),
     path('groups/<int:pk>/regenerate-key/', views.group_regenerate_key, name='group_regenerate_key'),
     path('groups/<int:group_id>/', views.group_detail, name='group_detail'),
+    path('notify/<int:pk>/read/', views.mark_one_read, name='notif_mark_one'),
+    path('notify/mark-read/',     views.mark_all_read, name='notif_mark_read'),
 ]
