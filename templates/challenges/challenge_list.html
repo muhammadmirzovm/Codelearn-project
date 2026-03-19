@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Global Challenges' %} — CodeLearn{% endblock %}
+
+{% block content %}
+<style>
+.challenges-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
+}
+.challenges-title { font-size: 1.5rem; font-weight: 700; color: var(--text); margin: 0; }
+.challenges-sub   { font-size: .85rem; color: var(--text-muted); margin: 4px 0 0; }
+
+.filter-row {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.filter-btn {
+  padding: 6px 14px; border-radius: 99px; font-size: .78rem; font-weight: 600;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text-muted); cursor: pointer; text-decoration: none;
+  transition: all .15s;
+}
+.filter-btn:hover   { border-color: var(--accent); color: var(--accent); }
+.filter-btn.active  { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.challenge-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: border-color .15s, transform .15s;
+  text-decoration: none; color: inherit;
+}
+.challenge-card:hover {
+  border-color: var(--accent); transform: translateY(-2px);
+}
+.challenge-card.solved {
+  border-color: var(--success, #22c55e);
+  background: var(--success-bg, rgba(34,197,94,.04));
+}
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-title { font-size: .95rem; font-weight: 700; color: var(--text); flex: 1; }
+.solved-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #22c55e; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; flex-shrink: 0;
+}
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 9px; border-radius: 99px;
+  font-size: .68rem; font-weight: 700; font-family: var(--font-mono);
+  letter-spacing: .04em;
+}
+.badge-easy   { background: rgba(34,197,94,.12);  color: #16a34a; border: 1px solid rgba(34,197,94,.25); }
+.badge-medium { background: rgba(234,179, 8,.12); color: #b45309; border: 1px solid rgba(234,179,8,.25); }
+.badge-hard   { background: rgba(239, 68,68,.12); color: #dc2626; border: 1px solid rgba(239,68,68,.25); }
+.badge-coin   { background: rgba(250,204,21,.15); color: #92400e; border: 1px solid rgba(250,204,21,.3); gap: 4px; }
+
+.card-meta {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: .75rem; color: var(--text-muted);
+}
+.card-meta i { font-size: .8rem; }
+.card-desc {
+  font-size: .82rem; color: var(--text-muted); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.leaderboard-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: var(--radius);
+  background: var(--accent-bg, rgba(13,148,136,.08));
+  border: 1.5px solid var(--accent);
+  color: var(--accent); font-size: .82rem; font-weight: 600;
+  text-decoration: none; transition: all .15s; white-space: nowrap;
+}
+.leaderboard-btn:hover { background: var(--accent); color: #fff; }
+
+.coin-balance-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 99px;
+  background: rgba(250,204,21,.12); border: 1.5px solid rgba(250,204,21,.3);
+  font-size: .82rem; font-weight: 700; color: #92400e;
+}
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--text-muted);
+}
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.empty-state p { font-size: .9rem; }
+
+.pagination { display: flex; gap: 6px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+.page-link {
+  padding: 6px 13px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); font-size: .82rem; text-decoration: none;
+  transition: all .15s;
+}
+.page-link:hover, .page-link.current { border-color: var(--accent); color: var(--accent); }
+.page-link.current { font-weight: 700; }
+</style>
+
+<div class="challenges-header">
+  <div>
+    <h1 class="challenges-title">🏆 {% trans 'Global Challenges' %}</h1>
+    <p class="challenges-sub">
+      {% blocktrans with n=total_published %}{{ n }} published challenges — solve them to earn coins{% endblocktrans %}
+    </p>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <span class="coin-balance-pill">
+      🪙 {{ request.user.coin_balance }} {% trans 'coins' %}
+    </span>
+    <a href="{% url 'tasks:leaderboard' %}" class="leaderboard-btn">
+      <i class="bi bi-trophy"></i> {% trans 'Leaderboard' %}
+    </a>
+  </div>
+</div>
+
+{# Difficulty filter #}
+<div class="filter-row">
+  <a href="{% url 'tasks:challenge_list' %}"
+     class="filter-btn {% if not difficulty %}active{% endif %}">
+    {% trans 'All' %}
+  </a>
+  <a href="?difficulty=easy"
+     class="filter-btn {% if difficulty == 'easy' %}active{% endif %}">
+    🟢 {% trans 'Easy' %}
+  </a>
+  <a href="?difficulty=medium"
+     class="filter-btn {% if difficulty == 'medium' %}active{% endif %}">
+    🟡 {% trans 'Medium' %}
+  </a>
+  <a href="?difficulty=hard"
+     class="filter-btn {% if difficulty == 'hard' %}active{% endif %}">
+    🔴 {% trans 'Hard' %}
+  </a>
+</div>
+
+{% if page_obj.object_list %}
+<div class="challenge-grid">
+  {% for task in page_obj %}
+  <a href="{% url 'tasks:challenge_detail' task.pk %}"
+     class="challenge-card {% if task.pk in solved_ids %}solved{% endif %}">
+
+    <div class="card-top">
+      <span class="card-title">{{ task.title }}</span>
+      {% if task.pk in solved_ids %}
+      <span class="solved-check" title="{% trans 'Solved' %}">✓</span>
+      {% endif %}
+    </div>
+
+    <div class="card-meta">
+      <span class="badge badge-{{ task.difficulty }}">{{ task.get_difficulty_display }}</span>
+      {% if task.coin_reward %}
+      <span class="badge badge-coin">🪙 {{ task.coin_reward }}</span>
+      {% endif %}
+      <span><i class="bi bi-people"></i> {{ task.solve_count }} {% trans 'solves' %}</span>
+      <span><i class="bi bi-clock"></i> {{ task.time_limit }}s</span>
+    </div>
+
+    <p class="card-desc">{{ task.description|truncatechars:120 }}</p>
+  </a>
+  {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="pagination">
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}"
+     class="page-link">‹ {% trans 'Prev' %}</a>
+  {% endif %}
+  {% for n in page_obj.paginator.page_range %}
+    {% if n == page_obj.number %}
+    <span class="page-link current">{{ n }}</span>
+    {% elif n >= page_obj.number|add:"-2" and n <= page_obj.number|add:"2" %}
+    <a href="?page={{ n }}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}"
+       class="page-link">{{ n }}</a>
+    {% endif %}
+  {% endfor %}
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}{% if difficulty %}&difficulty={{ difficulty }}{% endif %}"
+     class="page-link">{% trans 'Next' %} ›</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">🔍</div>
+  <p>{% trans 'No challenges found for this filter.' %}</p>
+</div>
+{% endif %}
+
+{% endblock %}

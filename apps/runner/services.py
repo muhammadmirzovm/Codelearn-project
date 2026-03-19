@@ -58,8 +58,8 @@ def run_code_sync(code: str, test_cases, time_limit: int, memory_limit: str,
         )
         results.append({
             'test_case_id': tc.pk,
-            'input':    tc.input_data    if tc.is_example else '(hidden)',
-            'expected': tc.expected_output if tc.is_example else '(hidden)',
+            'input':    tc.input_data       if tc.is_example else '(hidden)',
+            'expected': tc.expected_output  if tc.is_example else '(hidden)',
             'stdout':   result['stdout'],
             'stderr':   result['stderr'],
             'exit_code': result['exit_code'],
@@ -136,11 +136,11 @@ def _run_in_subprocess(code: str, stdin_data: str, time_limit: int,
             )
             elapsed = time.monotonic() - start
             return {
-                'stdout':   proc.stdout.decode(errors='replace'),
-                'stderr':   proc.stderr.decode(errors='replace'),
+                'stdout':    proc.stdout.decode(errors='replace'),
+                'stderr':    proc.stderr.decode(errors='replace'),
                 'exit_code': proc.returncode,
                 'time_used': round(elapsed, 3),
-                'error':    None,
+                'error':     None,
             }
         except subprocess.TimeoutExpired:
             return {
@@ -161,6 +161,82 @@ def _run_in_subprocess(code: str, stdin_data: str, time_limit: int,
             }
 
 
+# ── Coin award helper ─────────────────────────────────────────────────────────
+
+def _try_award_coins(submission) -> None:
+    """
+    Award coins to the student if this is the first accepted solve
+    of a published global challenge. Safe under concurrent submissions
+    thanks to the unique_together DB constraint on SolvedChallenge.
+    """
+    from django.db import transaction, IntegrityError
+    from apps.submissions.models import SolvedChallenge
+    from apps.users.models import CoinTransaction, Notification
+    from apps.tasks.models import Task
+
+    task = submission.task
+
+    # Only award for published global challenges with a reward
+    if task.scope != Task.SCOPE_GLOBAL:
+        return
+    if task.status != Task.STATUS_PUBLISHED:
+        return
+    if task.coin_reward <= 0:
+        return
+
+    try:
+        with transaction.atomic():
+            # get_or_create is atomic inside the transaction.
+            # If two concurrent submissions both pass, only the first
+            # insert succeeds; the second hits the unique constraint → created=False.
+            _, created = SolvedChallenge.objects.get_or_create(
+                user=submission.student,
+                task=task,
+                defaults={
+                    'submission':    submission,
+                    'coins_awarded': task.coin_reward,
+                },
+            )
+            if not created:
+                logger.info(
+                    'Submission %s: user %s already solved task %s — no coins awarded.',
+                    submission.pk, submission.student_id, task.pk,
+                )
+                return
+
+            # Record the transaction in the ledger
+            CoinTransaction.objects.create(
+                user           = submission.student,
+                amount         = task.coin_reward,
+                tx_type        = CoinTransaction.TYPE_EARN,
+                ref_submission = submission,
+                note           = f'Solved: {task.title}',
+            )
+
+            # Notify the student
+            Notification.objects.create(
+                recipient  = submission.student,
+                title      = f'🪙 +{task.coin_reward} coins earned!',
+                message    = f'You solved "{task.title}" — keep it up!',
+                notif_type = 'success',
+            )
+
+            logger.info(
+                'Awarded %s coins to user %s for solving task %s.',
+                task.coin_reward, submission.student_id, task.pk,
+            )
+
+    except IntegrityError:
+        # Race condition: another process inserted first — harmless, no double award.
+        logger.warning(
+            'IntegrityError awarding coins for submission %s — likely a race condition, ignored.',
+            submission.pk,
+        )
+    except Exception:
+        # Never let a coin error crash the submission pipeline.
+        logger.exception('Unexpected error awarding coins for submission %s', submission.pk)
+
+
 # ── Sync evaluator (called directly — no Celery) ─────────────────────────────
 
 def _evaluate_submission_sync(submission_pk: int):
@@ -179,15 +255,14 @@ def _evaluate_submission_sync(submission_pk: int):
 
     hidden_cases = list(sub.task.hidden_cases)
     if not hidden_cases:
-        # Fall back to all test cases if no hidden ones
         hidden_cases = list(sub.task.test_cases.all())
     if not hidden_cases:
-        sub.status = Submission.STATUS_ERROR
+        sub.status  = Submission.STATUS_ERROR
         sub.results = [{'error': 'No test cases configured for this task'}]
         sub.save()
         return
 
-    results = run_code_sync(
+    results    = run_code_sync(
         sub.code, hidden_cases,
         sub.task.time_limit, sub.task.memory_limit,
         language=sub.language,
@@ -202,6 +277,7 @@ def _evaluate_submission_sync(submission_pk: int):
 
     logger.info('Submission %s [%s] → %s', submission_pk, sub.language, sub.status)
 
+    # ── Broadcast to session monitor (session submissions only) ───────────
     if sub.session_id:
         _broadcast_session_event(sub.session_id, 'submission_result', {
             'student':       sub.student.username,
@@ -210,3 +286,7 @@ def _evaluate_submission_sync(submission_pk: int):
             'status':        sub.status,
             'is_correct':    sub.is_correct,
         })
+
+    # ── Award coins (global challenge submissions only) ───────────────────
+    if is_correct and sub.session_id is None:
+        _try_award_coins(sub)

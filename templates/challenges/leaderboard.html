@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Leaderboard' %} — CodeLearn{% endblock %}
+
+{% block content %}
+<style>
+.lb-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
+}
+.lb-title { font-size: 1.5rem; font-weight: 700; color: var(--text); margin: 0; }
+.lb-sub   { font-size: .85rem; color: var(--text-muted); margin: 4px 0 0; }
+
+.my-rank-card {
+  background: var(--accent-bg, rgba(13,148,136,.08));
+  border: 1.5px solid var(--accent); border-radius: var(--radius-lg);
+  padding: 14px 20px; display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.my-rank-label { font-size: .8rem; color: var(--text-muted); }
+.my-rank-val   { font-size: 1.4rem; font-weight: 800; color: var(--accent); font-family: var(--font-mono); }
+.my-coins-val  { font-size: 1.1rem; font-weight: 700; color: #92400e; }
+.my-rank-sep   { width: 1px; height: 32px; background: var(--border); }
+
+.lb-table-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th {
+  padding: 10px 16px; text-align: left; font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--text-muted); background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.lb-table td {
+  padding: 11px 16px; font-size: .85rem; color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.lb-table tr:last-child td { border-bottom: none; }
+.lb-table tr:hover td { background: var(--highlight); }
+.lb-table tr.me td { background: var(--accent-bg, rgba(13,148,136,.06)); }
+
+.rank-num {
+  font-family: var(--font-mono); font-weight: 800; font-size: .88rem;
+  color: var(--text-muted);
+}
+.rank-1 { color: #f59e0b; }
+.rank-2 { color: #9ca3af; }
+.rank-3 { color: #b45309; }
+
+.lb-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 800; font-family: var(--font-mono);
+  flex-shrink: 0; vertical-align: middle; margin-right: 8px;
+}
+.lb-username { font-weight: 600; vertical-align: middle; }
+.lb-you {
+  font-size: .65rem; font-weight: 700; font-family: var(--font-mono);
+  background: var(--accent); color: #fff;
+  padding: 1px 6px; border-radius: 99px; margin-left: 6px;
+  vertical-align: middle;
+}
+.coins-cell {
+  font-family: var(--font-mono); font-weight: 700; color: #92400e;
+  display: flex; align-items: center; gap: 5px;
+}
+.solved-cell { color: var(--text-muted); font-family: var(--font-mono); font-size: .82rem; }
+
+.empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+.empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+@media (max-width: 600px) {
+  .lb-table th:nth-child(3), .lb-table td:nth-child(3) { display: none; }
+}
+</style>
+
+<div class="lb-header">
+  <div>
+    <h1 class="lb-title">🏆 {% trans 'Leaderboard' %}</h1>
+    <p class="lb-sub">{% trans 'Ranked by total coins earned from global challenges' %}</p>
+  </div>
+  <a href="{% url 'tasks:challenge_list' %}" class="btn btn-ghost btn-sm">
+    <i class="bi bi-arrow-left"></i> {% trans 'Back to challenges' %}
+  </a>
+</div>
+
+{# Current user's rank card #}
+{% if my_rank %}
+<div class="my-rank-card">
+  <div>
+    <div class="my-rank-label">{% trans 'Your rank' %}</div>
+    <div class="my-rank-val">#{{ my_rank }}</div>
+  </div>
+  <div class="my-rank-sep"></div>
+  <div>
+    <div class="my-rank-label">{% trans 'Your coins' %}</div>
+    <div class="my-coins-val">🪙 {{ my_balance }}</div>
+  </div>
+  <div class="my-rank-sep"></div>
+  <div>
+    <div class="my-rank-label">{% trans 'Keep solving to climb the board!' %}</div>
+  </div>
+</div>
+{% elif my_balance == 0 %}
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 20px;margin-bottom:20px;font-size:.85rem;color:var(--text-muted);">
+  💡 {% trans "You haven't earned any coins yet — solve a global challenge to appear on the leaderboard!" %}
+</div>
+{% endif %}
+
+<div class="lb-table-wrap">
+  {% if rankings %}
+  <table class="lb-table">
+    <thead>
+      <tr>
+        <th style="width:52px;">#</th>
+        <th>{% trans 'User' %}</th>
+        <th>{% trans 'Solved' %}</th>
+        <th>{% trans 'Coins' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in rankings %}
+      <tr {% if u == request.user %}class="me"{% endif %}>
+        <td>
+          <span class="rank-num
+            {% if forloop.counter == 1 %}rank-1
+            {% elif forloop.counter == 2 %}rank-2
+            {% elif forloop.counter == 3 %}rank-3{% endif %}">
+            {% if forloop.counter == 1 %}🥇
+            {% elif forloop.counter == 2 %}🥈
+            {% elif forloop.counter == 3 %}🥉
+            {% else %}{{ forloop.counter }}{% endif %}
+          </span>
+        </td>
+        <td>
+          <span class="lb-avatar">{{ u.username|first|upper }}</span>
+          <span class="lb-username">{{ u.get_full_name|default:u.username }}</span>
+          {% if u == request.user %}<span class="lb-you">{% trans 'you' %}</span>{% endif %}
+        </td>
+        <td class="solved-cell">{{ u.solved_count }}</td>
+        <td>
+          <span class="coins-cell">🪙 {{ u.total_coins }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🌱</div>
+    <p>{% trans 'No one has earned coins yet. Be the first!' %}</p>
+    <a href="{% url 'tasks:challenge_list' %}" class="btn btn-primary btn-sm" style="margin-top:10px;">
+      {% trans 'Start solving' %}
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

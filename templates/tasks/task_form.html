@@ -13,6 +13,50 @@
 .type-toggle label { flex:1; text-align:center; padding:7px 10px; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .15s; color:var(--text-muted); background:var(--surface); font-family:var(--font-mono); }
 .type-toggle input[type=radio] { display:none; }
 .type-toggle input:checked + label { background:var(--accent); color:white; }
+
+/* Scope toggle — two large pills */
+.scope-toggle { display:flex; gap:10px; }
+.scope-opt input[type=radio] { display:none; }
+.scope-opt label {
+  display:flex; align-items:center; gap:8px;
+  padding:10px 18px; border-radius:var(--radius-lg);
+  border:1.5px solid var(--border); background:var(--surface);
+  cursor:pointer; font-size:.85rem; font-weight:600;
+  color:var(--text-muted); transition:all .18s;
+  user-select:none;
+}
+.scope-opt input:checked + label {
+  border-color:var(--accent); background:var(--accent-bg,rgba(13,148,136,.08)); color:var(--accent);
+}
+.scope-opt label:hover { border-color:var(--accent-ll,rgba(13,148,136,.4)); color:var(--text); }
+
+/* Global settings card — slides in */
+#global-card {
+  overflow:hidden; transition:max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s;
+  max-height:0; opacity:0; margin-bottom:0;
+}
+#global-card.visible { max-height:600px; opacity:1; margin-bottom:20px; }
+
+/* Difficulty pills */
+.diff-toggle { display:flex; gap:8px; flex-wrap:wrap; }
+.diff-opt input[type=radio] { display:none; }
+.diff-opt label {
+  padding:6px 16px; border-radius:99px; font-size:.78rem; font-weight:700;
+  border:1.5px solid var(--border); background:var(--surface);
+  cursor:pointer; transition:all .15s; font-family:var(--font-mono);
+  color:var(--text-muted);
+}
+.diff-opt.easy   input:checked + label { background:rgba(34,197,94,.12);  border-color:rgba(34,197,94,.4);  color:#16a34a; }
+.diff-opt.medium input:checked + label { background:rgba(234,179,8,.12);  border-color:rgba(234,179,8,.4);  color:#b45309; }
+.diff-opt.hard   input:checked + label { background:rgba(239,68,68,.12);  border-color:rgba(239,68,68,.4);  color:#dc2626; }
+.diff-opt label:hover { border-color:var(--accent-ll,rgba(13,148,136,.4)); }
+
+.help-text { font-size:.74rem; color:var(--text-sub); margin-top:4px; }
+.field-err  { color:var(--danger); font-size:.78rem; margin-top:4px; }
+
+/* Status select colour hint */
+select#id_status option[value=published] { color:#16a34a; font-weight:700; }
+select#id_status option[value=archived]  { color:#9ca3af; }
 </style>
 {% endblock %}
 
@@ -27,18 +71,21 @@
     {% csrf_token %}
     {{ formset.management_form }}
 
-    <!-- TASK DETAILS CARD -->
+    <!-- ── TASK DETAILS ─────────────────────────────────────────────────── -->
     <div class="card card-p fade-up-2" style="margin-bottom:20px;">
       <h2 style="font-weight:600;font-size:1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">📄 {% trans "Task Details" %}</h2>
+
       <div class="inp-group">
         <label class="inp-label">{% trans "Title" %} *</label>
         {{ form.title }}
-        {% if form.title.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.title.errors.0 }}</p>{% endif %}
+        {% if form.title.errors %}<p class="field-err">{{ form.title.errors.0 }}</p>{% endif %}
       </div>
+
       <div class="inp-group">
         <label class="inp-label">{% trans "Problem Statement" %} *</label>
         {{ form.description }}
       </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="inp-group">
           <label class="inp-label">
@@ -55,6 +102,7 @@
           {{ form.example_output }}
         </div>
       </div>
+
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="inp-group">
           <label class="inp-label">{% trans "Time Limit (seconds)" %}</label>
@@ -67,7 +115,80 @@
       </div>
     </div>
 
-    <!-- TEST CASES CARD -->
+    <!-- ── SCOPE TOGGLE ──────────────────────────────────────────────────── -->
+    <div class="card card-p fade-up-2" style="margin-bottom:20px;">
+      <h2 style="font-weight:600;font-size:1rem;margin-bottom:6px;">🌐 {% trans "Availability" %}</h2>
+      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:14px;">
+        {% trans "Session tasks are only used inside a class session. Global challenges are open to all users and can award coins." %}
+      </p>
+
+      <div class="scope-toggle">
+        <div class="scope-opt">
+          <input type="radio" name="scope" id="scope_session" value="session"
+                 {% if not form.scope.value or form.scope.value == 'session' %}checked{% endif %}>
+          <label for="scope_session">🏫 {% trans "Session only" %}</label>
+        </div>
+        <div class="scope-opt">
+          <input type="radio" name="scope" id="scope_global" value="global"
+                 {% if form.scope.value == 'global' %}checked{% endif %}>
+          <label for="scope_global">🌐 {% trans "Global challenge" %}</label>
+        </div>
+      </div>
+      {% if form.scope.errors %}<p class="field-err">{{ form.scope.errors.0 }}</p>{% endif %}
+    </div>
+
+    <!-- ── GLOBAL CHALLENGE SETTINGS (hidden until scope=global) ─────────── -->
+    <div class="card card-p fade-up-2" id="global-card">
+      <h2 style="font-weight:600;font-size:1rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);">🏆 {% trans "Global Challenge Settings" %}</h2>
+
+      <!-- Difficulty -->
+      <div class="inp-group">
+        <label class="inp-label">{% trans "Difficulty" %}</label>
+        <div class="diff-toggle">
+          <div class="diff-opt easy">
+            <input type="radio" name="difficulty" id="diff_easy" value="easy"
+                   {% if not form.difficulty.value or form.difficulty.value == 'easy' %}checked{% endif %}>
+            <label for="diff_easy">🟢 {% trans "Easy" %}</label>
+          </div>
+          <div class="diff-opt medium">
+            <input type="radio" name="difficulty" id="diff_medium" value="medium"
+                   {% if form.difficulty.value == 'medium' %}checked{% endif %}>
+            <label for="diff_medium">🟡 {% trans "Medium" %}</label>
+          </div>
+          <div class="diff-opt hard">
+            <input type="radio" name="difficulty" id="diff_hard" value="hard"
+                   {% if form.difficulty.value == 'hard' %}checked{% endif %}>
+            <label for="diff_hard">🔴 {% trans "Hard" %}</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coin reward + Status side by side -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="inp-group">
+          <label class="inp-label">🪙 {% trans "Coin Reward" %}</label>
+          {{ form.coin_reward }}
+          <p class="help-text">{% trans "Awarded once on first correct solve. Suggested: Easy=10 · Medium=25 · Hard=60" %}</p>
+          {% if form.coin_reward.errors %}<p class="field-err">{{ form.coin_reward.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">📢 {% trans "Status" %}</label>
+          {{ form.status }}
+          <p class="help-text">{% trans "Only Published challenges appear in the challenge list." %}</p>
+          {% if form.status.errors %}<p class="field-err">{{ form.status.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      {% if form.non_field_errors %}
+      <div style="background:var(--danger-bg);border:1px solid var(--danger-brd);border-radius:var(--radius);padding:10px 14px;margin-top:4px;">
+        {% for err in form.non_field_errors %}
+        <p style="color:var(--danger);font-size:.82rem;">{{ err }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ── TEST CASES ────────────────────────────────────────────────────── -->
     <div class="card card-p fade-up-3" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:10px;">
         <div>
@@ -124,6 +245,7 @@
       </div>
     </div>
 
+    <!-- ── SAVE ──────────────────────────────────────────────────────────── -->
     <div style="display:flex;gap:10px;" class="fade-up-3">
       <button type="submit" class="btn btn-primary btn-lg" style="flex:1;" id="save-btn">💾 {% trans "Save Task" %}</button>
       <a href="{% url 'tasks:task_list' %}" class="btn btn-ghost btn-lg">{% trans "Cancel" %}</a>
@@ -134,7 +256,7 @@
 
 {% block extra_js %}
 <script>
-// i18n strings injected into JavaScript
+// ── i18n strings ──────────────────────────────────────────────────────────
 const i18n = {
   test:              "{% trans 'Test' %}",
   inputStdin:        "{% trans 'Input (stdin)' %}",
@@ -147,8 +269,22 @@ const i18n = {
   remove:            "{% trans 'Remove' %}",
 };
 
+// ── Scope toggle → show/hide global card ─────────────────────────────────
+const globalCard   = document.getElementById('global-card');
+const scopeInputs  = document.querySelectorAll('input[name="scope"]');
+
+function updateGlobalCard() {
+  const isGlobal = document.querySelector('input[name="scope"]:checked')?.value === 'global';
+  globalCard.classList.toggle('visible', isGlobal);
+}
+
+scopeInputs.forEach(r => r.addEventListener('change', updateGlobalCard));
+// Run on load (handles edit mode where scope=global is already saved)
+updateGlobalCard();
+
+// ── Test case management (unchanged from original) ────────────────────────
 let totalForms = parseInt(document.querySelector('[name$="TOTAL_FORMS"]').value) || 0;
-let formIdx = totalForms;
+let formIdx    = totalForms;
 
 function renumberCards() {
   document.querySelectorAll('#tc-list .tc-card').forEach((card, i) => {
@@ -161,16 +297,16 @@ function renumberCards() {
 }
 
 function deleteTC(btn) {
-  const card = btn.closest('.tc-card');
+  const card    = btn.closest('.tc-card');
   const idInput = card.querySelector('input[name$="-id"]');
   if (idInput && idInput.value) {
-    const delName = idInput.name.replace('-id', '-DELETE');
+    const delName  = idInput.name.replace('-id', '-DELETE');
     const delInput = document.querySelector(`[name="${delName}"]`);
     if (delInput) delInput.checked = true;
   }
   card.style.transition = 'all .2s';
-  card.style.opacity = '0';
-  card.style.transform = 'scale(.97)';
+  card.style.opacity    = '0';
+  card.style.transform  = 'scale(.97)';
   setTimeout(() => { card.remove(); renumberCards(); }, 200);
 }
 

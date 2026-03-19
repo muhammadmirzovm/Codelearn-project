@@ -53,8 +53,11 @@
       {% if user.is_authenticated %}
       <div class="nav-links hide-sm">
         {% if user.is_teacher %}
-        <a href="{% url 'tasks:task_list' %}" class="nav-link">{% trans 'Challenges' %}</a>
+          <a href="{% url 'tasks:task_list' %}" class="nav-link">{% trans 'My Tasks' %}</a>
         {% endif %}
+        <a href="{% url 'tasks:challenge_list' %}" class="nav-link">
+            <i class="bi bi-trophy"></i> {% trans 'Challenges' %}
+        </a>
         <a href="{% url 'users:group_list' %}" class="nav-link">{% trans 'Groups' %}</a>
         <a href="{% url 'support:contact' %}" class="nav-link">{% trans 'Support' %}</a>
         {% if user.is_superuser %}
@@ -72,7 +75,15 @@
     {# Right side #}
     <div class="nav-right">
       {% if user.is_authenticated %}
-
+      <a href="{% url 'tasks:leaderboard' %}" class="hide-sm"
+              style="display:flex;align-items:center;gap:5px;
+              padding:5px 11px;border-radius:99px;
+              background:rgba(250,204,21,.1);border:1.5px solid rgba(250,204,21,.3);
+              color:#92400e;font-size:.78rem;font-weight:700;text-decoration:none;
+              transition:all .15s;"
+              title="{% trans 'Your coin balance — click for leaderboard' %}">
+            🪙 {{ request.user.coin_balance }}
+    </a>
       {# Profile pill #}
       <a href="{% url 'users:profile' %}" class="nav-user hide-sm" title="{% trans 'My profile' %}">
         <div class="nav-avatar">{{ user.username|first|upper }}</div>
@@ -224,6 +235,13 @@
     <a href="{% url 'users:group_list' %}" class="drawer-link">
       <i class="bi bi-people"></i> {% trans 'Groups' %}
     </a>
+    <a href="{% url 'tasks:challenge_list' %}" class="drawer-link">
+        <i class="bi bi-trophy"></i> {% trans 'Challenges' %}
+    </a>
+    <a href="{% url 'tasks:leaderboard' %}" class="drawer-link">
+        <i class="bi bi-bar-chart-steps"></i> {% trans 'Leaderboard' %} &nbsp;🪙 {{ request.user.coin_balance }}
+    </a>
+
     <a href="{% url 'support:contact' %}" class="drawer-link">
       <i class="bi bi-chat-dots"></i> {% trans 'Support' %}
     </a>

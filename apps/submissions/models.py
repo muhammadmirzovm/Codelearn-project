@@ -39,10 +39,10 @@ class Submission(models.Model):
         related_name='submissions',
         null=True, blank=True,
     )
-    code       = models.TextField()
-    language   = models.CharField(max_length=20, choices=LANG_CHOICES, default=LANG_PYTHON)
-    status     = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
-    is_correct = models.BooleanField(default=False)
+    code          = models.TextField()
+    language      = models.CharField(max_length=20, choices=LANG_CHOICES, default=LANG_PYTHON)
+    status        = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    is_correct    = models.BooleanField(default=False)
     created_at    = models.DateTimeField(auto_now_add=True)
     evaluated_at  = models.DateTimeField(null=True, blank=True)
     results       = models.JSONField(default=list, blank=True)
@@ -60,3 +60,18 @@ class Submission(models.Model):
     @property
     def total_count(self):
         return len(self.results)
+
+
+class SolvedChallenge(models.Model):
+    user          = models.ForeignKey(User, on_delete=models.CASCADE, related_name='solved_challenges')
+    task          = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='solved_challenges')
+    submission    = models.ForeignKey(Submission, on_delete=models.SET_NULL, null=True, related_name='solve_record')
+    coins_awarded = models.PositiveIntegerField(default=0)
+    solved_at     = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'task')
+        ordering = ['-solved_at']
+
+    def __str__(self):
+        return f'{self.user.username} solved "{self.task.title}" (+{self.coins_awarded} coins)'
