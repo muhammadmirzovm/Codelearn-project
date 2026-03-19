@@ -5,7 +5,7 @@ TestCase: example or hidden test data for evaluation.
 """
 from django.db import models
 from apps.users.models import User
-
+from django.urls import reverse
 
 class Task(models.Model):
 
@@ -98,6 +98,8 @@ class Task(models.Model):
             self.DIFF_HARD:   'badge-hard',
         }.get(self.difficulty, '')
 
+    def get_absolute_url(self):
+        return reverse('tasks:challenge_detail', kwargs={'pk': self.pk})
 
 class TestCase(models.Model):
     """
