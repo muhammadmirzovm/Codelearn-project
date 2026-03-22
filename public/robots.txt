@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mondaycodelearn.fly.dev/sitemap.xml

@@ -1,0 +1,539 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Useful Websites" %} – CodeLearn{% endblock %}
+{% block codemirror %}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ── Search ───────────────────────────────────────────────── */
+.res-form-error {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 6px; padding: 7px 12px;
+  background: var(--danger-bg, rgba(239,68,68,.08));
+  border: 1px solid var(--danger-brd, rgba(239,68,68,.25));
+  border-left: 3px solid #ef4444;
+  border-radius: var(--radius);
+  font-size: .78rem; font-weight: 600; color: #ef4444;
+}
+.res-search-wrap { position:relative; margin-bottom:20px; }
+.res-search-icon {
+  position:absolute; left:13px; top:50%;
+  transform:translateY(-50%);
+  color:var(--text-muted); font-size:.95rem; pointer-events:none;
+}
+.res-search {
+  width:100%; box-sizing:border-box;
+  padding:10px 16px 10px 38px; font-size:.9rem;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); color:var(--text); outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.res-search:focus {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(13,148,136,.12);
+}
+.res-search::placeholder { color:var(--text-sub); }
+
+/* ── Category tabs ────────────────────────────────────────── */
+.res-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.res-tab {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 14px; border:1.5px solid var(--border); border-radius:99px;
+  font-size:.78rem; font-weight:600; background:var(--surface);
+  color:var(--text-muted); cursor:pointer; text-decoration:none;
+  transition:all .15s; font-family:var(--font-mono); white-space:nowrap;
+}
+.res-tab:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-bg); }
+.res-tab.active { border-color:var(--accent); background:var(--accent); color:#fff; }
+.res-tab.active:hover { background:var(--accent); color:#fff; }
+.res-tab-count {
+  font-size:.65rem; padding:1px 5px; border-radius:99px;
+  font-weight:800; background:rgba(255,255,255,.25);
+}
+.res-tab:not(.active) .res-tab-count { background:var(--border); color:var(--text-sub); }
+
+/* ── Stats ────────────────────────────────────────────────── */
+.res-stats {
+  display:flex; align-items:center; gap:8px;
+  margin-bottom:18px; font-size:.8rem; color:var(--text-muted);
+}
+.res-count-pill {
+  font-family:var(--font-mono); font-size:.72rem; font-weight:800;
+  background:var(--accent-bg); color:var(--accent);
+  padding:2px 9px; border-radius:99px;
+  border:1px solid rgba(13,148,136,.2);
+  min-width:24px; text-align:center; transition:all .2s;
+}
+
+/* ── Cards grid ───────────────────────────────────────────── */
+.res-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+  gap:16px; margin-bottom:32px;
+}
+.res-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:18px;
+  text-decoration:none; display:flex; flex-direction:column;
+  transition:border-color .15s, transform .15s, box-shadow .15s;
+  cursor:pointer; position:relative; overflow:hidden;
+}
+.res-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background:var(--card-accent, var(--accent)); opacity:0;
+  transition:opacity .15s;
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.res-card:hover {
+  border-color:var(--accent);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(0,0,0,.1);
+}
+.res-card:hover::before { opacity:1; }
+
+.res-card-top { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+.res-card-logo {
+  width:40px; height:40px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; font-weight:800; color:#fff;
+  flex-shrink:0; font-family:var(--font-mono);
+}
+.res-card-meta { flex:1; min-width:0; }
+.res-card-name {
+  font-size:.92rem; font-weight:700; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-bottom:2px; display:flex; align-items:center; gap:6px;
+}
+.res-card-domain { font-size:.7rem; color:var(--text-sub); font-family:var(--font-mono); }
+.res-card-desc {
+  font-size:.82rem; color:var(--text-muted); line-height:1.55;
+  margin-bottom:12px; flex:1;
+  display:-webkit-box; -webkit-line-clamp:2;
+  -webkit-box-orient:vertical; overflow:hidden;
+}
+.res-card-footer {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:8px; margin-top:auto;
+}
+.res-card-tags { display:flex; gap:4px; flex-wrap:wrap; flex:1; }
+.res-card-tag {
+  font-size:.66rem; padding:2px 7px; border-radius:4px;
+  background:var(--accent-bg); color:var(--accent);
+  font-weight:600; font-family:var(--font-mono);
+}
+.res-card-visit {
+  font-size:.75rem; color:var(--text-sub); flex-shrink:0;
+  opacity:0; transition:opacity .15s; font-family:var(--font-mono);
+}
+.res-card:hover .res-card-visit { opacity:1; }
+
+/* ── Badges ───────────────────────────────────────────────── */
+.res-badge-featured {
+  font-size:.58rem; padding:2px 6px; border-radius:4px;
+  background:rgba(250,204,21,.12); color:#92400e;
+  font-weight:800; font-family:var(--font-mono);
+  border:1px solid rgba(250,204,21,.3); flex-shrink:0;
+}
+
+/* ── Empty state ──────────────────────────────────────────── */
+.res-empty { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--text-muted); }
+.res-empty-icon { font-size:2.5rem; margin-bottom:12px; }
+.res-empty h3 { font-size:1rem; font-weight:700; margin-bottom:6px; color:var(--text); }
+.res-empty p  { font-size:.85rem; }
+
+/* ── About / suggest block ────────────────────────────────── */
+.res-about {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius-lg); padding:20px 24px;
+  display:flex; align-items:flex-start; gap:16px;
+}
+.res-about-icon { font-size:1.6rem; flex-shrink:0; margin-top:2px; }
+.res-about-body h3 { font-size:.95rem; font-weight:700; color:var(--text); margin-bottom:6px; }
+.res-about-body p  { font-size:.84rem; color:var(--text-muted); line-height:1.6; margin-bottom:12px; }
+
+/* ── Suggest form ─────────────────────────────────────────── */
+.res-form-label {
+  display:block; font-size:.78rem; font-weight:600;
+  color:var(--text-muted); margin-bottom:5px;
+}
+.res-form-error { font-size:.75rem; color:#ef4444; margin-top:4px; }
+.form-input {
+  width:100%; box-sizing:border-box;
+  padding:8px 12px; font-size:.88rem;
+  background:var(--bg2, var(--surface));
+  border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--text);
+  outline:none; transition:border-color .15s, box-shadow .15s;
+}
+.form-input:focus {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(13,148,136,.12);
+}
+textarea.form-input { resize:vertical; min-height:80px; }
+
+/* ── My suggestions status pills ──────────────────────────── */
+.sug-pill {
+  font-size:.7rem; padding:2px 8px; border-radius:99px;
+  font-weight:700; white-space:nowrap;
+}
+.sug-pill-pending  { background:rgba(250,204,21,.12); color:#92400e; border:1px solid rgba(250,204,21,.3); }
+.sug-pill-approved { background:var(--success-bg); color:var(--success); border:1px solid var(--success-brd); }
+.sug-pill-rejected { background:var(--danger-bg);  color:var(--danger);  border:1px solid var(--danger-brd); }
+
+@media (max-width:600px) {
+  .res-grid  { grid-template-columns:1fr; }
+  .res-about { flex-direction:column; }
+  .res-form-grid { grid-template-columns:1fr !important; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+{# ── Hero ──────────────────────────────────────────────────────────────── #}
+<div class="page-hero fade-up">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div>
+      <h1 class="section-title">{% trans "Useful Websites" %} 🌐</h1>
+      <p class="section-sub">{% trans "Hand-picked resources to accelerate your learning journey" %}</p>
+    </div>
+    {% if user.is_superuser %}
+    <div style="display:flex;gap:10px;">
+      <a href="{% url 'admin:resources_website_add' %}" class="btn btn-ghost btn-sm">
+        <i class="bi bi-plus-lg"></i> {% trans "Add Website" %}
+      </a>
+      <a href="{% url 'admin:resources_category_add' %}" class="btn btn-ghost btn-sm">
+        <i class="bi bi-folder-plus"></i> {% trans "Add Category" %}
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="fade-up-2">
+
+  {# ── Search ──────────────────────────────────────────────────────────── #}
+  <div class="res-search-wrap">
+    <i class="bi bi-search res-search-icon"></i>
+    <input
+      type="text" id="res-search" class="res-search"
+      placeholder="{% trans 'Search websites, tools, topics…' %}"
+      value="{{ search_query }}" autocomplete="off" spellcheck="false"
+    >
+  </div>
+
+  {# ── Category tabs ───────────────────────────────────────────────────── #}
+  <div class="res-tabs">
+    <a href="{% url 'resources:website_list' %}"
+       class="res-tab {% if not active_slug %}active{% endif %}">
+      <i class="bi bi-grid-3x3-gap"></i>
+      {% trans "All" %}
+      <span class="res-tab-count">{{ total_count }}</span>
+    </a>
+    {% for cat in categories %}
+    <a href="{% url 'resources:website_list' %}?category={{ cat.slug }}"
+       class="res-tab {% if active_slug == cat.slug %}active{% endif %}"
+       {% if active_slug == cat.slug %}style="border-color:{{ cat.color }};background:{{ cat.color }};"{% endif %}>
+      <i class="bi {{ cat.icon }}"></i>
+      {{ cat.name }}
+      <span class="res-tab-count">{{ cat.website_count }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  {# ── Stats bar ───────────────────────────────────────────────────────── #}
+  <div class="res-stats">
+    <span class="res-count-pill" id="res-visible-count">{{ total_count }}</span>
+    <span>{% trans "websites available" %}</span>
+    {% if search_query %}
+    <span style="color:var(--text-sub);">
+      — {% blocktrans with q=search_query %}results for "{{ q }}"{% endblocktrans %}
+      <a href="{% url 'resources:website_list' %}{% if active_slug %}?category={{ active_slug }}{% endif %}"
+         style="color:var(--accent);text-decoration:none;margin-left:4px;">✕</a>
+    </span>
+    {% endif %}
+  </div>
+
+  {# ── Cards grid ──────────────────────────────────────────────────────── #}
+  <div class="res-grid" id="res-grid">
+    {% for site in websites %}
+    <a href="{% url 'resources:website_visit' site.pk %}"
+       class="res-card"
+       style="--card-accent:{{ site.color }};"
+       data-name="{{ site.name|lower }}"
+       data-desc="{{ site.display_description|lower }}"
+       data-tags="{% for t in site.tags.all %}{{ t.name|lower }} {% endfor %}"
+       target="_blank" rel="noopener noreferrer">
+
+      <div class="res-card-top">
+        <div class="res-card-logo" style="background:{{ site.color }};">{{ site.letter }}</div>
+        <div class="res-card-meta">
+          <div class="res-card-name">
+            <span>{{ site.name }}</span>
+            {% if site.is_featured %}
+            <span class="res-badge-featured">⭐ {% trans "Featured" %}</span>
+            {% endif %}
+          </div>
+          <div class="res-card-domain">{{ site.get_domain }}</div>
+        </div>
+      </div>
+
+      <p class="res-card-desc">{{ site.display_description }}</p>
+
+      <div class="res-card-footer">
+        <div class="res-card-tags">
+          {% for tag in site.tags.all|slice:":3" %}
+          <span class="res-card-tag">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+        <span class="res-card-visit">{% trans "Visit" %} →</span>
+      </div>
+
+    </a>
+    {% empty %}
+    <div class="res-empty">
+      <div class="res-empty-icon">🌐</div>
+      <h3>{% trans "No websites yet" %}</h3>
+      <p>{% trans "Check back soon — we're adding new resources regularly." %}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# ── Suggest + About block ───────────────────────────────────────────── #}
+  <div class="res-about fade-up-3">
+    <div class="res-about-icon">💡</div>
+    <div class="res-about-body" style="width:100%;">
+      <h3>{% trans "Know a great resource?" %}</h3>
+      <p>{% trans "Suggest a website and our team will review it. If it's a good fit, we'll add it to the list." %}</p>
+
+      {# Toggle button #}
+      <button class="btn btn-ghost btn-sm" id="suggest-toggle-btn" onclick="toggleSuggestForm()">
+        <i class="bi bi-plus-lg"></i> {% trans "Suggest a website" %}
+      </button>
+
+      {# Collapsible form #}
+      <div id="suggest-form-wrap" style="display:{% if open_suggest %}block{% else %}none{% endif %};margin-top:16px;">
+        <form method="post" action="{% url 'resources:website_suggest' %}">
+          {% csrf_token %}
+
+          <div class="res-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div>
+              <label class="res-form-label">{% trans "Website name" %} *</label>
+              {{ suggest_form.name }}
+                {% if suggest_form.name.errors %}
+          <div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding:7px 12px;
+                      background:var(--danger-bg,rgba(239,68,68,.08));
+                      border:1px solid var(--danger-brd,rgba(239,68,68,.25));
+                      border-left:3px solid #ef4444;border-radius:var(--radius);">
+            <span style="font-size:.85rem;">🚫</span>
+            <p style="font-size:.78rem;font-weight:600;color:#ef4444;margin:0;">{{ suggest_form.name.errors.0 }}</p>
+          </div>
+          {% endif %}
+            </div>
+          <div>
+            <label class="res-form-label">{% trans "URL" %} *</label>
+            {{ suggest_form.url }}
+            {% if suggest_form.url.errors %}
+            <div style="
+              display:flex; align-items:flex-start; gap:8px;
+              margin-top:8px; padding:10px 14px;
+              background:var(--danger-bg, rgba(239,68,68,.08));
+              border:1px solid var(--danger-brd, rgba(239,68,68,.25));
+              border-left:3px solid #ef4444;
+              border-radius:var(--radius);
+            ">
+              <span style="font-size:1rem;flex-shrink:0;margin-top:1px;">🚫</span>
+              <div>
+                <p style="font-size:.82rem;font-weight:700;color:#ef4444;margin-bottom:2px;">
+                  {% trans "URL not accepted" %}
+                </p>
+                <p style="font-size:.78rem;color:var(--danger, #ef4444);opacity:.85;margin:0;">
+                  {{ suggest_form.url.errors.0 }}
+                </p>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          </div>
+
+          <div style="margin-bottom:12px;">
+            <label class="res-form-label">{% trans "Category (pick existing)" %}</label>
+            {{ suggest_form.category }}
+
+            <div style="margin-top:8px;">
+              <label style="display:flex;align-items:center;gap:7px;cursor:pointer;
+                            font-size:.78rem;color:var(--text-muted);">
+                <input type="checkbox" id="new-cat-toggle" onchange="toggleNewCategory(this)"
+                       style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;">
+                {% trans "My category isn't listed — I'll suggest a new one" %}
+              </label>
+            </div>
+
+            <div id="new-cat-wrap" style="display:none;margin-top:8px;">
+              <label class="res-form-label">{% trans "New category name" %}</label>
+
+              {# The input with datalist autocomplete #}
+              {{ suggest_form.suggested_category }}
+
+              {# Datalist — feeds autocomplete suggestions from existing categories #}
+              <datalist id="category-suggestions">
+                {% for cat in all_categories %}
+                <option value="{{ cat.name }}">
+                {% endfor %}
+              </datalist>
+
+              {% if suggest_form.suggested_category.errors %}
+              <p class="res-form-error">{{ suggest_form.suggested_category.errors.0 }}</p>
+              {% endif %}
+              <p style="font-size:.72rem;color:var(--text-sub);margin-top:4px;">
+                {% trans "Pick an existing one or type a new name — admin will create it if approved." %}
+              </p>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label class="res-form-label">{% trans "Why is it useful?" %} *</label>
+            {{ suggest_form.description }}
+            {% if suggest_form.description.errors %}
+<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding:7px 12px;
+            background:var(--danger-bg,rgba(239,68,68,.08));
+            border:1px solid var(--danger-brd,rgba(239,68,68,.25));
+            border-left:3px solid #ef4444;border-radius:var(--radius);">
+  <span style="font-size:.85rem;">🚫</span>
+  <p style="font-size:.78rem;font-weight:600;color:#ef4444;margin:0;">{{ suggest_form.description.errors.0 }}</p>
+</div>
+{% endif %}
+          </div>
+
+          <div style="display:flex;gap:8px;">
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="bi bi-send"></i> {% trans "Submit suggestion" %}
+            </button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="toggleSuggestForm()">
+              {% trans "Cancel" %}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {# My suggestions history #}
+      {% if my_suggestions %}
+      <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
+        <p style="font-size:.78rem;font-weight:700;color:var(--text-muted);
+                  font-family:var(--font-mono);letter-spacing:.06em;
+                  text-transform:uppercase;margin-bottom:10px;">
+          {% trans "My suggestions" %}
+        </p>
+        {% for s in my_suggestions %}
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    padding:8px 0;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
+          <div>
+            <p style="font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:1px;">{{ s.name }}</p>
+            <p style="font-size:.72rem;color:var(--text-sub);font-family:var(--font-mono);">
+              {{ s.created_at|date:"M j, Y" }}
+            </p>
+          </div>
+          {% if s.status == 'pending' %}
+          <span class="sug-pill sug-pill-pending">⏳ {% trans "Pending" %}</span>
+          {% elif s.status == 'approved' %}
+          <span class="sug-pill sug-pill-approved">✅ {% trans "Approved" %}</span>
+          {% else %}
+          <span class="sug-pill sug-pill-rejected">❌ {% trans "Rejected" %}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if user.is_superuser %}
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <a href="{% url 'admin:resources_websitesuggestion_changelist' %}" class="btn btn-ghost btn-sm">
+          <i class="bi bi-gear"></i> {% trans "Review suggestions in admin" %}
+        </a>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+// ── Live search filter ─────────────────────────────────────────────────────
+(function () {
+  const searchInput = document.getElementById('res-search');
+  const grid        = document.getElementById('res-grid');
+  const countPill   = document.getElementById('res-visible-count');
+  let emptyEl       = null;
+
+  function filterCards() {
+    const q     = searchInput.value.toLowerCase().trim();
+    const cards = grid.querySelectorAll('.res-card');
+    let visible = 0;
+
+    cards.forEach(card => {
+      const match =
+        !q ||
+        (card.dataset.name || '').includes(q) ||
+        (card.dataset.desc || '').includes(q) ||
+        (card.dataset.tags || '').includes(q);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+
+    countPill.textContent = visible;
+
+    if (visible === 0 && !emptyEl) {
+      emptyEl = document.createElement('div');
+      emptyEl.className = 'res-empty';
+      emptyEl.innerHTML =
+        '<div class="res-empty-icon">🔍</div>' +
+        '<h3>{% trans "No results found" %}</h3>' +
+        '<p>{% trans "Try a different search term." %}</p>';
+      grid.appendChild(emptyEl);
+    } else if (visible > 0 && emptyEl) {
+      emptyEl.remove();
+      emptyEl = null;
+    }
+  }
+
+  searchInput?.addEventListener('input', filterCards);
+})();
+
+// ── Suggest form toggle ────────────────────────────────────────────────────
+function toggleSuggestForm() {
+  const wrap = document.getElementById('suggest-form-wrap');
+  const btn  = document.getElementById('suggest-toggle-btn');
+  const open = wrap.style.display === 'none';
+  wrap.style.display = open ? 'block' : 'none';
+  btn.innerHTML = open
+    ? '<i class="bi bi-x-lg"></i> {% trans "Cancel" %}'
+    : '<i class="bi bi-plus-lg"></i> {% trans "Suggest a website" %}';
+  if (open) wrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+// ── New category toggle ────────────────────────────────────────────────────
+function toggleNewCategory(checkbox) {
+  const wrap      = document.getElementById('new-cat-wrap');
+  const catSelect = document.getElementById('id_category');
+  const newInput  = document.getElementById('id_suggested_category');
+
+  if (checkbox.checked) {
+    wrap.style.display   = 'block';
+    catSelect.value      = '';
+    catSelect.disabled   = true;
+    newInput.required    = true;
+  } else {
+    wrap.style.display   = 'none';
+    catSelect.disabled   = false;
+    newInput.required    = false;
+    newInput.value       = '';
+  }
+}
+</script>
+{% endblock %}

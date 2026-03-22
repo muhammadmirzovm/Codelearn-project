@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
 
     'channels',
     'crispy_forms',
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'apps.runner',
     'apps.journals',
     'apps.support',
+    'apps.resources',
 ]
 
 MIDDLEWARE = [
@@ -109,6 +111,7 @@ LOCALE_PATHS = [
     BASE_DIR / 'apps/submissions/locale',
     BASE_DIR / 'apps/tasks/locale',
     BASE_DIR / 'apps/users/locale',
+    BASE_DIR / 'apps/resources/locale',
 ]
 USE_I18N = True
 
@@ -116,7 +119,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
+WHITENOISE_ROOT = BASE_DIR / 'public'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 

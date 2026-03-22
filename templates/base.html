@@ -4,6 +4,8 @@
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}" data-theme="light">
 <head>
+  <meta name="google-site-verification" content="1zjvJZYhwnlaj4gn1_ZQeMu6Km5_dPXcykRjtR1V86c" />
+
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{% block title %}{% trans 'CodeLearn' %}{% endblock %}</title>
@@ -57,6 +59,9 @@
         {% endif %}
         <a href="{% url 'tasks:challenge_list' %}" class="nav-link">
             <i class="bi bi-trophy"></i> {% trans 'Challenges' %}
+        </a>
+        <a href="{% url 'resources:website_list' %}" class="nav-link">
+            <i class="bi bi-globe"></i> {% trans 'Resources' %}
         </a>
         <a href="{% url 'users:group_list' %}" class="nav-link">{% trans 'Groups' %}</a>
         <a href="{% url 'support:contact' %}" class="nav-link">{% trans 'Support' %}</a>
@@ -237,6 +242,9 @@
     </a>
     <a href="{% url 'tasks:challenge_list' %}" class="drawer-link">
         <i class="bi bi-trophy"></i> {% trans 'Challenges' %}
+    </a>
+    <a href="{% url 'resources:website_list' %}" class="drawer-link">
+        <i class="bi bi-globe"></i> {% trans 'Resources' %}
     </a>
     <a href="{% url 'tasks:leaderboard' %}" class="drawer-link">
         <i class="bi bi-bar-chart-steps"></i> {% trans 'Leaderboard' %} &nbsp;🪙 {{ request.user.coin_balance }}
