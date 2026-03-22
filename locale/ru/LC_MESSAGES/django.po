@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-19 13:26+0500\n"
-"PO-Revision-Date: 2026-03-19 13:36+0500\n"
+"POT-Creation-Date: 2026-03-22 18:56+0500\n"
+"PO-Revision-Date: 2026-03-22 19:09+0500\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,109 +19,304 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Translated-Using: django-rosetta 0.10.3\n"
 
+#: apps/resources/forms.py:12
+msgid "e.g. MDN Web Docs"
+msgstr "MDN Web Docs"
+
+#: apps/resources/forms.py:24
+msgid "e.g. DevOps, AI/ML, Career…"
+msgstr "DevOps, AI/ML, Карьера…"
+
+#: apps/resources/forms.py:31
+msgid "Why is this useful for learners?"
+msgstr "Почему это полезно для учащихся?"
+
+#: apps/resources/forms.py:37 templates/resources/website_list.html:362
+msgid "Category (pick existing)"
+msgstr "Категория (выберите существующую)"
+
+#: apps/resources/forms.py:38
+msgid "Or type / suggest a category"
+msgstr "Или введите / предложите категорию"
+
+#: apps/resources/forms.py:49
+msgid "This website is already in our list."
+msgstr "Этот веб-сайт уже есть в нашем списке."
+
+#: apps/resources/forms.py:61
+msgid "This website has already been suggested and is awaiting review."
+msgstr "Этот веб-сайт уже был предложен и ожидает проверки."
+
+#: apps/resources/models.py:9 apps/resources/models.py:40
+#: apps/resources/models.py:58 apps/resources/models.py:121
+#| msgid "Last name"
+msgid "name"
+msgstr "название"
+
+#: apps/resources/models.py:12
+msgid "icon"
+msgstr "иконка"
+
+#: apps/resources/models.py:13
+msgid "Bootstrap icon class, e.g. bi-code-slash"
+msgstr "Класс иконки Bootstrap, например: bi-code-slash"
+
+#: apps/resources/models.py:16
+msgid "color"
+msgstr "цвет"
+
+#: apps/resources/models.py:17
+msgid "Hex color for the category accent"
+msgstr "Hex-цвет для акцента категории"
+
+#: apps/resources/models.py:19 apps/resources/models.py:80
+msgid "order"
+msgstr "порядок"
+
+#: apps/resources/models.py:20 apps/resources/models.py:60
+#: apps/resources/models.py:123
+#| msgid "Description / Notes"
+msgid "description"
+msgstr "описание"
+
+#: apps/resources/models.py:23 templates/support/contact.html:27
+msgid "Category"
+msgstr "Категория"
+
+#: apps/resources/models.py:24
+#| msgid "Category"
+msgid "Categories"
+msgstr "Категории"
+
+#: apps/resources/models.py:44
+#| msgid "ago"
+msgid "Tag"
+msgstr "Тег"
+
+#: apps/resources/models.py:45
+msgid "Tags"
+msgstr "Теги"
+
+#: apps/resources/models.py:59 apps/resources/models.py:122
+#: templates/resources/website_list.html:336
+msgid "URL"
+msgstr "URL"
+
+#: apps/resources/models.py:62
+msgid "short description"
+msgstr "краткое описание"
+
+#: apps/resources/models.py:63
+msgid "Shown on the card. Falls back to description if empty."
+msgstr "Отображается на карточке. Если пусто, используется описание."
+
+#: apps/resources/models.py:68 apps/resources/models.py:127
+#| msgid "Category"
+msgid "category"
+msgstr "категория"
+
+#: apps/resources/models.py:71
+msgid "tags"
+msgstr "теги"
+
+#: apps/resources/models.py:74
+msgid "accent color"
+msgstr "акцентный цвет"
+
+#: apps/resources/models.py:75
+msgid "Hex color for the card logo background"
+msgstr "Hex-цвет для фона логотипа карточки"
+
+#: apps/resources/models.py:77
+msgid "featured"
+msgstr "рекомендуемый"
+
+#: apps/resources/models.py:78
+msgid "active"
+msgstr "активный"
+
+#: apps/resources/models.py:79
+msgid "view count"
+msgstr "количество просмотров"
+
+#: apps/resources/models.py:81 apps/resources/models.py:141
+#| msgid "Created"
+msgid "created at"
+msgstr "создано"
+
+#: apps/resources/models.py:82
+#| msgid "Update"
+msgid "updated at"
+msgstr "обновлено"
+
+#: apps/resources/models.py:85
+msgid "Website"
+msgstr "Веб-сайт"
+
+#: apps/resources/models.py:86
+msgid "Websites"
+msgstr "Веб-сайты"
+
+#: apps/resources/models.py:110 templates/resources/website_list.html:439
+msgid "Pending"
+msgstr "Ожидает проверки"
+
+#: apps/resources/models.py:111 templates/resources/website_list.html:441
+msgid "Approved"
+msgstr "Одобрено"
+
+#: apps/resources/models.py:112 templates/resources/website_list.html:443
+#| msgid "Expected"
+msgid "Rejected"
+msgstr "Отклонено"
+
+#: apps/resources/models.py:119
+msgid "suggested by"
+msgstr "предложено пользователем"
+
+#: apps/resources/models.py:130
+msgid "suggested category"
+msgstr "предложенная категория"
+
+#: apps/resources/models.py:131
+msgid "If your category is not in the list above, type it here"
+msgstr "Если вашей категории нет в списке выше, введите её здесь"
+
+#: apps/resources/models.py:134
+#| msgid "Status"
+msgid "status"
+msgstr "статус"
+
+#: apps/resources/models.py:138
+msgid "admin note"
+msgstr "заметка администратора"
+
+#: apps/resources/models.py:139
+msgid "Optional note shown to the user"
+msgstr "Необязательная заметка, отображаемая пользователю"
+
+#: apps/resources/models.py:142
+msgid "reviewed at"
+msgstr "проверено в"
+
+#: apps/resources/models.py:145
+msgid "Website Suggestion"
+msgstr "Предложение веб-сайта"
+
+#: apps/resources/models.py:146
+msgid "Website Suggestions"
+msgstr "Предложения веб-сайтов"
+
+#: apps/resources/views.py:66
+msgid "Your suggestion has been submitted for review. Thank you! 🙌"
+msgstr "Ваше предложение отправлено на проверку. Спасибо! 🙌"
+
 #: templates/admin/users/notification/change_list.html:8
 msgid "Send to All"
 msgstr "Отправить всем"
 
-#: templates/base.html:9 templates/challenges/challenge_detail.html:4
+#: templates/base.html:11 templates/challenges/challenge_detail.html:4
 msgid "CodeLearn"
 msgstr "CodeLearn"
 
-#: templates/base.html:56
-#| msgid "Tasks"
+#: templates/base.html:58
 msgid "My Tasks"
 msgstr "Мои задачи"
 
-#: templates/base.html:59 templates/base.html:232 templates/base.html:239
+#: templates/base.html:61 templates/base.html:237 templates/base.html:244
 #: templates/challenges/challenge_detail.html:162
 #: templates/tasks/task_list.html:9
 msgid "Challenges"
 msgstr "Испытания"
 
-#: templates/base.html:61 templates/base.html:236
+#: templates/base.html:64 templates/base.html:247
+msgid "Resources"
+msgstr "Ресурсы"
+
+#: templates/base.html:66 templates/base.html:241
 #: templates/users/group_list.html:3
 msgid "Groups"
 msgstr "Группы"
 
-#: templates/base.html:62 templates/base.html:246
+#: templates/base.html:67 templates/base.html:254
 msgid "Support"
 msgstr "Поддержка"
 
-#: templates/base.html:65 templates/base.html:251
+#: templates/base.html:70 templates/base.html:259
 msgid "Inbox"
 msgstr "Входящие"
 
-#: templates/base.html:84
+#: templates/base.html:89
 msgid "Your coin balance — click for leaderboard"
 msgstr "Ваш баланс монет — нажмите, чтобы открыть рейтинг"
 
-#: templates/base.html:88
+#: templates/base.html:93
 msgid "My profile"
 msgstr "Мой профиль"
 
-#: templates/base.html:98 templates/base.html:294
+#: templates/base.html:103 templates/base.html:302
 msgid "Sign out"
 msgstr "Выйти"
 
-#: templates/base.html:104 templates/base.html:112 templates/base.html:116
+#: templates/base.html:109 templates/base.html:117 templates/base.html:121
 #: templates/support/contact.html:70 templates/users/profile.html:62
 msgid "Notifications"
 msgstr "Уведомления"
 
-#: templates/base.html:120
+#: templates/base.html:125
 msgid "Mark all read"
 msgstr "Отметить всё как прочитанное"
 
-#: templates/base.html:137 templates/challenges/challenge_detail.html:239
+#: templates/base.html:142 templates/challenges/challenge_detail.html:239
 #: templates/support/inbox.html:56
 msgid "ago"
 msgstr "назад"
 
-#: templates/base.html:144
+#: templates/base.html:149
 msgid "No notifications yet"
 msgstr "Пока нет уведомлений"
 
-#: templates/base.html:153 templates/users/login.html:3
+#: templates/base.html:158 templates/users/login.html:3
 msgid "Login"
 msgstr "Войти"
 
-#: templates/base.html:154 templates/users/login.html:72
+#: templates/base.html:159 templates/users/login.html:72
 msgid "Get started"
 msgstr "Начать"
 
-#: templates/base.html:160
+#: templates/base.html:165
 msgid "Change language"
 msgstr "Выберите язык"
 
-#: templates/base.html:172 templates/base.html:261
+#: templates/base.html:177 templates/base.html:269
 msgid "Language"
 msgstr "Язык"
 
-#: templates/base.html:193 templates/base.html:285
+#: templates/base.html:198 templates/base.html:293
 msgid "Toggle theme"
 msgstr "Сменить тему"
 
-#: templates/base.html:194
+#: templates/base.html:199
 msgid "Open menu"
 msgstr "Открыть меню"
 
-#: templates/base.html:204
+#: templates/base.html:209
 msgid "Navigation menu"
 msgstr "Навигационное меню"
 
-#: templates/base.html:217
+#: templates/base.html:222
 msgid "Close menu"
 msgstr "Закрыть меню"
 
-#: templates/base.html:225
+#: templates/base.html:230
 msgid "Home"
 msgstr "Главная"
 
-#: templates/base.html:228 templates/users/profile.html:4
+#: templates/base.html:233 templates/users/profile.html:4
 msgid "Profile"
 msgstr "Профиль"
 
-#: templates/base.html:242 templates/challenges/challenge_list.html:121
+#: templates/base.html:250 templates/challenges/challenge_list.html:121
 #: templates/challenges/leaderboard.html:4
 #: templates/challenges/leaderboard.html:83
 #: templates/sessions/leaderboard.html:3 templates/sessions/leaderboard.html:9
@@ -130,16 +325,16 @@ msgstr "Профиль"
 msgid "Leaderboard"
 msgstr "Таблица лидеров"
 
-#: templates/base.html:282
+#: templates/base.html:290
 msgid "Theme"
 msgstr "Тема"
 
-#: templates/base.html:313 templates/support/contact.html:3
+#: templates/base.html:321 templates/support/contact.html:3
 #: templates/support/contact.html:11
 msgid "Contact Support"
 msgstr "Связаться с поддержкой"
 
-#: templates/base.html:316 templates/support/my_tickets.html:3
+#: templates/base.html:324 templates/support/my_tickets.html:3
 #: templates/support/my_tickets.html:11
 msgid "My Tickets"
 msgstr "Мои обращения"
@@ -157,7 +352,6 @@ msgstr "Решено"
 
 #: templates/challenges/challenge_detail.html:181
 #, python-format
-#| msgid "You already solved this task!"
 msgid "You already solved this and earned %(coins)s coins!"
 msgstr "Вы уже решили эту задачу и заработали %(coins)s монет!"
 
@@ -166,7 +360,6 @@ msgid "Problem"
 msgstr "Задача"
 
 #: templates/challenges/challenge_detail.html:204
-#| msgid "Example"
 msgid "Examples"
 msgstr "Пример"
 
@@ -178,33 +371,27 @@ msgstr "Пример"
 
 #: templates/challenges/challenge_detail.html:214
 #: templates/challenges/challenge_detail.html:342
-#| msgid "Input:"
 msgid "Input"
 msgstr "Ввод:"
 
 #: templates/challenges/challenge_detail.html:218
-#| msgid "Expected Output"
 msgid "Expected output"
 msgstr "Ожидаемый вывод"
 
 #: templates/challenges/challenge_detail.html:232
-#| msgid "Submissions"
 msgid "My submissions"
 msgstr "Мои отправки"
 
 #: templates/challenges/challenge_detail.html:238
 #: templates/challenges/challenge_detail.html:375
-#| msgid "Passed"
 msgid "passed"
 msgstr "Пройдено"
 
 #: templates/challenges/challenge_detail.html:250
-#| msgid "Duration"
 msgid "Solution"
 msgstr "Решение"
 
 #: templates/challenges/challenge_detail.html:258
-#| msgid "Write your reply..."
 msgid "Write your solution here"
 msgstr "Напишите ваш ответ..."
 
@@ -236,12 +423,10 @@ msgid "Test"
 msgstr "Тест"
 
 #: templates/challenges/challenge_detail.html:343
-#| msgid "Expected:"
 msgid "Expected"
 msgstr "Ожидаемый"
 
 #: templates/challenges/challenge_detail.html:344
-#| msgid "Sample Output"
 msgid "Output"
 msgstr "Вывод"
 
@@ -255,17 +440,14 @@ msgid "Please write some code first."
 msgstr "Пожалуйста, сначала напишите код."
 
 #: templates/challenges/challenge_detail.html:361
-#| msgid "Running…"
 msgid "Running..."
 msgstr "Выполняется…"
 
 #: templates/challenges/challenge_detail.html:375
-#| msgid "Example"
 msgid "Example cases"
 msgstr "Примеры"
 
 #: templates/challenges/challenge_detail.html:379
-#| msgid "Results"
 msgid "Run results"
 msgstr "Результаты выполнения"
 
@@ -275,12 +457,10 @@ msgid "Network error. Please try again."
 msgstr "Ошибка сети. Пожалуйста, попробуйте снова."
 
 #: templates/challenges/challenge_detail.html:394
-#| msgid "Evaluating…"
 msgid "Evaluating..."
 msgstr "Оценка…"
 
 #: templates/challenges/challenge_detail.html:399
-#| msgid "Evaluating against hidden tests…"
 msgid "Running against all test cases…"
 msgstr "Оценка по скрытым тестам…"
 
@@ -304,18 +484,15 @@ msgid "Wrong answer"
 msgstr "Неправильный ответ"
 
 #: templates/challenges/challenge_detail.html:428
-#| msgid "All tests passed!"
 msgid "test cases passed"
 msgstr "Все тесты пройдены!"
 
 #: templates/challenges/challenge_detail.html:432
-#| msgid "Submissions"
 msgid "Submission result"
 msgstr "Результаты отправки"
 
 #: templates/challenges/challenge_list.html:4
 #: templates/challenges/challenge_list.html:111
-#| msgid "Challenges"
 msgid "Global Challenges"
 msgstr "Глобальные вызовы"
 
@@ -325,6 +502,7 @@ msgid "%(n)s published challenges — solve them to earn coins"
 msgstr "%(n)s опубликованных задач — решите их, чтобы заработать монеты"
 
 #: templates/challenges/challenge_list.html:130
+#: templates/resources/website_list.html:232
 msgid "All"
 msgstr "Все"
 
@@ -364,17 +542,14 @@ msgid "Ranked by total coins earned from global challenges"
 msgstr "Рейтинг по сумме монет, полученных за глобальные задачи"
 
 #: templates/challenges/leaderboard.html:87
-#| msgid "Back to coding"
 msgid "Back to challenges"
 msgstr "Назад к задачам"
 
 #: templates/challenges/leaderboard.html:95
-#| msgid "Your reply"
 msgid "Your rank"
 msgstr "Ваш рейтинг"
 
 #: templates/challenges/leaderboard.html:100
-#| msgid "Your Code"
 msgid "Your coins"
 msgstr "Ваши монеты"
 
@@ -409,7 +584,6 @@ msgid "No one has earned coins yet. Be the first!"
 msgstr "Пока никто не получил монеты. Будьте первым!"
 
 #: templates/challenges/leaderboard.html:157
-#| msgid "Start Now"
 msgid "Start solving"
 msgstr "Начать решение"
 
@@ -558,6 +732,8 @@ msgstr "Сохранить урок"
 
 #: templates/journals/lesson_form.html:56
 #: templates/journals/record_form.html:76
+#: templates/resources/website_list.html:415
+#: templates/resources/website_list.html:515
 #: templates/sessions/session_form.html:26
 #: templates/tasks/task_confirm_delete.html:14
 #: templates/tasks/task_form.html:251
@@ -585,6 +761,123 @@ msgstr "Заметка..."
 #: templates/journals/record_form.html:77
 msgid "Save Grades"
 msgstr "Сохранить оценки"
+
+#: templates/resources/website_list.html:4
+#: templates/resources/website_list.html:199
+msgid "Useful Websites"
+msgstr "Полезные веб-сайты"
+
+#: templates/resources/website_list.html:200
+msgid "Hand-picked resources to accelerate your learning journey"
+msgstr "Отобранные ресурсы, чтобы ускорить ваше обучение"
+
+#: templates/resources/website_list.html:205
+#| msgid "Add Test Case"
+msgid "Add Website"
+msgstr "Добавить веб-сайт"
+
+#: templates/resources/website_list.html:208
+#| msgid "Category"
+msgid "Add Category"
+msgstr "Добавить категорию"
+
+#: templates/resources/website_list.html:222
+msgid "Search websites, tools, topics…"
+msgstr "Поиск сайтов, инструментов, тем…"
+
+#: templates/resources/website_list.html:249
+msgid "websites available"
+msgstr "доступные веб-сайты"
+
+#: templates/resources/website_list.html:252
+#, python-format
+msgid "results for \"%(q)s\""
+msgstr "результаты для \"%(q)s\""
+
+#: templates/resources/website_list.html:276
+msgid "Featured"
+msgstr "Рекомендуемые"
+
+#: templates/resources/website_list.html:291
+msgid "Visit"
+msgstr "Перейти"
+
+#: templates/resources/website_list.html:298
+#| msgid "No messages yet"
+msgid "No websites yet"
+msgstr "Пока нет веб-сайтов"
+
+#: templates/resources/website_list.html:299
+msgid "Check back soon — we're adding new resources regularly."
+msgstr "Загляните позже — мы регулярно добавляем новые ресурсы."
+
+#: templates/resources/website_list.html:308
+msgid "Know a great resource?"
+msgstr "Знаете отличный ресурс?"
+
+#: templates/resources/website_list.html:309
+msgid ""
+"Suggest a website and our team will review it. If it's a good fit, we'll add"
+" it to the list."
+msgstr ""
+"Предложите веб-сайт, и наша команда его рассмотрит. Если он подходит, мы "
+"добавим его в список."
+
+#: templates/resources/website_list.html:313
+#: templates/resources/website_list.html:516
+msgid "Suggest a website"
+msgstr "Предложить веб-сайт"
+
+#: templates/resources/website_list.html:323
+#| msgid "Last name"
+msgid "Website name"
+msgstr "Название веб-сайта"
+
+#: templates/resources/website_list.html:350
+msgid "URL not accepted"
+msgstr "URL не принят"
+
+#: templates/resources/website_list.html:370
+msgid "My category isn't listed — I'll suggest a new one"
+msgstr "Моей категории нет в списке — предложу новую"
+
+#: templates/resources/website_list.html:375
+msgid "New category name"
+msgstr "Название новой категории"
+
+#: templates/resources/website_list.html:391
+msgid ""
+"Pick an existing one or type a new name — admin will create it if approved."
+msgstr ""
+"Выберите существующую или введите новое название — администратор создаст её,"
+" если она будет одобрена."
+
+#: templates/resources/website_list.html:397
+msgid "Why is it useful?"
+msgstr "Почему это полезно?"
+
+#: templates/resources/website_list.html:412
+#| msgid "Submission"
+msgid "Submit suggestion"
+msgstr "Отправить предложение"
+
+#: templates/resources/website_list.html:427
+#| msgid "My submissions"
+msgid "My suggestions"
+msgstr "Мои предложения"
+
+#: templates/resources/website_list.html:453
+msgid "Review suggestions in admin"
+msgstr "Просмотреть предложения в панели администратора"
+
+#: templates/resources/website_list.html:496
+#| msgid "No results returned."
+msgid "No results found"
+msgstr "Ничего не найдено"
+
+#: templates/resources/website_list.html:497
+msgid "Try a different search term."
+msgstr "Попробуйте другой поисковый запрос."
 
 #: templates/sessions/leaderboard.html:13
 #: templates/sessions/session_list.html:51
@@ -988,10 +1281,6 @@ msgstr "Возникли проблемы? Отправьте нам сообщ�
 msgid "New Message"
 msgstr "Новое сообщение"
 
-#: templates/support/contact.html:27
-msgid "Category"
-msgstr "Категория"
-
 #: templates/support/contact.html:36
 msgid "Subject"
 msgstr "Тема"
@@ -1204,12 +1493,10 @@ msgstr ""
 "открыты для всех пользователей и могут давать монеты."
 
 #: templates/tasks/task_form.html:129
-#| msgid "Sessions"
 msgid "Session only"
 msgstr "Только сессия"
 
 #: templates/tasks/task_form.html:134
-#| msgid "Challenges"
 msgid "Global challenge"
 msgstr "Глобальный вызов"
 
@@ -1508,7 +1795,6 @@ msgstr "Пока нет сообщений"
 
 #: templates/users/group_detail.html:292
 #, python-format
-#| msgid "Be the first to say hello in <strong>%(name)s</strong>!"
 msgid "Be the first to say hello in %(name)s!"
 msgstr "Будьте первым, кто скажет «Привет» в <strong>%(name)s</strong>!"
 
@@ -1531,7 +1817,6 @@ msgid "Admin"
 msgstr "Админ"
 
 #: templates/users/group_detail.html:361
-#| msgid "Members"
 msgid "All members"
 msgstr "Все участники"
 

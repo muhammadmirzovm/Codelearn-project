@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-19 13:26+0500\n"
-"PO-Revision-Date: 2026-03-19 13:31+0500\n"
+"POT-Creation-Date: 2026-03-22 18:56+0500\n"
+"PO-Revision-Date: 2026-03-22 21:17+0500\n"
 "Last-Translator:   <>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,109 +19,305 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Translated-Using: django-rosetta 0.10.3\n"
 
+#: apps/resources/forms.py:12
+msgid "e.g. MDN Web Docs"
+msgstr "masalan: MDN Web Docs"
+
+#: apps/resources/forms.py:24
+msgid "e.g. DevOps, AI/ML, Career…"
+msgstr "masalan: DevOps, AI/ML, Karyera…"
+
+#: apps/resources/forms.py:31
+msgid "Why is this useful for learners?"
+msgstr "Bu o‘rganuvchilar uchun nima sababdan foydali?"
+
+#: apps/resources/forms.py:37 templates/resources/website_list.html:362
+msgid "Category (pick existing)"
+msgstr "Kategoriya (mavjudidan tanlang)"
+
+#: apps/resources/forms.py:38
+msgid "Or type / suggest a category"
+msgstr "Yoki kategoriya yozing / taklif qiling"
+
+#: apps/resources/forms.py:49
+msgid "This website is already in our list."
+msgstr "Bu veb-sayt allaqachon bizning ro‘yxatimizda mavjud."
+
+#: apps/resources/forms.py:61
+msgid "This website has already been suggested and is awaiting review."
+msgstr ""
+"Bu veb-sayt allaqachon taklif qilingan va ko‘rib chiqilishini kutmoqda."
+
+#: apps/resources/models.py:9 apps/resources/models.py:40
+#: apps/resources/models.py:58 apps/resources/models.py:121
+#| msgid "Last name"
+msgid "name"
+msgstr "nom"
+
+#: apps/resources/models.py:12
+msgid "icon"
+msgstr "ikonka"
+
+#: apps/resources/models.py:13
+msgid "Bootstrap icon class, e.g. bi-code-slash"
+msgstr "Bootstrap ikonka klassi, masalan: bi-code-slash"
+
+#: apps/resources/models.py:16
+msgid "color"
+msgstr "rang"
+
+#: apps/resources/models.py:17
+msgid "Hex color for the category accent"
+msgstr "Kategoriya aksenti uchun Hex-rang"
+
+#: apps/resources/models.py:19 apps/resources/models.py:80
+msgid "order"
+msgstr "tartib"
+
+#: apps/resources/models.py:20 apps/resources/models.py:60
+#: apps/resources/models.py:123
+#| msgid "Description / Notes"
+msgid "description"
+msgstr "tavsif"
+
+#: apps/resources/models.py:23 templates/support/contact.html:27
+msgid "Category"
+msgstr "Kategoriya"
+
+#: apps/resources/models.py:24
+#| msgid "Category"
+msgid "Categories"
+msgstr "Kategoriyalar"
+
+#: apps/resources/models.py:44
+#| msgid "ago"
+msgid "Tag"
+msgstr "Teg"
+
+#: apps/resources/models.py:45
+msgid "Tags"
+msgstr "Teglar"
+
+#: apps/resources/models.py:59 apps/resources/models.py:122
+#: templates/resources/website_list.html:336
+msgid "URL"
+msgstr "URL"
+
+#: apps/resources/models.py:62
+msgid "short description"
+msgstr "qisqa tavsif"
+
+#: apps/resources/models.py:63
+msgid "Shown on the card. Falls back to description if empty."
+msgstr "Kartada ko‘rsatiladi. Agar bo‘sh bo‘lsa, tavsif ishlatiladi."
+
+#: apps/resources/models.py:68 apps/resources/models.py:127
+#| msgid "Category"
+msgid "category"
+msgstr "kategoriya"
+
+#: apps/resources/models.py:71
+msgid "tags"
+msgstr "teglar"
+
+#: apps/resources/models.py:74
+msgid "accent color"
+msgstr "aksent rangi"
+
+#: apps/resources/models.py:75
+msgid "Hex color for the card logo background"
+msgstr "Karta logotipi fonining Hex-rangi"
+
+#: apps/resources/models.py:77
+msgid "featured"
+msgstr "tavsiya etilgan"
+
+#: apps/resources/models.py:78
+msgid "active"
+msgstr "faol"
+
+#: apps/resources/models.py:79
+msgid "view count"
+msgstr "ko‘rishlar soni"
+
+#: apps/resources/models.py:81 apps/resources/models.py:141
+#| msgid "Created"
+msgid "created at"
+msgstr "yaratilgan"
+
+#: apps/resources/models.py:82
+#| msgid "Update"
+msgid "updated at"
+msgstr "yangilangan"
+
+#: apps/resources/models.py:85
+msgid "Website"
+msgstr "Veb-sayt"
+
+#: apps/resources/models.py:86
+msgid "Websites"
+msgstr "Veb-saytlar"
+
+#: apps/resources/models.py:110 templates/resources/website_list.html:439
+msgid "Pending"
+msgstr "Ko‘rib chiqilmoqda"
+
+#: apps/resources/models.py:111 templates/resources/website_list.html:441
+msgid "Approved"
+msgstr "Tasdiqlangan"
+
+#: apps/resources/models.py:112 templates/resources/website_list.html:443
+#| msgid "Expected"
+msgid "Rejected"
+msgstr "rad etilgan"
+
+#: apps/resources/models.py:119
+msgid "suggested by"
+msgstr "taklif qilgan"
+
+#: apps/resources/models.py:130
+msgid "suggested category"
+msgstr "taklif qilingan kategoriya"
+
+#: apps/resources/models.py:131
+msgid "If your category is not in the list above, type it here"
+msgstr "Agar kategoriyangiz yuqoridagi ro‘yxatda bo‘lmasa, bu yerga yozing"
+
+#: apps/resources/models.py:134
+#| msgid "Status"
+msgid "status"
+msgstr "holat"
+
+#: apps/resources/models.py:138
+msgid "admin note"
+msgstr "administrator eslatmasi"
+
+#: apps/resources/models.py:139
+msgid "Optional note shown to the user"
+msgstr "Foydalanuvchiga ko‘rsatiladigan ixtiyoriy eslatma"
+
+#: apps/resources/models.py:142
+msgid "reviewed at"
+msgstr "tekshirildi"
+
+#: apps/resources/models.py:145
+msgid "Website Suggestion"
+msgstr "Veb-sayt taklifi"
+
+#: apps/resources/models.py:146
+msgid "Website Suggestions"
+msgstr "Veb-sayt takliflari"
+
+#: apps/resources/views.py:66
+msgid "Your suggestion has been submitted for review. Thank you! 🙌"
+msgstr "Sizning taklifingiz ko‘rib chiqish uchun yuborildi. Rahmat! 🙌"
+
 #: templates/admin/users/notification/change_list.html:8
 msgid "Send to All"
 msgstr "Barchaga yuborish"
 
-#: templates/base.html:9 templates/challenges/challenge_detail.html:4
+#: templates/base.html:11 templates/challenges/challenge_detail.html:4
 msgid "CodeLearn"
 msgstr "CodeLearn"
 
-#: templates/base.html:56
-#| msgid "Tasks"
+#: templates/base.html:58
 msgid "My Tasks"
 msgstr "Vazifalarim"
 
-#: templates/base.html:59 templates/base.html:232 templates/base.html:239
+#: templates/base.html:61 templates/base.html:237 templates/base.html:244
 #: templates/challenges/challenge_detail.html:162
 #: templates/tasks/task_list.html:9
 msgid "Challenges"
 msgstr "Sinovlar"
 
-#: templates/base.html:61 templates/base.html:236
+#: templates/base.html:64 templates/base.html:247
+msgid "Resources"
+msgstr "Resurslar"
+
+#: templates/base.html:66 templates/base.html:241
 #: templates/users/group_list.html:3
 msgid "Groups"
 msgstr "Guruhlar"
 
-#: templates/base.html:62 templates/base.html:246
+#: templates/base.html:67 templates/base.html:254
 msgid "Support"
 msgstr "Yordam"
 
-#: templates/base.html:65 templates/base.html:251
+#: templates/base.html:70 templates/base.html:259
 msgid "Inbox"
 msgstr "Kiruvchi xabarlar"
 
-#: templates/base.html:84
+#: templates/base.html:89
 msgid "Your coin balance — click for leaderboard"
 msgstr "Tangalar balansingiz — reytingni ko‘rish uchun bosing"
 
-#: templates/base.html:88
+#: templates/base.html:93
 msgid "My profile"
 msgstr "Mening profilim"
 
-#: templates/base.html:98 templates/base.html:294
+#: templates/base.html:103 templates/base.html:302
 msgid "Sign out"
 msgstr "Chiqish"
 
-#: templates/base.html:104 templates/base.html:112 templates/base.html:116
+#: templates/base.html:109 templates/base.html:117 templates/base.html:121
 #: templates/support/contact.html:70 templates/users/profile.html:62
 msgid "Notifications"
 msgstr "Xabarnomalar"
 
-#: templates/base.html:120
+#: templates/base.html:125
 msgid "Mark all read"
 msgstr "Hammasini o‘qilgan deb belgilash"
 
-#: templates/base.html:137 templates/challenges/challenge_detail.html:239
+#: templates/base.html:142 templates/challenges/challenge_detail.html:239
 #: templates/support/inbox.html:56
 msgid "ago"
 msgstr "oldin"
 
-#: templates/base.html:144
+#: templates/base.html:149
 msgid "No notifications yet"
 msgstr "Hali bildirishnomalar yo‘q"
 
-#: templates/base.html:153 templates/users/login.html:3
+#: templates/base.html:158 templates/users/login.html:3
 msgid "Login"
 msgstr "Kirish"
 
-#: templates/base.html:154 templates/users/login.html:72
+#: templates/base.html:159 templates/users/login.html:72
 msgid "Get started"
 msgstr "Boshlash"
 
-#: templates/base.html:160
+#: templates/base.html:165
 msgid "Change language"
 msgstr "Tilni tanlang"
 
-#: templates/base.html:172 templates/base.html:261
+#: templates/base.html:177 templates/base.html:269
 msgid "Language"
 msgstr "Til"
 
-#: templates/base.html:193 templates/base.html:285
+#: templates/base.html:198 templates/base.html:293
 msgid "Toggle theme"
 msgstr "Mavzuni almashtirish"
 
-#: templates/base.html:194
+#: templates/base.html:199
 msgid "Open menu"
 msgstr "Menyuni ochish"
 
-#: templates/base.html:204
+#: templates/base.html:209
 msgid "Navigation menu"
 msgstr "Navigatsiya menyusi"
 
-#: templates/base.html:217
+#: templates/base.html:222
 msgid "Close menu"
 msgstr "Menuni yopish"
 
-#: templates/base.html:225
+#: templates/base.html:230
 msgid "Home"
 msgstr "Bosh sahifa"
 
-#: templates/base.html:228 templates/users/profile.html:4
+#: templates/base.html:233 templates/users/profile.html:4
 msgid "Profile"
 msgstr "Profil"
 
-#: templates/base.html:242 templates/challenges/challenge_list.html:121
+#: templates/base.html:250 templates/challenges/challenge_list.html:121
 #: templates/challenges/leaderboard.html:4
 #: templates/challenges/leaderboard.html:83
 #: templates/sessions/leaderboard.html:3 templates/sessions/leaderboard.html:9
@@ -130,16 +326,16 @@ msgstr "Profil"
 msgid "Leaderboard"
 msgstr "Yetakchilar jadvali"
 
-#: templates/base.html:282
+#: templates/base.html:290
 msgid "Theme"
 msgstr "Mavzu"
 
-#: templates/base.html:313 templates/support/contact.html:3
+#: templates/base.html:321 templates/support/contact.html:3
 #: templates/support/contact.html:11
 msgid "Contact Support"
 msgstr "Yordam bilan bog‘lanish"
 
-#: templates/base.html:316 templates/support/my_tickets.html:3
+#: templates/base.html:324 templates/support/my_tickets.html:3
 #: templates/support/my_tickets.html:11
 msgid "My Tickets"
 msgstr "Mening murojaatlarim"
@@ -157,7 +353,6 @@ msgstr "Yechilgan"
 
 #: templates/challenges/challenge_detail.html:181
 #, python-format
-#| msgid "You already solved this task!"
 msgid "You already solved this and earned %(coins)s coins!"
 msgstr "Siz allaqachon bu vazifani yechib, %(coins)s ta tanga oldingiz!"
 
@@ -166,7 +361,6 @@ msgid "Problem"
 msgstr "Masala"
 
 #: templates/challenges/challenge_detail.html:204
-#| msgid "Example"
 msgid "Examples"
 msgstr "Namuna"
 
@@ -178,33 +372,27 @@ msgstr "Namuna"
 
 #: templates/challenges/challenge_detail.html:214
 #: templates/challenges/challenge_detail.html:342
-#| msgid "Input:"
 msgid "Input"
 msgstr "Kiritish"
 
 #: templates/challenges/challenge_detail.html:218
-#| msgid "Expected Output"
 msgid "Expected output"
 msgstr "Kutilgan chiqish"
 
 #: templates/challenges/challenge_detail.html:232
-#| msgid "Submissions"
 msgid "My submissions"
 msgstr "Mening yuborishlarim"
 
 #: templates/challenges/challenge_detail.html:238
 #: templates/challenges/challenge_detail.html:375
-#| msgid "Passed"
 msgid "passed"
 msgstr "O'tgan"
 
 #: templates/challenges/challenge_detail.html:250
-#| msgid "Duration"
 msgid "Solution"
 msgstr "Yechim"
 
 #: templates/challenges/challenge_detail.html:258
-#| msgid "Write your reply..."
 msgid "Write your solution here"
 msgstr "Javobni shu yerga yozing"
 
@@ -236,12 +424,10 @@ msgid "Test"
 msgstr "Test"
 
 #: templates/challenges/challenge_detail.html:343
-#| msgid "Expected:"
 msgid "Expected"
 msgstr "Kutilgan"
 
 #: templates/challenges/challenge_detail.html:344
-#| msgid "Sample Output"
 msgid "Output"
 msgstr "Chiqish"
 
@@ -255,17 +441,14 @@ msgid "Please write some code first."
 msgstr "Iltimos, avval kod yozing."
 
 #: templates/challenges/challenge_detail.html:361
-#| msgid "Running…"
 msgid "Running..."
 msgstr "Ishlayapti…"
 
 #: templates/challenges/challenge_detail.html:375
-#| msgid "Example"
 msgid "Example cases"
 msgstr "Namuna testlar"
 
 #: templates/challenges/challenge_detail.html:379
-#| msgid "Results"
 msgid "Run results"
 msgstr "Ishga tushirish natijalari"
 
@@ -275,12 +458,10 @@ msgid "Network error. Please try again."
 msgstr "Tarmoq xatosi. Qayta urinib ko‘ring."
 
 #: templates/challenges/challenge_detail.html:394
-#| msgid "Evaluating…"
 msgid "Evaluating..."
 msgstr "Baholanmoqda..."
 
 #: templates/challenges/challenge_detail.html:399
-#| msgid "Evaluating against hidden tests…"
 msgid "Running against all test cases…"
 msgstr "Barcha testlar bo‘yicha tekshirilmoqda…"
 
@@ -304,18 +485,15 @@ msgid "Wrong answer"
 msgstr "Noto‘g‘ri javob"
 
 #: templates/challenges/challenge_detail.html:428
-#| msgid "All tests passed!"
 msgid "test cases passed"
 msgstr "Barcha testlar bajarildi"
 
 #: templates/challenges/challenge_detail.html:432
-#| msgid "Submissions"
 msgid "Submission result"
 msgstr "Yuborish natijasi"
 
 #: templates/challenges/challenge_list.html:4
 #: templates/challenges/challenge_list.html:111
-#| msgid "Challenges"
 msgid "Global Challenges"
 msgstr "Global masalalar"
 
@@ -325,6 +503,7 @@ msgid "%(n)s published challenges — solve them to earn coins"
 msgstr "%(n)s ta chop etilgan masala — tangalar olish uchun ularni yeching"
 
 #: templates/challenges/challenge_list.html:130
+#: templates/resources/website_list.html:232
 msgid "All"
 msgstr "Barchasi"
 
@@ -364,17 +543,14 @@ msgid "Ranked by total coins earned from global challenges"
 msgstr "Global masalalardan olingan jami tangalar bo‘yicha reyting"
 
 #: templates/challenges/leaderboard.html:87
-#| msgid "Back to coding"
 msgid "Back to challenges"
 msgstr "Masalalarga qaytish"
 
 #: templates/challenges/leaderboard.html:95
-#| msgid "Your reply"
 msgid "Your rank"
 msgstr "Sizning o‘rningiz"
 
 #: templates/challenges/leaderboard.html:100
-#| msgid "Your Code"
 msgid "Your coins"
 msgstr "Sizning tangalaringiz"
 
@@ -409,7 +585,6 @@ msgid "No one has earned coins yet. Be the first!"
 msgstr "Hali hech kim tanga olmagan. Birinchi bo‘ling!"
 
 #: templates/challenges/leaderboard.html:157
-#| msgid "Start Now"
 msgid "Start solving"
 msgstr "Sizning tangalaringiz"
 
@@ -558,6 +733,8 @@ msgstr "Darsni saqlash"
 
 #: templates/journals/lesson_form.html:56
 #: templates/journals/record_form.html:76
+#: templates/resources/website_list.html:415
+#: templates/resources/website_list.html:515
 #: templates/sessions/session_form.html:26
 #: templates/tasks/task_confirm_delete.html:14
 #: templates/tasks/task_form.html:251
@@ -585,6 +762,125 @@ msgstr "Izoh..."
 #: templates/journals/record_form.html:77
 msgid "Save Grades"
 msgstr "Baholarni saqlash"
+
+#: templates/resources/website_list.html:4
+#: templates/resources/website_list.html:199
+msgid "Useful Websites"
+msgstr "Foydali veb-saytlar"
+
+#: templates/resources/website_list.html:200
+msgid "Hand-picked resources to accelerate your learning journey"
+msgstr "O‘rganishingizni tezlashtirish uchun maxsus tanlangan resurslar"
+
+#: templates/resources/website_list.html:205
+#| msgid "Add Test Case"
+msgid "Add Website"
+msgstr "Veb-sayt qo‘shish"
+
+#: templates/resources/website_list.html:208
+#| msgid "Category"
+msgid "Add Category"
+msgstr "Kategoriya qo‘shish"
+
+#: templates/resources/website_list.html:222
+msgid "Search websites, tools, topics…"
+msgstr "Veb-saytlar, vositalar, mavzularni qidiring…"
+
+#: templates/resources/website_list.html:249
+msgid "websites available"
+msgstr "mavjud veb-saytlar"
+
+#: templates/resources/website_list.html:252
+#, python-format
+msgid "results for \"%(q)s\""
+msgstr "\"%(q)s\" bo‘yicha natijalar"
+
+#: templates/resources/website_list.html:276
+msgid "Featured"
+msgstr "Tavsiya etilgan"
+
+#: templates/resources/website_list.html:291
+msgid "Visit"
+msgstr "O‘tish"
+
+#: templates/resources/website_list.html:298
+#| msgid "No messages yet"
+msgid "No websites yet"
+msgstr "Hali veb-saytlar yo‘q"
+
+#: templates/resources/website_list.html:299
+msgid "Check back soon — we're adding new resources regularly."
+msgstr ""
+"Yaqinda qaytadan tekshiring — biz doimiy ravishda yangi resurslar "
+"qo‘shyapmiz."
+
+#: templates/resources/website_list.html:308
+msgid "Know a great resource?"
+msgstr "Ajoyib resursni bilasizmi?"
+
+#: templates/resources/website_list.html:309
+msgid ""
+"Suggest a website and our team will review it. If it's a good fit, we'll add"
+" it to the list."
+msgstr ""
+"Veb-saytni taklif qiling, va jamoamiz uni ko‘rib chiqadi. Agar mos bo‘lsa, "
+"ro‘yxatga qo‘shamiz."
+
+#: templates/resources/website_list.html:313
+#: templates/resources/website_list.html:516
+msgid "Suggest a website"
+msgstr "Veb-saytni taklif qilish"
+
+#: templates/resources/website_list.html:323
+#| msgid "Last name"
+msgid "Website name"
+msgstr "Veb-sayt nomi"
+
+#: templates/resources/website_list.html:350
+msgid "URL not accepted"
+msgstr "URL qabul qilinmadi"
+
+#: templates/resources/website_list.html:370
+msgid "My category isn't listed — I'll suggest a new one"
+msgstr "Mening kategoriyam ro‘yxatda yo‘q — yangi kategoriya taklif qilaman"
+
+#: templates/resources/website_list.html:375
+msgid "New category name"
+msgstr "Yangi kategoriya nomi"
+
+#: templates/resources/website_list.html:391
+msgid ""
+"Pick an existing one or type a new name — admin will create it if approved."
+msgstr ""
+"Mavjud bo‘lganini tanlang yoki yangi nom yozing — agar tasdiqlansa, admin "
+"uni yaratadi."
+
+#: templates/resources/website_list.html:397
+msgid "Why is it useful?"
+msgstr "Bu nima uchun foydali?"
+
+#: templates/resources/website_list.html:412
+#| msgid "Submission"
+msgid "Submit suggestion"
+msgstr "Taklifni yuborish"
+
+#: templates/resources/website_list.html:427
+#| msgid "My submissions"
+msgid "My suggestions"
+msgstr "Mening takliflarim"
+
+#: templates/resources/website_list.html:453
+msgid "Review suggestions in admin"
+msgstr "Takliflarni admin panelida ko‘rib chiqing"
+
+#: templates/resources/website_list.html:496
+#| msgid "No results returned."
+msgid "No results found"
+msgstr "Hech narsa topilmadi"
+
+#: templates/resources/website_list.html:497
+msgid "Try a different search term."
+msgstr "Boshqa qidiruv so‘zini sinab ko‘ring"
 
 #: templates/sessions/leaderboard.html:13
 #: templates/sessions/session_list.html:51
@@ -989,10 +1285,6 @@ msgstr "Muammo bormi? Bizga xabar yuboring, va biz sizga javob beramiz."
 msgid "New Message"
 msgstr "Yangi xabar"
 
-#: templates/support/contact.html:27
-msgid "Category"
-msgstr "Kategoriya"
-
 #: templates/support/contact.html:36
 msgid "Subject"
 msgstr "Mavzu"
@@ -1205,12 +1497,10 @@ msgstr ""
 " barcha foydalanuvchilar uchun ochiq va tanga berishi mumkin."
 
 #: templates/tasks/task_form.html:129
-#| msgid "Sessions"
 msgid "Session only"
 msgstr "Faqat sessiya uchun"
 
 #: templates/tasks/task_form.html:134
-#| msgid "Challenges"
 msgid "Global challenge"
 msgstr "Global masala"
 
@@ -1508,7 +1798,6 @@ msgstr "Hali xabarlar yo‘q"
 
 #: templates/users/group_detail.html:292
 #, python-format
-#| msgid "Be the first to say hello in <strong>%(name)s</strong>!"
 msgid "Be the first to say hello in %(name)s!"
 msgstr "<strong>%(name)s</strong> da birinchi bo‘lib salom yozing!"
 
@@ -1531,7 +1820,6 @@ msgid "Admin"
 msgstr "Administrator"
 
 #: templates/users/group_detail.html:361
-#| msgid "Members"
 msgid "All members"
 msgstr "Barcha a’zolar"
 
