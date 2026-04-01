@@ -43,6 +43,7 @@ urlpatterns = [
 
 urlpatterns += i18n_patterns(
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('users/', include('apps.users.urls', namespace='users')),
     path('dashboard/', include('apps.users.dashboard_urls', namespace='dashboard')),
     path('tasks/', include('apps.tasks.urls', namespace='tasks')),

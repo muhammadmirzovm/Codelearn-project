@@ -34,11 +34,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
+    'django.contrib.sites',              # ← required by allauth
 
     'channels',
     'crispy_forms',
     'crispy_tailwind',
     'rosetta',
+
+    # django-allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 
     'apps.users',
     'apps.tasks',
@@ -60,6 +67,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',  # ← required by allauth
 ]
 
 ROOT_URLCONF = 'codelearn.urls'
@@ -72,10 +80,10 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',
+                'django.template.context_processors.request',  # ← required by allauth
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'apps.users.context_processors.notifications', 
+                'apps.users.context_processors.notifications',
             ],
         },
     },
@@ -85,6 +93,31 @@ ASGI_APPLICATION = 'codelearn.asgi.application'
 WSGI_APPLICATION = 'codelearn.wsgi.application'
 
 AUTH_USER_MODEL = 'users.User'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',  # ← allauth backend
+]
+
+SITE_ID = 1  # ← required by allauth
+
+# django-allauth config
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # change to 'mandatory' if you want email confirmation
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': env('GOOGLE_CLIENT_ID'),
+            'secret': env('GOOGLE_CLIENT_SECRET'),
+            'key': '',
+        },
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -104,7 +137,7 @@ LANGUAGES = [
     ('uz', "O'zbek"),
 ]
 LOCALE_PATHS = [
-    BASE_DIR / 'locale',                        # global
+    BASE_DIR / 'locale',
     BASE_DIR / 'apps/journals/locale',
     BASE_DIR / 'apps/runner/locale',
     BASE_DIR / 'apps/sessions_app/locale',
@@ -113,7 +146,6 @@ LOCALE_PATHS = [
     BASE_DIR / 'apps/users/locale',
     BASE_DIR / 'apps/resources/locale',
 ]
-USE_I18N = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -155,15 +187,12 @@ CELERY_TIMEZONE = TIME_ZONE
 # Sandbox settings
 USE_DOCKER_SANDBOX = env('USE_DOCKER_SANDBOX')
 SANDBOX_IMAGE = env('SANDBOX_IMAGE', default='codelearn-runner:latest')
-SANDBOX_TIMEOUT = int(env('SANDBOX_TIMEOUT', default='10'))        # seconds
+SANDBOX_TIMEOUT = int(env('SANDBOX_TIMEOUT', default='10'))
 SANDBOX_MEMORY_LIMIT = env('SANDBOX_MEMORY_LIMIT', default='64m')
 SANDBOX_CPU_PERIOD = 100000
-SANDBOX_CPU_QUOTA = 50000   # 50% of one CPU
+SANDBOX_CPU_QUOTA = 50000
 
-# Code size limit (bytes)
-MAX_CODE_SIZE = 64 * 1024  # 64 KB
-
-# Rate limiting (requests per minute per student)
+MAX_CODE_SIZE = 64 * 1024
 RUN_RATE_LIMIT = 10
 SUBMIT_RATE_LIMIT = 5
 
@@ -194,3 +223,5 @@ LOGGING = {
         },
     },
 }
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
