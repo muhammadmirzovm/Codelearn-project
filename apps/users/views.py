@@ -17,7 +17,7 @@ from apps.users.models import ChatMessage
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
-from .models import Notification
+from .models import Notification, GroupMembership
 
 from django.http import JsonResponse
 
@@ -143,7 +143,7 @@ def join_group(request):
         if group.students.filter(pk=request.user.pk).exists():
             messages.info(request, f'You are already a member of "{group.name}".')
         else:
-            group.students.add(request.user)
+            GroupMembership.objects.create(student=request.user, group=group)
             messages.success(request, f'🎉 You joined "{group.name}" successfully!')
         return redirect('dashboard:home')
 

@@ -47,6 +47,7 @@ class Group(models.Model):
         User, blank=True,
         related_name='student_groups',
         limit_choices_to={'role': User.STUDENT},
+        through='GroupMembership',  
     )
     invite_key = models.UUIDField(
         default=uuid.uuid4, unique=True, editable=False,
@@ -143,3 +144,19 @@ class CoinTransaction(models.Model):
     def __str__(self):
         sign = '+' if self.amount >= 0 else ''
         return f'{sign}{self.amount} coins → {self.user.username} ({self.note})'
+        
+class GroupMembership(models.Model):
+    """Tracks when a student joined a group."""
+    student   = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='memberships'
+    )
+    group     = models.ForeignKey(
+        'Group', on_delete=models.CASCADE, related_name='memberships'
+    )
+    joined_at = models.DateField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'group')
+
+    def __str__(self):
+        return f'{self.student.username} → {self.group.name} ({self.joined_at})'

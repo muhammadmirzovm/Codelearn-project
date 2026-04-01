@@ -1,10 +1,9 @@
-# apps/journals/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView, CreateView, View
 
-from apps.users.models import Group
+from apps.users.models import Group, GroupMembership
 from apps.journals.models import Journal, Lesson, Record
 from apps.journals.forms import LessonForm
 
@@ -33,23 +32,44 @@ class JournalDetailView(LoginRequiredMixin, DetailView):
 
         student_stats = []
         for student in students:
+            # Get the date this student joined the group
+            try:
+                membership = GroupMembership.objects.get(
+                    student=student, group=journal.group
+                )
+                joined_at = membership.joined_at
+            except GroupMembership.DoesNotExist:
+                joined_at = None
+
+            # Only count lessons from join date onwards
+            if joined_at:
+                student_lessons = lessons.filter(date__gte=joined_at)
+            else:
+                student_lessons = lessons
+
+            student_lesson_count = student_lessons.count()
+            student_max_score = student_lesson_count * 5
+
             total_grade = sum(
                 r.grade for r in Record.objects.filter(
-                    lesson__journal=journal,
+                    lesson__in=student_lessons,
                     student=student,
                     grade__isnull=False
                 )
             )
             attended = Record.objects.filter(
-                lesson__journal=journal,
+                lesson__in=student_lessons,
                 student=student,
                 attended=True
             ).count()
-            percentage = round((total_grade / max_score) * 100) if max_score > 0 else 0
+            percentage = round((total_grade / student_max_score) * 100) if student_max_score > 0 else 0
+
             student_stats.append({
                 'student': student,
                 'total_grade': total_grade,
                 'attended': attended,
+                'lesson_count': student_lesson_count,   # ← per-student
+                'max_score': student_max_score,         # ← per-student
                 'percentage': percentage,
             })
 
@@ -78,13 +98,14 @@ class LessonCreateView(LoginRequiredMixin, CreateView):
         lesson.journal = group.journal
         lesson.save()
 
-        # Auto-create a record for every student with grade=0, attended=False
-        for student in group.students.all():
-            Record.objects.get_or_create(
-                lesson=lesson,
-                student=student,
-                defaults={'grade': 0, 'attended': False}
-            )
+        # Only create records for students who joined on or before this lesson's date
+        for membership in GroupMembership.objects.filter(group=group):
+            if membership.joined_at <= lesson.date:
+                Record.objects.get_or_create(
+                    lesson=lesson,
+                    student=membership.student,
+                    defaults={'grade': 0, 'attended': False}
+                )
 
         return redirect('journals:detail', group_pk=self.kwargs['group_pk'])
 
@@ -105,13 +126,14 @@ class RecordUpdateView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         group = self.lesson.journal.group
 
-        # Create missing records for any student who doesn't have one yet
-        for student in group.students.all():
-            Record.objects.get_or_create(
-                lesson=self.lesson,
-                student=student,
-                defaults={'grade': 0, 'attended': False}
-            )
+        # Only create records for students who joined on or before this lesson's date
+        for membership in GroupMembership.objects.filter(group=group):
+            if membership.joined_at <= self.lesson.date:
+                Record.objects.get_or_create(
+                    lesson=self.lesson,
+                    student=membership.student,
+                    defaults={'grade': 0, 'attended': False}
+                )
 
         records = Record.objects.filter(
             lesson=self.lesson
@@ -131,9 +153,7 @@ class RecordUpdateView(LoginRequiredMixin, View):
         for record in records:
             attended = f'attended_{record.pk}' in request.POST
             grade_val = request.POST.get(f'grade_{record.pk}', '0')
-
             record.attended = attended
-            # Absent students automatically get 0
             record.grade = int(grade_val) if grade_val != '' else 0
             record.comment = request.POST.get(f'comment_{record.pk}', '')
             record.save()

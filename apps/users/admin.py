@@ -27,7 +27,7 @@ class UserAdmin(BaseUserAdmin):
 @admin.register(StudentGroup)
 class GroupAdmin(admin.ModelAdmin):
     list_display = ('name', 'teacher', 'student_count', 'created_at')
-    filter_horizontal = ('students',)
+    # filter_horizontal = ('students',)
 
     def student_count(self, obj):
         return obj.students.count()

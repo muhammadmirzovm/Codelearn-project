@@ -124,8 +124,8 @@
         {% for stat in student_stats %}
         <tr>
           <td><strong>{{ stat.student.get_full_name|default:stat.student.username }}</strong></td>
-          <td class="score-cell">{{ stat.total_grade }} / {{ max_score }}</td>
-          <td class="attend-cell">{{ stat.attended }} / {{ lesson_count }}</td>
+          <td class="score-cell">{{ stat.total_grade }} / {{ stat.max_score }}</td>
+          <td class="attend-cell">{{ stat.attended }} / {{ stat.lesson_count }}</td>
           <td>
             <div class="prog-wrap">
               <div class="prog-bar">
