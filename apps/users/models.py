@@ -15,7 +15,7 @@ class User(AbstractUser):
         (TEACHER, 'Teacher'),
         (STUDENT, 'Student'),
     ]
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=STUDENT)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='', blank=True)
 
     @property
     def is_teacher(self):

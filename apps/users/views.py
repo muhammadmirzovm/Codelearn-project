@@ -10,22 +10,18 @@ from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST
 
 from .forms import RegisterForm, GroupForm
-from .models import User, Group
-from apps.users.models import ChatMessage
-
+from .models import User, Group, GroupMembership
+from apps.users.models import ChatMessage, Notification
 
 from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
-from .models import Notification, GroupMembership
-
 from django.http import JsonResponse
-
 from django.contrib.auth import update_session_auth_hash
 from .forms import ProfileForm, PasswordChangeForm
 
-
 import json
+
+
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -74,6 +70,7 @@ def group_list(request):
         'unread_counts': unread_counts,
     })
 
+
 @teacher_required
 def group_create(request):
     if request.method == 'POST':
@@ -118,7 +115,6 @@ def group_delete(request, pk):
 @teacher_required
 @require_POST
 def group_regenerate_key(request, pk):
-    """Teacher regenerates the invite key for a group."""
     group = get_object_or_404(Group, pk=pk, teacher=request.user)
     group.regenerate_key()
     messages.success(request, f'New invite key generated for "{group.name}".')
@@ -127,7 +123,6 @@ def group_regenerate_key(request, pk):
 
 @login_required
 def join_group(request):
-    """Student joins a group using an invite key."""
     if request.user.is_teacher:
         messages.error(request, 'Teachers cannot join groups as students.')
         return redirect('dashboard:home')
@@ -157,9 +152,10 @@ def group_detail(request, group_id):
         'group': group,
         'previous_messages': previous_messages,
     })
-    
+
+
 @login_required
-@require_POST                          # auto-returns 405 for non-POST
+@require_POST
 def mark_one_read(request, pk):
     Notification.objects.filter(pk=pk, recipient=request.user).update(is_read=True)
     return JsonResponse({'ok': True})
@@ -171,13 +167,14 @@ def mark_all_read(request):
     request.user.notifications.filter(is_read=False).update(is_read=True)
     return JsonResponse({'ok': True})
 
+
 @login_required
 def profile(request):
     user = request.user
- 
+
     if request.method == 'POST':
         action = request.POST.get('action')
- 
+
         if action == 'update_info':
             form = ProfileForm(request.POST, instance=user)
             if form.is_valid():
@@ -186,7 +183,7 @@ def profile(request):
                 return redirect('users:profile')
             else:
                 messages.error(request, '❌ Please fix the errors below.')
- 
+
         elif action == 'change_password':
             pw_form = PasswordChangeForm(user, request.POST)
             if pw_form.is_valid():
@@ -196,11 +193,11 @@ def profile(request):
                 return redirect('users:profile')
             else:
                 messages.error(request, '❌ Please fix the password errors.')
- 
+
     # ── Common ────────────────────────────────────────────────────────────────
     notifications_count = user.notifications.count()
     unread_notif_count  = user.notifications.filter(is_read=False).count()
- 
+
     # ── Teacher ───────────────────────────────────────────────────────────────
     if user.is_teacher:
         groups_count      = user.taught_groups.count()
@@ -209,57 +206,67 @@ def profile(request):
         ).distinct().count()
         submissions_count = None
         journal_stats     = None
- 
+
     # ── Student ───────────────────────────────────────────────────────────────
     else:
         from apps.journals.models import Record
- 
+
         groups_count   = user.student_groups.count()
         students_count = None
- 
+
         try:
             from apps.submissions.models import Submission
             submissions_count = Submission.objects.filter(student=user).count()
         except Exception:
             submissions_count = 0
- 
+
         journal_stats = []
         for group in user.student_groups.select_related('journal').all():
             try:
                 journal = group.journal
             except Exception:
                 continue
- 
-            # Lessons ordered by date (oldest → newest) for the line chart
-            lessons = journal.lessons.order_by('date')
+
+            # Get join date for this student
+            try:
+                membership = GroupMembership.objects.get(student=user, group=group)
+                joined_at = membership.joined_at
+            except GroupMembership.DoesNotExist:
+                joined_at = None
+
+            # Only count lessons from join date onwards
+            all_lessons = journal.lessons.order_by('date')
+            if joined_at:
+                lessons = all_lessons.filter(date__gte=joined_at)
+            else:
+                lessons = all_lessons
+
             lesson_count = lessons.count()
             if lesson_count == 0:
                 continue
- 
+
             records = Record.objects.filter(
-                lesson__journal=journal,
+                lesson__in=lessons,
                 student=user,
             ).select_related('lesson')
- 
-            # Build a dict for fast lookup: lesson_id → record
+
             record_map = {r.lesson_id: r for r in records}
- 
-            # Per-lesson arrays for Chart.js
-            chart_labels = []   # ["01.03", "08.03", ...]
-            chart_grades = []   # [4, 5, null, 3, ...]  null = absent/no grade
- 
+
+            chart_labels = []
+            chart_grades = []
+
             for lesson in lessons:
                 rec = record_map.get(lesson.pk)
                 chart_labels.append(lesson.date.strftime('%d.%m'))
                 if rec and rec.grade is not None:
                     chart_grades.append(rec.grade)
                 else:
-                    chart_grades.append(None)  # will become null in JSON → gap in line
- 
+                    chart_grades.append(None)
+
             attended    = records.filter(attended=True).count()
             total_grade = sum(r.grade for r in records if r.grade is not None)
             max_score   = lesson_count * 5
- 
+
             journal_stats.append({
                 'group':          group,
                 'lesson_count':   lesson_count,
@@ -269,11 +276,10 @@ def profile(request):
                 'max_score':      max_score,
                 'attendance_pct': round(attended / lesson_count * 100) if lesson_count else 0,
                 'grade_pct':      round(total_grade / max_score * 100) if max_score else 0,
-                # JSON strings for Chart.js (safe to dump directly into <script>)
                 'chart_labels':   json.dumps(chart_labels),
                 'chart_grades':   json.dumps(chart_grades),
             })
- 
+
     context = {
         'form':                ProfileForm(instance=user),
         'pw_form':             PasswordChangeForm(user),
@@ -285,3 +291,17 @@ def profile(request):
         'journal_stats':       journal_stats,
     }
     return render(request, 'users/profile.html', context)
+
+@login_required
+def select_role(request):
+    if request.user.role:
+        return redirect('dashboard:home')
+
+    if request.method == 'POST':
+        role = request.POST.get('role')
+        if role in ['teacher', 'student']:
+            request.user.role = role
+            request.user.save(update_fields=['role'])
+            return redirect('dashboard:home')
+
+    return render(request, 'users/select_role.html')

@@ -3,6 +3,21 @@ import django.db.models.deletion
 from django.conf import settings
 
 
+def copy_and_drop(apps, schema_editor):
+    if schema_editor.connection.vendor == 'postgresql':
+        schema_editor.execute(
+            "INSERT INTO users_groupmembership (student_id, group_id, joined_at) "
+            "SELECT user_id, group_id, CURRENT_DATE FROM users_group_students "
+            "ON CONFLICT DO NOTHING"
+        )
+    else:
+        schema_editor.execute(
+            "INSERT OR IGNORE INTO users_groupmembership (student_id, group_id, joined_at) "
+            "SELECT user_id, group_id, DATE('now') FROM users_group_students"
+        )
+    schema_editor.execute("DROP TABLE IF EXISTS users_group_students")
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -24,23 +39,10 @@ class Migration(migrations.Migration):
             },
         ),
 
-        # Step 2: Copy existing M2M data into GroupMembership
-        migrations.RunSQL(
-            sql="""
-                INSERT OR IGNORE INTO users_groupmembership (student_id, group_id, joined_at)
-                SELECT user_id, group_id, DATE('now')
-                FROM users_group_students;
-            """,
-            reverse_sql=migrations.RunSQL.noop,
-        ),
+        # Step 2: Copy existing M2M data and drop old table
+        migrations.RunPython(copy_and_drop, reverse_code=migrations.RunPython.noop),
 
-        # Step 3: Remove the old auto-generated M2M table
-        migrations.RunSQL(
-            sql="DROP TABLE IF EXISTS users_group_students;",
-            reverse_sql=migrations.RunSQL.noop,
-        ),
-
-        # Step 4: Update Django state only — no DB changes
+        # Step 3: Update Django state only — no DB changes
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AlterField(
@@ -55,6 +57,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            database_operations=[],  # nothing to do in DB
+            database_operations=[],
         ),
     ]

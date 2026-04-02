@@ -118,7 +118,7 @@
       <div class="chart-box chart-box-line">
         <div class="chart-box-label">📈 {% trans "Grade per lesson" %}</div>
         <div class="line-scroll-wrap" id="lineWrap{{ forloop.counter }}">
-          <canvas id="lineChart{{ forloop.counter }}" height="130"></canvas>
+          <canvas id="lineChart{{ forloop.counter }}" height="160"></canvas>
         </div>
       </div>
 
@@ -150,14 +150,14 @@
     const lineLabels = {{ js.chart_labels|safe }};
     const lineData   = {{ js.chart_grades|safe }};
 
-    // Dynamic width: 44px per point, min = container width
+    // Dynamic width: 60px per point, min = container width
     const canvas  = document.getElementById('lineChart{{ forloop.counter }}');
     const wrapper = document.getElementById('lineWrap{{ forloop.counter }}');
-    const minW    = Math.max(lineLabels.length * 44, wrapper.clientWidth || 300);
+    const minW    = Math.max(lineLabels.length * 60, wrapper.clientWidth || 300);
     canvas.style.width  = minW + 'px';
-    canvas.style.height = '130px';
+    canvas.style.height = '160px';
     canvas.width  = minW;
-    canvas.height = 130;
+    canvas.height = 160;
 
     new Chart(canvas, {
       type: 'line',
@@ -170,19 +170,31 @@
           backgroundColor: accentBg,
           borderWidth: 2.5,
           pointBackgroundColor: accent,
-          pointRadius: 4,
-          pointHoverRadius: 6,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          pointHoverBorderWidth: 2,
           fill: true,
           tension: 0.35,
           spanGaps: false,
         }]
       },
       options: {
-        responsive: false,          // must be false for fixed-width scroll
+        responsive: false,
         maintainAspectRatio: false,
+        layout: {
+          padding: { top: 16, bottom: 4, left: 4, right: 4 }
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
+            backgroundColor: 'var(--surface)',
+            borderColor: accent,
+            borderWidth: 1,
+            titleColor: accent,
+            bodyColor: textMuted,
+            padding: 10,
             callbacks: {
               label: ctx => ctx.parsed.y === null
                 ? '{% trans "No grade" %}'
@@ -192,11 +204,13 @@
         },
         scales: {
           y: {
-            min: 0, max: 5,
+            min: 0,
+            max: 6,  // extra space so grade 5 is not clipped at top
             ticks: {
               stepSize: 1,
               color: textMuted,
               font: { family: 'monospace', size: 11 },
+              callback: val => val <= 5 ? val : '',  // hide the 6 tick label
             },
             grid: { color: borderCol },
           },
@@ -205,7 +219,7 @@
               color: textMuted,
               font: { family: 'monospace', size: 10 },
               maxRotation: 0,
-              autoSkip: false,    // show every label
+              autoSkip: false,
             },
             grid: { display: false },
           }
@@ -397,7 +411,6 @@
     overflow-x: auto;
     overflow-y: hidden;
     cursor: grab;
-    /* thin scrollbar */
     scrollbar-width: thin;
     scrollbar-color: var(--border2) transparent;
   }

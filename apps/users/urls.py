@@ -22,4 +22,5 @@ urlpatterns = [
     path("groups/<int:group_id>/", views.group_detail, name="group_detail"),
     path("notify/<int:pk>/read/", views.mark_one_read, name="notif_mark_one"),
     path("notify/mark-read/", views.mark_all_read, name="notif_mark_read"),
+    path("select-role/", views.select_role, name="select_role"),
 ]
