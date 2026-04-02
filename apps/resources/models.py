@@ -148,3 +148,102 @@ class WebsiteSuggestion(models.Model):
 
     def __str__(self):
         return f'{self.name} — {self.suggested_by.username} ({self.status})'
+    
+    
+import re
+
+class VideoCategory(models.Model):
+    name  = models.CharField(_('name'), max_length=100)
+    slug  = models.SlugField(unique=True)
+
+    class Meta:
+        verbose_name        = _('Video Category')
+        verbose_name_plural = _('Video Categories')
+        ordering            = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+
+class Video(models.Model):
+    LANGUAGE_CHOICES = [
+        ('uz', "O'zbek"),
+        ('ru', 'Русский'),
+        ('en', 'English'),
+    ]
+
+    title       = models.CharField(_('title'), max_length=200)
+    url         = models.TextField(_('YouTube URL or iframe'))
+    embed_url   = models.CharField(_('embed URL'), max_length=500, blank=True)
+    description = models.TextField(_('description'), blank=True)
+    language    = models.CharField(
+        _('language'), max_length=5,
+        choices=LANGUAGE_CHOICES
+    )
+    category    = models.ForeignKey(
+        VideoCategory, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='videos', verbose_name=_('category'),
+    )
+    new_category = models.CharField(
+        _('new category'), max_length=100, blank=True,
+        help_text=_('If your category is not listed, type a new one here')
+    )
+    added_by    = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='videos',
+        verbose_name=_('added by'),
+    )
+    created_at  = models.DateTimeField(_('created at'), auto_now_add=True)
+
+    class Meta:
+        verbose_name        = _('Video')
+        verbose_name_plural = _('Videos')
+        ordering            = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    @staticmethod
+    def extract_youtube_id(raw):
+        """Extract YouTube video ID from any URL or iframe."""
+        # If it's an iframe tag
+        iframe_src = re.search(r'src=["\']([^"\']+)["\']', raw)
+        if iframe_src:
+            raw = iframe_src.group(1)
+
+        # Match various YouTube URL formats
+        patterns = [
+            r'youtube\.com/embed/([a-zA-Z0-9_-]{11})',
+            r'youtube\.com/watch\?v=([a-zA-Z0-9_-]{11})',
+            r'youtu\.be/([a-zA-Z0-9_-]{11})',
+            r'youtube\.com/shorts/([a-zA-Z0-9_-]{11})',
+        ]
+        for pattern in patterns:
+            match = re.search(pattern, raw)
+            if match:
+                return match.group(1)
+        return None
+
+    def save(self, *args, **kwargs):
+        # Auto-create category from new_category field
+        if self.new_category and not self.category:
+            cat, _ = VideoCategory.objects.get_or_create(
+                slug=slugify(self.new_category),
+                defaults={'name': self.new_category}
+            )
+            self.category = cat
+            self.new_category = ''
+
+        # Extract embed URL
+        video_id = self.extract_youtube_id(self.url)
+        if video_id:
+            self.embed_url = f'https://www.youtube.com/embed/{video_id}'
+
+        super().save(*args, **kwargs)

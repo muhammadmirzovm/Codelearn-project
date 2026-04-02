@@ -4,8 +4,12 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q, F
 
-from .models import Category, Website, WebsiteSuggestion
-from .forms import WebsiteSuggestionForm
+from .models import Category, Website, WebsiteSuggestion ,Video, VideoCategory
+from .forms import WebsiteSuggestionForm, VideoForm
+
+
+
+
 
 
 def _base_context(request, category_slug='', search_query=''):
@@ -71,3 +75,79 @@ def website_suggest(request):
     context['suggest_form'] = form
     context['open_suggest'] = True
     return render(request, 'resources/website_list.html', context)
+
+
+
+
+@login_required
+def resource_home(request):
+    return render(request, 'resources/home.html', {
+        'website_count': Website.objects.filter(is_active=True).count(),
+        'video_count':   Video.objects.count(),
+    })
+
+
+@login_required
+def video_list(request):
+    language = request.GET.get('lang', '').strip()
+    category_slug = request.GET.get('category', '').strip()
+    search_query = request.GET.get('q', '').strip()
+
+    videos = Video.objects.select_related('category', 'added_by')
+
+    if language:
+        videos = videos.filter(language=language)
+    if category_slug:
+        videos = videos.filter(category__slug=category_slug)
+    if search_query:
+        videos = videos.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+
+    return render(request, 'resources/video_list.html', {
+        'videos':          videos,
+        'video_categories': VideoCategory.objects.all(),
+        'active_lang':     language,
+        'active_slug':     category_slug,
+        'search_query':    search_query,
+        'video_form':      VideoForm(),
+        'language_choices': Video.LANGUAGE_CHOICES,
+    })
+
+
+@login_required
+def video_add(request):
+    if request.method != 'POST':
+        return redirect('resources:video_list')
+
+    form = VideoForm(request.POST)
+    if form.is_valid():
+        video = form.save(commit=False)
+        video.added_by = request.user
+        video.save()
+        messages.success(request, _('Video added successfully! 🎉'))
+        return redirect('resources:video_list')
+
+    language = request.GET.get('lang', '').strip()
+    videos = Video.objects.select_related('category', 'added_by')
+    if language:
+        videos = videos.filter(language=language)
+
+    return render(request, 'resources/video_list.html', {
+        'videos':           videos,
+        'video_categories': VideoCategory.objects.all(),
+        'active_lang':      language,
+        'video_form':       form,
+        'language_choices': Video.LANGUAGE_CHOICES,
+        'open_video_form':  True,
+    })
+
+
+@login_required
+def video_delete(request, pk):
+    video = get_object_or_404(Video, pk=pk)
+    if request.user == video.added_by or request.user.is_staff:
+        video.delete()
+        messages.success(request, _('Video deleted.'))
+    return redirect('resources:video_list')
