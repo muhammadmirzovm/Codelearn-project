@@ -1,23 +1,46 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% trans "Monitor" %} – CodeLearn{% endblock %}
+
+{% block extra_head %}
+<style>
+/* countdown — shared with session_join */
+.cd-wrap { display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:var(--radius); font-weight:700; }
+.cd-ok   { background:var(--success-bg); border:1.5px solid var(--success-brd); color:var(--success); }
+.cd-warn { background:var(--warning-bg); border:1.5px solid var(--warning-brd); color:var(--warning); }
+.cd-crit { background:var(--danger-bg);  border:1.5px solid var(--danger-brd);  color:var(--danger); animation:blink .65s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.45} }
+@keyframes spin  { to{transform:rotate(360deg)} }
+/* toast */
+.toast-msg { position:fixed; bottom:1.25rem; right:1.25rem; padding:.7rem 1.15rem; border-radius:var(--radius); font-size:.82rem; font-family:var(--font-mono); font-weight:500; z-index:9999; opacity:0; transform:translateY(6px); transition:all .25s; pointer-events:none; }
+.toast-msg.show { opacity:1; transform:translateY(0); }
+.toast-s { background:var(--success); color:#fff; }
+.toast-w { background:var(--warning); color:#fff; }
+.toast-e { background:var(--danger);  color:#fff; }
+/* avatar colors */
+.av { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--font-mono); }
+.av-0{background:#7F77DD}.av-1{background:#1D9E75}.av-2{background:#D85A30}.av-3{background:#378ADD}
+.av-4{background:#D4537E}.av-5{background:#BA7517}.av-6{background:#533AB7}.av-7{background:#0F6E56}
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-    <div style="display:flex;align-items:center;gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <div>
         <h1 class="section-title">📡 {% trans "Live Monitor" %}</h1>
         <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
       </div>
       <div id="ws-indicator" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:var(--bg2);border:1px solid var(--border);">
-        <span id="ws-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-sub);"></span>
-        <span id="ws-label" style="font-size:.72rem;font-weight:600;color:var(--text-sub);font-family:var(--font-mono);">{% trans "Connecting" %}</span>
+        <span id="ws-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-muted);"></span>
+        <span id="ws-label" style="font-size:.72rem;font-weight:600;color:var(--text-muted);font-family:var(--font-mono);">{% trans "Connecting" %}</span>
       </div>
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       {% if session.duration_minutes and session.activated_at %}
-      <div class="cd-wrap cd-ok" id="cd-wrap" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius);font-weight:700;">
+      <div class="cd-wrap cd-ok" id="cd-wrap">
         <span style="font-size:.75rem;">⏱</span>
         <span class="mono" id="countdown">--:--</span>
       </div>
@@ -31,6 +54,7 @@
   </div>
 </div>
 
+<!-- Stats bar -->
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px;" class="fade-up-2">
   <div class="stat-card" style="text-align:center;">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-total">{{ student_data|length }}</p>
@@ -54,46 +78,52 @@
   </div>
 </div>
 
+<!-- Student table -->
 <div class="card fade-up-3" style="overflow:hidden;">
-  <table class="tbl">
-    <thead>
-      <tr>
-        <th>{% trans "Student" %}</th>
-        <th>{% trans "Status" %}</th>
-        <th class="hide-sm">{% trans "Score" %}</th>
-        <th class="hide-sm">{% trans "Last Activity" %}</th>
-      </tr>
-    </thead>
-    <tbody id="monitor-body">
-      {% for item in student_data %}
-      <tr id="row-{{ item.student.pk }}">
-        <td>
-          <div style="display:flex;align-items:center;gap:9px;">
-            <div class="ac-{{ forloop.counter0 }}" style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;font-family:var(--font-mono);">{{ item.student.username|first|upper }}</div>
-            <div>
-              <p style="font-weight:600;font-size:.9rem;">{{ item.student.get_full_name|default:item.student.username }}</p>
-              <p style="font-size:.73rem;color:var(--text-muted);font-family:var(--font-mono);">@{{ item.student.username }}</p>
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table class="tbl" style="min-width:500px;">
+      <thead>
+        <tr>
+          <th>{% trans "Student" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th class="hide-sm">{% trans "Score" %}</th>
+          <th class="hide-sm">{% trans "Last Activity" %}</th>
+        </tr>
+      </thead>
+      <tbody id="monitor-body">
+        {% for item in student_data %}
+        <tr id="row-{{ item.student.pk }}">
+          <td>
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div class="av av-{{ forloop.counter0|divisibleby:8|yesno:'0,' }}{{ forloop.counter0 }}">{{ item.student.username|first|upper }}</div>
+              <div>
+                <p style="font-weight:600;font-size:.9rem;">{{ item.student.get_full_name|default:item.student.username }}</p>
+                <p style="font-size:.73rem;color:var(--text-muted);font-family:var(--font-mono);">@{{ item.student.username }}</p>
+              </div>
             </div>
-          </div>
-        </td>
-        <td id="status-{{ item.student.pk }}">
-          {% if item.submission %}
-            <span class="badge badge-{{ item.submission.status }}">{{ item.submission.get_status_display }}</span>
-          {% else %}
-            <span class="badge badge-notstarted">{% trans "Not started" %}</span>
-          {% endif %}
-        </td>
-        <td class="hide-sm" id="score-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.875rem;font-family:var(--font-mono);">
-          {% if item.submission %}{{ item.submission.passed_count }}/{{ item.submission.total_count }}{% else %}—{% endif %}
-        </td>
-        <td class="hide-sm" id="time-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.78rem;font-family:var(--font-mono);">
-          {% if item.submission %}{{ item.submission.created_at|date:"H:i:s" }}{% else %}—{% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          </td>
+          <td id="status-{{ item.student.pk }}">
+            {% if item.submission %}
+              <span class="badge badge-{{ item.submission.status }}">{{ item.submission.get_status_display }}</span>
+            {% else %}
+              <span class="badge badge-notstarted">{% trans "Not started" %}</span>
+            {% endif %}
+          </td>
+          <td class="hide-sm" id="score-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.875rem;font-family:var(--font-mono);">
+            {% if item.submission %}{{ item.submission.passed_count }}/{{ item.submission.total_count }}{% else %}—{% endif %}
+          </td>
+          <td class="hide-sm" id="time-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.78rem;font-family:var(--font-mono);">
+            {% if item.submission %}{{ item.submission.created_at|date:"H:i:s" }}{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<!-- Toast -->
+<div id="toast-el" class="toast-msg"></div>
 
 <script type="application/json" id="page-data">
 {
@@ -114,7 +144,6 @@ const DURATION_SECS = DATA.duration_mins * 60;
 const ACTIVATED_AT  = DATA.activated_at;
 const total         = DATA.total;
 
-// i18n strings for JavaScript
 const i18n = {
   live:         "{% trans 'Live' %}",
   reconnecting: "{% trans 'Reconnecting' %}",
@@ -125,6 +154,17 @@ const i18n = {
   notStarted:   "{% trans 'Not started' %}",
 };
 
+/* ── Toast ── */
+let _toastTimer = null;
+function _toast(msg, type) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg;
+  el.className = `toast-msg toast-${type} show`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ── Stats ── */
 let nPassed = DATA.statuses.filter(s => s === 'passed').length;
 let nSub    = DATA.statuses.filter(s => s !== 'none' && s !== 'passed').length;
 let nRun    = 0;
@@ -137,21 +177,20 @@ function updateStats() {
   document.getElementById('s-idle').textContent   = Math.max(0, total - nPassed - nSub - nRun);
 }
 
+/* ── Countdown ── */
 if (DURATION_SECS && ACTIVATED_AT) {
   function updateCD() {
     const elapsed = (Date.now() - new Date(ACTIVATED_AT).getTime()) / 1000;
     const rem = Math.max(0, DURATION_SECS - elapsed);
-    const m = Math.floor(rem/60), s = Math.floor(rem%60);
-    const el = document.getElementById('countdown');
-    const wrap = document.getElementById('cd-wrap');
+    const m = Math.floor(rem / 60), s = Math.floor(rem % 60);
+    const el = document.getElementById('countdown'); const wrap = document.getElementById('cd-wrap');
     if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    if (wrap) wrap.className = 'cd-wrap ' + (rem>120?'cd-ok':rem>30?'cd-warn':'cd-crit');
+    if (wrap) wrap.className = 'cd-wrap ' + (rem > 120 ? 'cd-ok' : rem > 30 ? 'cd-warn' : 'cd-crit');
   }
   updateCD(); setInterval(updateCD, 500);
 }
 
-function nowStr() { return new Date().toTimeString().slice(0, 8); }
-
+/* ── WS indicator ── */
 function setWS(ok) {
   const dot = document.getElementById('ws-dot');
   const lbl = document.getElementById('ws-label');
@@ -160,10 +199,12 @@ function setWS(ok) {
     dot.style.background = 'var(--success)'; lbl.textContent = i18n.live; lbl.style.color = 'var(--success)';
     ind.style.background = 'var(--success-bg)'; ind.style.borderColor = 'var(--success-brd)';
   } else {
-    dot.style.background = 'var(--text-sub)'; lbl.textContent = i18n.reconnecting; lbl.style.color = 'var(--text-sub)';
+    dot.style.background = 'var(--text-muted)'; lbl.textContent = i18n.reconnecting; lbl.style.color = 'var(--text-muted)';
     ind.style.background = 'var(--bg2)'; ind.style.borderColor = 'var(--border)';
   }
 }
+
+function nowStr() { return new Date().toTimeString().slice(0, 8); }
 
 function updateRow(sid, badge, flash) {
   const s = document.getElementById(`status-${sid}`);
@@ -172,27 +213,36 @@ function updateRow(sid, badge, flash) {
   if (t) t.textContent = nowStr();
   if (flash) {
     const row = document.getElementById(`row-${sid}`);
-    if (row) { row.style.transition='background .15s'; row.style.background=flash; setTimeout(()=>row.style.background='',1500); }
+    if (row) { row.style.transition = 'background .15s'; row.style.background = flash; setTimeout(() => row.style.background = '', 1500); }
   }
 }
 
+/* ── WebSocket with auto-reconnect ── */
 function connectWS() {
-  const proto = location.protocol==='https:'?'wss':'ws';
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_PK}/`);
+
   ws.onopen  = () => setWS(true);
   ws.onclose = () => { setWS(false); setTimeout(connectWS, 3000); };
+  ws.onerror = (e) => console.warn('[WS monitor] error', e);
+
   ws.onmessage = e => {
     const msg = JSON.parse(e.data); const d = msg.data; const sid = d.student_id;
-    if (msg.event==='ran_example') { nRun++; updateStats(); updateRow(sid,`<span class="badge badge-running">${i18n.running}</span>`,'rgba(13,148,136,.07)'); }
-    else if (msg.event==='submitted') { nRun=Math.max(0,nRun-1); nSub++; updateStats(); updateRow(sid,`<span class="badge badge-pending">${i18n.evaluating}</span>`,'rgba(13,148,136,.05)'); }
-    else if (msg.event==='submission_result') {
-      nSub=Math.max(0,nSub-1);
+    if (msg.event === 'ran_example') {
+      nRun++; updateStats();
+      updateRow(sid, `<span class="badge badge-running">${i18n.running}</span>`, 'rgba(13,148,136,.07)');
+    } else if (msg.event === 'submitted') {
+      nRun = Math.max(0, nRun - 1); nSub++; updateStats();
+      updateRow(sid, `<span class="badge badge-pending">${i18n.evaluating}</span>`, 'rgba(13,148,136,.05)');
+    } else if (msg.event === 'submission_result') {
+      nSub = Math.max(0, nSub - 1);
       if (d.is_correct) nPassed++;
       updateStats();
       const badge = d.is_correct
         ? `<span class="badge badge-passed">${i18n.passed}</span>`
         : `<span class="badge badge-failed">${i18n.failed}</span>`;
-      updateRow(sid, badge, d.is_correct?'rgba(5,150,105,.07)':'rgba(220,38,38,.06)');
+      updateRow(sid, badge, d.is_correct ? 'rgba(5,150,105,.07)' : 'rgba(220,38,38,.06)');
+      if (d.is_correct) _toast(`✓ ${d.username || 'Student'} passed!`, 's');
     }
   };
 }

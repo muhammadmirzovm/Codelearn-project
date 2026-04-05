@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.views.decorators.http import require_POST
+from django.urls import reverse
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -60,8 +61,21 @@ def session_activate(request, pk):
     session.is_active = True
     session.activated_at = timezone.now()
     session.save()
+
+    # Notify clients inside the session room
     _broadcast_session_event(session.pk, 'session_started', {})
-    messages.success(request, f'Session is now active!')
+
+    # Notify student dashboards in real-time
+    _broadcast_group_event(session.group.pk, 'session_started', {
+        'session_pk':       session.pk,
+        'task_title':       session.task.title,
+        'group_name':       session.group.name,
+        'duration_minutes': session.duration_minutes,
+        'join_url':         reverse('sessions:join', args=[session.pk]),
+        'leaderboard_url':  reverse('sessions:leaderboard', args=[session.pk]),
+    })
+
+    messages.success(request, 'Session is now active!')
     return redirect('sessions:monitor', pk=pk)
 
 
@@ -71,7 +85,15 @@ def session_deactivate(request, pk):
     session = get_object_or_404(Session, pk=pk, group__teacher=request.user)
     session.is_active = False
     session.save()
+
+    # Notify clients inside the session room
     _broadcast_session_event(session.pk, 'session_ended', {})
+
+    # Notify student dashboards so the session card disappears
+    _broadcast_group_event(session.group.pk, 'session_ended', {
+        'session_pk': session.pk,
+    })
+
     messages.success(request, 'Session closed.')
     return redirect('sessions:session_list')
 
@@ -81,16 +103,12 @@ def session_monitor(request, pk):
     """Live teacher dashboard showing student progress."""
     session = get_object_or_404(Session, pk=pk, group__teacher=request.user)
     students = session.group.students.all()
-    # Gather latest submission per student
     student_data = []
     for student in students:
         latest = Submission.objects.filter(
             student=student, session=session
         ).order_by('-created_at').first()
-        student_data.append({
-            'student': student,
-            'submission': latest,
-        })
+        student_data.append({'student': student, 'submission': latest})
     return render(request, 'sessions/session_monitor.html', {
         'session': session,
         'student_data': student_data,
@@ -113,10 +131,7 @@ def session_join(request, pk):
     my_submission = Submission.objects.filter(
         student=request.user, session=session
     ).order_by('-created_at').first()
-
-    # Pass activated_at as ISO string for accurate JS countdown
     activated_at_iso = session.activated_at.isoformat() if session.activated_at else ''
-
     return render(request, 'sessions/session_join.html', {
         'session': session,
         'task': task,
@@ -129,12 +144,10 @@ def session_join(request, pk):
 def leaderboard(request, pk):
     """Live leaderboard for a session."""
     session = get_object_or_404(Session, pk=pk)
-    # Verify access
     is_teacher = request.user.is_teacher and session.group.teacher == request.user
     is_student = request.user.is_student and session.group.students.filter(pk=request.user.pk).exists()
     if not (is_teacher or is_student):
         return HttpResponseForbidden()
-
     students = session.group.students.all()
     board = []
     for student in students:
@@ -147,18 +160,14 @@ def leaderboard(request, pk):
             'passed': best is not None,
             'submitted_at': best.created_at if best else None,
         })
-    # Sort: passed first (True > False), then by time
     board.sort(key=lambda x: (not x['passed'], x['submitted_at'] or '9999'))
-    return render(request, 'sessions/leaderboard.html', {
-        'session': session,
-        'board': board,
-    })
+    return render(request, 'sessions/leaderboard.html', {'session': session, 'board': board})
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
 def _broadcast_session_event(session_pk, event_type, data):
-    """Send a WebSocket message to all clients in the session's channel group."""
+    """Broadcast to all clients connected to a specific session room."""
     try:
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
@@ -166,4 +175,19 @@ def _broadcast_session_event(session_pk, event_type, data):
             {'type': 'session_event', 'event': event_type, 'data': data},
         )
     except Exception:
-        pass  # Graceful fallback if Redis unavailable
+        pass
+
+
+def _broadcast_group_event(group_pk, event_type, data):
+    """
+    Broadcast to all students connected to a group's dashboard channel.
+    Used so student dashboards update in real-time when a session starts/ends.
+    """
+    try:
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'group_session_{group_pk}',
+            {'type': 'group_session_event', 'event': event_type, 'data': data},
+        )
+    except Exception:
+        pass

@@ -216,7 +216,7 @@ def _try_award_coins(submission) -> None:
             # Notify the student
             Notification.objects.create(
                 recipient  = submission.student,
-                title      = f'🪙 +{task.coin_reward} coins earned!',
+                title      = f'© +{task.coin_reward} coins earned!',
                 message    = f'You solved "{task.title}" — keep it up!',
                 notif_type = 'success',
             )

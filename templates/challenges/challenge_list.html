@@ -115,7 +115,17 @@
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
     <span class="coin-balance-pill">
-      🪙 {{ request.user.coin_balance }} {% trans 'coins' %}
+      <span aria-hidden="true">
+  <svg width="24" height="24" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="36" cy="70" rx="28" ry="5" fill="#BA7517" opacity=".2"/>
+    <circle cx="36" cy="36" r="34" fill="#EF9F27"/>
+    <circle cx="36" cy="36" r="34" fill="none" stroke="#BA7517" stroke-width="2.5"/>
+    <circle cx="36" cy="36" r="27" fill="#FAC775"/>
+    <circle cx="36" cy="36" r="27" fill="none" stroke="#D4820F" stroke-width="1.5"/>
+    <ellipse cx="26" cy="22" rx="10" ry="6" fill="#FFF6DC" opacity=".45" transform="rotate(-30 26 22)"/>
+    <text x="36" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="28" font-weight="700" fill="#854F0B">₡</text>
+  </svg>
+</span> {{ request.user.coin_balance }} {% trans 'coins' %}
     </span>
     <a href="{% url 'tasks:leaderboard' %}" class="leaderboard-btn">
       <i class="bi bi-trophy"></i> {% trans 'Leaderboard' %}
@@ -159,7 +169,17 @@
     <div class="card-meta">
       <span class="badge badge-{{ task.difficulty }}">{{ task.get_difficulty_display }}</span>
       {% if task.coin_reward %}
-      <span class="badge badge-coin">🪙 {{ task.coin_reward }}</span>
+      <span class="badge badge-coin"><span aria-hidden="true">
+  <svg width="24" height="24" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="36" cy="70" rx="28" ry="5" fill="#BA7517" opacity=".2"/>
+    <circle cx="36" cy="36" r="34" fill="#EF9F27"/>
+    <circle cx="36" cy="36" r="34" fill="none" stroke="#BA7517" stroke-width="2.5"/>
+    <circle cx="36" cy="36" r="27" fill="#FAC775"/>
+    <circle cx="36" cy="36" r="27" fill="none" stroke="#D4820F" stroke-width="1.5"/>
+    <ellipse cx="26" cy="22" rx="10" ry="6" fill="#FFF6DC" opacity=".45" transform="rotate(-30 26 22)"/>
+    <text x="36" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="28" font-weight="700" fill="#854F0B">₡</text>
+  </svg>
+</span> {{ task.coin_reward }}</span>
       {% endif %}
       <span><i class="bi bi-people"></i> {{ task.solve_count }} {% trans 'solves' %}</span>
       <span><i class="bi bi-clock"></i> {{ task.time_limit }}s</span>

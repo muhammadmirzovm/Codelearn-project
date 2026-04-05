@@ -3,6 +3,10 @@
 {% block title %}{{ task.title }} – CodeLearn{% endblock %}
 
 {% block extra_head %}
+<!-- base.html already loads: core, nord theme, python mode, closebrackets, matchbrackets -->
+<!-- Only load the extra modes needed for JS / C++ / C -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
 <style>
 .CodeMirror { height: 100%; min-height: 340px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
 .CodeMirror-gutters { background: #2e3440 !important; border-right: 1px solid #3b4252 !important; }
@@ -12,15 +16,23 @@
 .tab-btn { padding:9px 18px; font-size:.82rem; font-weight:600; color:var(--text-muted); border-bottom:2.5px solid transparent; cursor:pointer; transition:all .15s; white-space:nowrap; background:transparent; border-top:none; border-left:none; border-right:none; }
 .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
 pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; border-radius:var(--radius-sm); margin:4px 0; font-size:.76rem; font-family:var(--font-mono); }
+/* countdown */
 .cd-wrap { display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:var(--radius); font-weight:700; }
 .cd-ok   { background:var(--success-bg); border:1.5px solid var(--success-brd); color:var(--success); }
 .cd-warn { background:var(--warning-bg); border:1.5px solid var(--warning-brd); color:var(--warning); }
 .cd-crit { background:var(--danger-bg);  border:1.5px solid var(--danger-brd);  color:var(--danger); animation:blink .65s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.45} }
+@keyframes spin  { to{transform:rotate(360deg)} }
+/* toast */
+.toast-msg { position:fixed; bottom:1.25rem; right:1.25rem; padding:.7rem 1.15rem; border-radius:var(--radius); font-size:.82rem; font-family:var(--font-mono); font-weight:500; z-index:9999; opacity:0; transform:translateY(6px); transition:all .25s; pointer-events:none; }
+.toast-msg.show { opacity:1; transform:translateY(0); }
+.toast-s { background:var(--success); color:#fff; }
+.toast-w { background:var(--warning); color:#fff; }
+.toast-e { background:var(--danger);  color:#fff; }
+/* layout */
 @media(min-width:1100px){ .room-grid { display:grid; grid-template-columns:420px 1fr; gap:18px; align-items:start; } }
 @media(max-width:1099px){ .room-grid { display:flex; flex-direction:column; gap:14px; } }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -82,10 +94,10 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
     <div class="card card-p" style="padding:14px 18px;">
       <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:var(--font-mono);">🌐 {% trans "Select Language" %}</p>
       <div style="display:flex;flex-wrap:wrap;gap:8px;" id="lang-selector">
-        <button class="lang-pill active" data-lang="python" onclick="switchLang(this)">🐍 Python</button>
-        <button class="lang-pill" data-lang="javascript" onclick="switchLang(this)">🟨 JavaScript</button>
-        <button class="lang-pill" data-lang="cpp" onclick="switchLang(this)">⚡ C++</button>
-        <button class="lang-pill" data-lang="c" onclick="switchLang(this)">🔵 C</button>
+        <button class="lang-pill active" data-lang="python"     onclick="switchLang(this)">🐍 Python</button>
+        <button class="lang-pill"        data-lang="javascript" onclick="switchLang(this)">🟨 JavaScript</button>
+        <button class="lang-pill"        data-lang="cpp"        onclick="switchLang(this)">⚡ C++</button>
+        <button class="lang-pill"        data-lang="c"          onclick="switchLang(this)">🔵 C</button>
       </div>
     </div>
 
@@ -99,7 +111,7 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
           </div>
           <span id="editor-filename" style="font-size:.75rem;color:#81a1c1;font-family:var(--font-mono);">solution.py</span>
         </div>
-        <div style="display:flex;gap:6px;">
+        <div style="display:flex;gap:6px;align-items:center;">
           <span style="font-size:.72rem;color:#616e88;font-family:var(--font-mono);">{{ task.time_limit }}s · {{ task.memory_limit }}</span>
           <button onclick="clearEditor()" style="background:transparent;border:none;color:#616e88;cursor:pointer;font-size:.72rem;padding:0 4px;">✕ {% trans "Clear" %}</button>
         </div>
@@ -112,7 +124,7 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
     </div>
 
     <div style="display:flex;gap:10px;" id="action-btns">
-      <button id="btn-run" class="btn btn-ghost" style="flex:1;" onclick="runCode()">▶ <span id="run-label">{% trans "Run Code" %}</span></button>
+      <button id="btn-run"    class="btn btn-ghost"   style="flex:1;" onclick="runCode()">▶ <span id="run-label">{% trans "Run Code" %}</span></button>
       <button id="btn-submit" class="btn btn-primary" style="flex:1;" onclick="submitCode()" {% if my_submission and my_submission.is_correct %}disabled{% endif %}>
         ✓ <span id="sub-label">{% if my_submission and my_submission.is_correct %}{% trans "Already Passed!" %}{% else %}{% trans "Submit" %}{% endif %}</span>
       </button>
@@ -127,7 +139,7 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
     <div class="card" style="overflow:hidden;min-height:420px;">
       <div style="display:flex;border-bottom:2px solid var(--border);padding:0 6px;gap:2px;">
         <button class="tab-btn active" id="tab-r" onclick="switchTab('r')">{% trans "Results" %}</button>
-        <button class="tab-btn" id="tab-h" onclick="switchTab('h')">{% trans "History" %}</button>
+        <button class="tab-btn"        id="tab-h" onclick="switchTab('h')">{% trans "History" %}</button>
       </div>
       <div id="panel-r" style="padding:18px;">
         <div id="results-body" style="text-align:center;padding:40px 10px;color:var(--text-muted);">
@@ -156,44 +168,61 @@ pre.err { color:var(--danger); background:var(--danger-bg); padding:6px 10px; bo
     </div>
   </div>
 </div>
+
+<!-- Toast element -->
+<div id="toast-el" class="toast-msg"></div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-const TASK_ID    = {{ task.pk }};
-const SESSION_ID = {{ session.pk }};
-const CSRF       = '{{ csrf_token }}';
-const DURATION_SECS = {{ session.duration_minutes|default:0 }} * 60;
-const ACTIVATED_AT  = '{{ activated_at_iso }}';
+const TASK_ID        = {{ task.pk }};
+const SESSION_ID     = {{ session.pk }};
+const CSRF           = '{{ csrf_token }}';
+const DURATION_SECS  = {{ session.duration_minutes|default:0 }} * 60;
+const ACTIVATED_AT   = '{{ activated_at_iso }}';
 const ALREADY_PASSED = {% if my_submission and my_submission.is_correct %}true{% else %}false{% endif %};
 
-// i18n strings for JavaScript
+/* Language-prefixed API URLs — avoids i18n 302 redirect that strips POST → GET */
+const LANG_PREFIX = '/{{ LANGUAGE_CODE }}';
+const URL_RUN    = `${LANG_PREFIX}/api/run/`;
+const URL_SUBMIT = `${LANG_PREFIX}/api/submit/`;
+
 const i18n = {
-  runCode:        "{% trans 'Run Code' %}",
-  running:        "{% trans 'Running…' %}",
-  evaluating:     "{% trans 'Evaluating…' %}",
-  submit:         "{% trans 'Submit' %}",
-  alreadyPassed:  "{% trans 'Already Passed!' %}",
-  passed:         "{% trans 'Passed!' %}",
-  timeUp:         "{% trans 'Time is up! Submissions are now closed.' %}",
-  sessionClosed:  "{% trans 'The session has been closed by the teacher.' %}",
-  clearConfirm:   "{% trans 'Clear the editor?' %}",
-  hide:           "{% trans 'Hide' %}",
-  show:           "{% trans 'Show' %}",
-  runningTests:   "{% trans 'Running tests…' %}",
-  evaluatingTests:"{% trans 'Evaluating against hidden tests…' %}",
-  exampleResults: "{% trans '▶ Example Test Results' %}",
-  submitResults:  "{% trans '✓ Submit Results' %}",
-  allPassed:      "{% trans 'All tests passed!' %}",
-  networkError:   "{% trans 'Network error:' %}",
-  serverError:    "{% trans 'Server error' %}",
-  testLabel:      "{% trans 'Test' %}",
-  inputLabel:     "{% trans 'Input:' %}",
-  expectedLabel:  "{% trans 'Expected:' %}",
-  gotLabel:       "{% trans 'Got:' %}",
-  readyToCode:    "{% trans 'Ready to code!' %}",
+  runCode:         "{% trans 'Run Code' %}",
+  running:         "{% trans 'Running…' %}",
+  evaluating:      "{% trans 'Evaluating…' %}",
+  submit:          "{% trans 'Submit' %}",
+  alreadyPassed:   "{% trans 'Already Passed!' %}",
+  passed:          "{% trans 'Passed!' %}",
+  timeUp:          "{% trans 'Time is up! Submissions are now closed.' %}",
+  sessionClosed:   "{% trans 'The session has been closed by the teacher.' %}",
+  clearConfirm:    "{% trans 'Clear the editor?' %}",
+  hide:            "{% trans 'Hide' %}",
+  show:            "{% trans 'Show' %}",
+  runningTests:    "{% trans 'Running tests…' %}",
+  evaluatingTests: "{% trans 'Evaluating against hidden tests…' %}",
+  exampleResults:  "{% trans '▶ Example Test Results' %}",
+  submitResults:   "{% trans '✓ Submit Results' %}",
+  allPassed:       "{% trans 'All tests passed!' %}",
+  networkError:    "{% trans 'Network error:' %}",
+  serverError:     "{% trans 'Server error' %}",
+  testLabel:       "{% trans 'Test' %}",
+  inputLabel:      "{% trans 'Input:' %}",
+  expectedLabel:   "{% trans 'Expected:' %}",
+  gotLabel:        "{% trans 'Got:' %}",
 };
 
+/* ── Toast ── */
+let _toastTimer = null;
+function _toast(msg, type) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg;
+  el.className = `toast-msg toast-${type} show`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ── Language config ── */
 const LANG_CONFIG = {
   python:     { filename:'solution.py',  mode:'python',        starter:'# Write your Python solution here\n# Input:  input()  or  int(input())\n# Output: print(...)\n\n' },
   javascript: { filename:'solution.js',  mode:'javascript',    starter:'// JavaScript solution\n// Input: const lines = require("fs").readFileSync("/dev/stdin","utf8").trim().split("\\n");\n\n' },
@@ -202,11 +231,12 @@ const LANG_CONFIG = {
 };
 let currentLang = 'python';
 
+/* ── CodeMirror init ── */
 const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
-  mode:'python', theme:'nord', lineNumbers:true,
-  autoCloseBrackets:true, matchBrackets:true,
-  indentUnit:4, tabSize:4, indentWithTabs:false,
-  extraKeys:{ Tab: cm => cm.execCommand('indentMore') },
+  mode: 'python', theme: 'nord', lineNumbers: true,
+  autoCloseBrackets: true, matchBrackets: true,
+  indentUnit: 4, tabSize: 4, indentWithTabs: false,
+  extraKeys: { Tab: cm => cm.execCommand('indentMore') },
 });
 
 function switchLang(btn) {
@@ -217,119 +247,136 @@ function switchLang(btn) {
   document.getElementById('editor-filename').textContent = cfg.filename;
   const val = editor.getValue().trim();
   const isStarter = Object.values(LANG_CONFIG).some(c => val === c.starter.trim() || val === '');
-  if (isStarter) { editor.setValue(cfg.starter); setTimeout(()=>editor.refresh(),50); }
+  if (isStarter) { editor.setValue(cfg.starter); setTimeout(() => editor.refresh(), 50); }
   currentLang = lang;
 }
 
 function clearEditor() { if (confirm(i18n.clearConfirm)) editor.setValue(LANG_CONFIG[currentLang].starter); }
+
 function toggleProblem() {
-  const b=document.getElementById('prob-body'); const a=document.getElementById('prob-arrow');
-  const show=b.style.display==='none'; b.style.display=show?'block':'none';
-  a.textContent=show?`▼ ${i18n.hide}`:`▶ ${i18n.show}`;
-}
-function switchTab(t) {
-  document.getElementById('panel-r').style.display=t==='r'?'block':'none';
-  document.getElementById('panel-h').style.display=t==='h'?'block':'none';
-  document.getElementById('tab-r').className='tab-btn'+(t==='r'?' active':'');
-  document.getElementById('tab-h').className='tab-btn'+(t==='h'?' active':'');
+  const b = document.getElementById('prob-body'); const a = document.getElementById('prob-arrow');
+  const show = b.style.display === 'none'; b.style.display = show ? 'block' : 'none';
+  a.textContent = show ? `▼ ${i18n.hide}` : `▶ ${i18n.show}`;
 }
 
+function switchTab(t) {
+  document.getElementById('panel-r').style.display = t === 'r' ? 'block' : 'none';
+  document.getElementById('panel-h').style.display = t === 'h' ? 'block' : 'none';
+  document.getElementById('tab-r').className = 'tab-btn' + (t === 'r' ? ' active' : '');
+  document.getElementById('tab-h').className = 'tab-btn' + (t === 'h' ? ' active' : '');
+}
+
+/* ── Countdown ── */
 let timeExpired = false;
 function updateCountdown() {
   if (!DURATION_SECS || !ACTIVATED_AT) return;
   const elapsed = (Date.now() - new Date(ACTIVATED_AT).getTime()) / 1000;
   const remaining = Math.max(0, DURATION_SECS - elapsed);
-  const m=Math.floor(remaining/60), s=Math.floor(remaining%60);
-  const cdEl=document.getElementById('countdown'); const wrap=document.getElementById('cd-wrap');
-  if (cdEl) cdEl.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  if (wrap) wrap.className='cd-wrap '+(remaining>120?'cd-ok':remaining>30?'cd-warn':'cd-crit');
-  if (remaining<=0&&!timeExpired){timeExpired=true;lockEditor();}
+  const m = Math.floor(remaining / 60), s = Math.floor(remaining % 60);
+  const cdEl = document.getElementById('countdown'); const wrap = document.getElementById('cd-wrap');
+  if (cdEl) cdEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (wrap) wrap.className = 'cd-wrap ' + (remaining > 120 ? 'cd-ok' : remaining > 30 ? 'cd-warn' : 'cd-crit');
+  if (remaining <= 0 && !timeExpired) { timeExpired = true; lockEditor(); }
 }
-if (DURATION_SECS&&ACTIVATED_AT){updateCountdown();setInterval(updateCountdown,500);}
+if (DURATION_SECS && ACTIVATED_AT) { updateCountdown(); setInterval(updateCountdown, 500); }
 
 function lockEditor() {
-  editor.setOption('readOnly','nocursor');
-  document.getElementById('editor-card').style.opacity='.55';
-  document.getElementById('btn-submit').disabled=true;
-  document.getElementById('btn-run').disabled=true;
-  document.getElementById('time-up-banner').style.display='block';
-  _toast(`⏰ ${i18n.timeUp}`,'w');
+  editor.setOption('readOnly', 'nocursor');
+  document.getElementById('editor-card').style.opacity = '.55';
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-run').disabled = true;
+  document.getElementById('time-up-banner').style.display = 'block';
+  _toast(`⏰ ${i18n.timeUp}`, 'w');
 }
 
-function setRunLoading(on){document.getElementById('btn-run').disabled=on||timeExpired;document.getElementById('run-label').textContent=on?i18n.running:i18n.runCode;}
-function setSubLoading(on){document.getElementById('btn-submit').disabled=on||timeExpired||ALREADY_PASSED;document.getElementById('sub-label').textContent=on?i18n.evaluating:(ALREADY_PASSED?i18n.alreadyPassed:i18n.submit);}
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+/* ── UI helpers ── */
+function setRunLoading(on) { document.getElementById('btn-run').disabled = on || timeExpired; document.getElementById('run-label').textContent = on ? i18n.running : i18n.runCode; }
+function setSubLoading(on) { document.getElementById('btn-submit').disabled = on || timeExpired || ALREADY_PASSED; document.getElementById('sub-label').textContent = on ? i18n.evaluating : (ALREADY_PASSED ? i18n.alreadyPassed : i18n.submit); }
+function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function renderLoading(msg) {
   switchTab('r');
-  document.getElementById('results-body').innerHTML=`<div style="text-align:center;padding:48px;color:var(--text-muted);"><div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><p style="font-weight:600;">${msg}</p></div>`;
+  document.getElementById('results-body').innerHTML = `<div style="text-align:center;padding:48px;color:var(--text-muted);"><div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;"></div><p style="font-weight:600;">${msg}</p></div>`;
 }
 function renderError(msg) {
   switchTab('r');
-  document.getElementById('results-body').innerHTML=`<div style="background:var(--danger-bg);border:2px solid var(--danger-brd);border-radius:var(--radius);padding:16px;color:var(--danger);font-size:.875rem;font-weight:500;">❌ ${esc(msg)}</div>`;
+  document.getElementById('results-body').innerHTML = `<div style="background:var(--danger-bg);border:2px solid var(--danger-brd);border-radius:var(--radius);padding:16px;color:var(--danger);font-size:.875rem;font-weight:500;">❌ ${esc(msg)}</div>`;
 }
 
 function renderResults(results, title, isSubmit) {
   switchTab('r');
   let html = title ? `<p style="font-weight:700;color:var(--text);margin-bottom:12px;font-size:.9rem;">${title}</p>` : '';
-  results.forEach((r,i) => {
-    const cls=r.passed?'pass':(r.error?'warn':'fail'); const icon=r.passed?'✅':(r.error?'⚠️':'❌');
-    html+=`<div class="ri ${cls}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-weight:700;font-size:.85rem;">${icon} ${i18n.testLabel} ${i+1}</span><span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">${r.time_used||''}s</span></div>`;
-    if (r.input&&r.input!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.inputLabel}</span> <code style="font-family:var(--font-mono);color:var(--accent);">${esc(r.input.trim())}</code></p>`;
-    if (!r.passed&&r.expected&&r.expected!=='(hidden)') html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.expectedLabel}</span> <code style="font-family:var(--font-mono);color:var(--success);">${esc(r.expected.trim())}</code></p>`;
-    if (r.stdout) html+=`<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.gotLabel}</span> <code style="font-family:var(--font-mono);color:${r.passed?'var(--success)':'var(--danger)'};">${esc(r.stdout.trim())}</code></p>`;
-    if (r.stderr) html+=`<pre class="err">${esc(r.stderr)}</pre>`;
-    html+=`</div>`;
+  results.forEach((r, i) => {
+    const cls = r.passed ? 'pass' : (r.error ? 'warn' : 'fail'); const icon = r.passed ? '✅' : (r.error ? '⚠️' : '❌');
+    html += `<div class="ri ${cls}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;"><span style="font-weight:700;font-size:.85rem;">${icon} ${i18n.testLabel} ${i + 1}</span><span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">${r.time_used || ''}s</span></div>`;
+    if (r.input && r.input !== '(hidden)') html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.inputLabel}</span> <code style="font-family:var(--font-mono);color:var(--accent);">${esc(r.input.trim())}</code></p>`;
+    if (!r.passed && r.expected && r.expected !== '(hidden)') html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.expectedLabel}</span> <code style="font-family:var(--font-mono);color:var(--success);">${esc(r.expected.trim())}</code></p>`;
+    if (r.stdout) html += `<p style="font-size:.75rem;margin-bottom:2px;"><span style="color:var(--text-muted);">${i18n.gotLabel}</span> <code style="font-family:var(--font-mono);color:${r.passed ? 'var(--success)' : 'var(--danger)'};">${esc(r.stdout.trim())}</code></p>`;
+    if (r.stderr) html += `<pre class="err">${esc(r.stderr)}</pre>`;
+    html += `</div>`;
   });
   if (isSubmit) {
-    const passed=results.filter(x=>x.passed).length; const total=results.length;
-    if (passed===total) {
-      html+=`<div style="background:var(--success-bg);border:2px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px;text-align:center;margin-top:8px;"><p style="font-size:2rem;margin-bottom:6px;">🎉</p><p style="font-weight:700;color:var(--success);font-size:1rem;">${i18n.allPassed.replace('!', '')} ${total}!</p></div>`;
-      document.getElementById('btn-submit').disabled=true;
-      document.getElementById('sub-label').textContent=`✓ ${i18n.passed}`;
+    const passed = results.filter(x => x.passed).length; const total = results.length;
+    if (passed === total) {
+      html += `<div style="background:var(--success-bg);border:2px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px;text-align:center;margin-top:8px;"><p style="font-size:2rem;margin-bottom:6px;">🎉</p><p style="font-weight:700;color:var(--success);font-size:1rem;">${i18n.allPassed}</p></div>`;
+      document.getElementById('btn-submit').disabled = true;
+      document.getElementById('sub-label').textContent = `✓ ${i18n.passed}`;
     } else {
-      html+=`<div style="background:var(--warning-bg);border:2px solid var(--warning-brd);border-radius:var(--radius-lg);padding:16px;text-align:center;margin-top:8px;"><p style="font-weight:700;color:var(--warning);">${passed}/${total} tests passed</p></div>`;
+      html += `<div style="background:var(--warning-bg);border:2px solid var(--warning-brd);border-radius:var(--radius-lg);padding:16px;text-align:center;margin-top:8px;"><p style="font-weight:700;color:var(--warning);">${passed}/${total} tests passed</p></div>`;
     }
   }
   document.getElementById('results-body').innerHTML = html;
 }
 
+/* ── API calls ── */
 async function runCode() {
   if (timeExpired) return;
   setRunLoading(true); renderLoading(i18n.runningTests);
   try {
-    const res = await fetch('/api/run/', { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
+    const res = await fetch(URL_RUN, { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
     const d = await res.json();
-    if (!res.ok){renderError(d.error||i18n.serverError);return;}
+    if (!res.ok) { renderError(d.error || i18n.serverError); return; }
     renderResults(d.results, i18n.exampleResults, false);
-  } catch(e){renderError(`${i18n.networkError} ${e.message}`);}
-  finally{setRunLoading(false);}
+  } catch(e) { renderError(`${i18n.networkError} ${e.message}`); }
+  finally { setRunLoading(false); }
 }
 
 async function submitCode() {
-  if (timeExpired||ALREADY_PASSED) return;
+  if (timeExpired || ALREADY_PASSED) return;
   setSubLoading(true); renderLoading(i18n.evaluatingTests);
   try {
-    const res = await fetch('/api/submit/', { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
+    const res = await fetch(URL_SUBMIT, { method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify({task_id:TASK_ID,session_id:SESSION_ID,code:editor.getValue(),language:currentLang}) });
     const d = await res.json();
-    if (!res.ok){renderError(d.error||i18n.serverError);return;}
+    if (!res.ok) { renderError(d.error || i18n.serverError); return; }
     renderResults(d.results, i18n.submitResults, true);
-    _toast(d.is_correct?`🎉 ${i18n.allPassed}`:`${d.passed_count}/${d.total_count} tests passed`,d.is_correct?'s':'w');
-  } catch(e){renderError(`${i18n.networkError} ${e.message}`);}
-  finally{setSubLoading(false);}
+    _toast(d.is_correct ? `🎉 ${i18n.allPassed}` : `${d.passed_count}/${d.total_count} tests passed`, d.is_correct ? 's' : 'w');
+  } catch(e) { renderError(`${i18n.networkError} ${e.message}`); }
+  finally { setSubLoading(false); }
 }
 
-(()=>{
-  const proto=location.protocol==='https:'?'wss':'ws';
-  const ws=new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_ID}/`);
-  ws.onmessage=e=>{
-    const msg=JSON.parse(e.data);
-    if (msg.event==='session_ended'){_toast(i18n.sessionClosed,'w');setTimeout(()=>location.href='/sessions/',3000);}
-  };
-})();
+/* ── WebSocket with auto-reconnect ── */
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_ID}/`);
 
-const st=document.createElement('style');
-st.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
-document.head.appendChild(st);
+  ws.onopen = () => console.log('[WS] connected to session', SESSION_ID);
+
+  ws.onclose = () => {
+    console.log('[WS] disconnected — retrying in 3s');
+    setTimeout(connectWS, 3000);
+  };
+
+  ws.onerror = (e) => console.warn('[WS] error', e);
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.event === 'session_ended') {
+      _toast(i18n.sessionClosed, 'w');
+      lockEditor();
+      setTimeout(() => location.href = '/sessions/', 3000);
+    }
+  };
+}
+connectWS();
 </script>
 {% endblock %}

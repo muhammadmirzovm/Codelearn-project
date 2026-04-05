@@ -1,8 +1,19 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block title %}{% trans "Dashboard" %} – CodeLearn{% endblock %}
-{% block content %}
 
+{% block extra_head %}
+<style>
+.toast-msg{position:fixed;bottom:1.25rem;right:1.25rem;max-width:340px;padding:.8rem 1.1rem;border-radius:var(--radius);font-size:.82rem;font-family:var(--font-mono);font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
+.toast-msg.show{opacity:1;transform:translateY(0);}
+.toast-s{background:var(--success);color:#fff;}
+.toast-w{background:var(--warning);color:#fff;}
+.session-card-enter{animation:slideIn .35s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:none}}
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
@@ -13,34 +24,37 @@
   </div>
 </div>
 
-{% if active_sessions %}
-<div style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:24px;" class="fade-up">
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-    <span class="live-dot pulse"></span>
-    <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">{% trans "Active Sessions — Join Now!" %}</span>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
-    {% for s in active_sessions %}
-    <div style="background:var(--surface);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:18px;">
-      <p style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px;">{{ s.task.title }}</p>
-      <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">
-        {{ s.group.name }}{% if s.duration_minutes %} · ⏱ {% blocktrans with mins=s.duration_minutes %}{{ mins }} min{% endblocktrans %}{% endif %}
-      </p>
-      <div style="display:flex;gap:8px;">
-        <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">▶ {% trans "Enter" %}</a>
-        <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
-      </div>
+<!-- Active sessions — updates in real-time -->
+<div id="active-sessions-wrap" class="fade-up" style="margin-bottom:24px;">
+  {% if active_sessions %}
+  <div id="active-sessions-inner" style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px 24px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+      <span class="live-dot pulse"></span>
+      <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">{% trans "Active Sessions — Join Now!" %}</span>
     </div>
-    {% endfor %}
+    <div id="sessions-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+      {% for s in active_sessions %}
+      <div id="session-card-{{ s.pk }}" style="background:var(--surface);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:18px;">
+        <p style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px;">{{ s.task.title }}</p>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">
+          {{ s.group.name }}{% if s.duration_minutes %} · ⏱ {% blocktrans with mins=s.duration_minutes %}{{ mins }} min{% endblocktrans %}{% endif %}
+        </p>
+        <div style="display:flex;gap:8px;">
+          <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">▶ {% trans "Enter" %}</a>
+          <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
   </div>
+  {% else %}
+  <div id="no-sessions-card" class="card card-p" style="text-align:center;">
+    <p style="font-size:2.5rem;margin-bottom:8px;">😴</p>
+    <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:4px;">{% trans "No active sessions right now" %}</p>
+    <p style="color:var(--text-muted);font-size:.875rem;">{% trans "Check back soon — your teacher will start a session!" %}</p>
+  </div>
+  {% endif %}
 </div>
-{% else %}
-<div class="card card-p" style="text-align:center;margin-bottom:24px;">
-  <p style="font-size:2.5rem;margin-bottom:8px;">😴</p>
-  <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:4px;">{% trans "No active sessions right now" %}</p>
-  <p style="color:var(--text-muted);font-size:.875rem;">{% trans "Check back soon — your teacher will start a session!" %}</p>
-</div>
-{% endif %}
 
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;" class="fade-up-2">
 
@@ -125,11 +139,117 @@
 
 </div>
 
+<!-- Toast -->
+<div id="toast-el" class="toast-msg"></div>
+
+<!-- Pass group PKs to JS -->
+<script type="application/json" id="dashboard-data">
+{
+  "group_pks": [{% for g in user.student_groups.all %}{{ g.pk }}{% if not forloop.last %},{% endif %}{% endfor %}]
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
 <script>
+/* ── Unread badges ── */
 const unreadCounts = {{ unread_counts|default:"{}" }};
 document.querySelectorAll('.chat-unread-badge[data-group]').forEach(el => {
   const cnt = unreadCounts[parseInt(el.dataset.group)];
   if (cnt) { el.textContent = cnt; el.style.display = 'inline-flex'; }
 });
+
+/* ── Toast ── */
+let _toastTimer = null;
+function showToast(msg, type) {
+  const el = document.getElementById('toast-el');
+  el.textContent = msg; el.className = `toast-msg toast-${type} show`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+/* ── DOM helpers ── */
+function getGrid() { return document.getElementById('sessions-grid'); }
+
+function ensureActiveBanner() {
+  // If the "No active sessions" card is showing, replace it with the live banner
+  const noCard = document.getElementById('no-sessions-card');
+  if (noCard) {
+    const wrap = document.getElementById('active-sessions-wrap');
+    wrap.innerHTML = `
+      <div id="active-sessions-inner" style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px 24px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <span class="live-dot pulse"></span>
+          <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">{% trans "Active Sessions — Join Now!" %}</span>
+        </div>
+        <div id="sessions-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
+      </div>`;
+  }
+}
+
+function addSessionCard(data) {
+  ensureActiveBanner();
+  const grid = getGrid();
+  if (!grid || document.getElementById(`session-card-${data.session_pk}`)) return;
+  const card = document.createElement('div');
+  card.id = `session-card-${data.session_pk}`;
+  card.className = 'session-card-enter';
+  card.style.cssText = 'background:var(--surface);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:18px;';
+  const duration = data.duration_minutes ? ` · ⏱ ${data.duration_minutes} min` : '';
+  card.innerHTML = `
+    <p style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px;">${data.task_title}</p>
+    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">${data.group_name}${duration}</p>
+    <div style="display:flex;gap:8px;">
+      <a href="${data.join_url}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">▶ {% trans "Enter" %}</a>
+      <a href="${data.leaderboard_url}" class="btn btn-ghost btn-sm">🏆</a>
+    </div>`;
+  grid.appendChild(card);
+}
+
+function removeSessionCard(sessionPk) {
+  const card = document.getElementById(`session-card-${sessionPk}`);
+  if (card) {
+    card.style.transition = 'opacity .3s, transform .3s';
+    card.style.opacity = '0'; card.style.transform = 'scale(.95)';
+    setTimeout(() => {
+      card.remove();
+      // If grid is now empty, show the "no sessions" card
+      const grid = getGrid();
+      if (grid && grid.children.length === 0) {
+        document.getElementById('active-sessions-wrap').innerHTML = `
+          <div id="no-sessions-card" class="card card-p" style="text-align:center;">
+            <p style="font-size:2.5rem;margin-bottom:8px;">😴</p>
+            <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:4px;">{% trans "No active sessions right now" %}</p>
+            <p style="color:var(--text-muted);font-size:.875rem;">{% trans "Check back soon — your teacher will start a session!" %}</p>
+          </div>`;
+      }
+    }, 300);
+  }
+}
+
+/* ── WebSocket — one connection per group ── */
+const DATA      = JSON.parse(document.getElementById('dashboard-data').textContent);
+const groupPks  = DATA.group_pks;
+
+function connectGroupWS(groupPk) {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const ws = new WebSocket(`${proto}://${location.host}/ws/group/${groupPk}/session/`);
+
+  ws.onclose = () => setTimeout(() => connectGroupWS(groupPk), 3000);
+  ws.onerror = (e) => console.warn(`[WS group ${groupPk}]`, e);
+
+  ws.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.event === 'session_started') {
+      addSessionCard(msg.data);
+      showToast(`🚀 {% trans "New session started:" %} ${msg.data.task_title}`, 's');
+    } else if (msg.event === 'session_ended') {
+      removeSessionCard(msg.data.session_pk);
+      showToast(`{% trans "Session ended." %}`, 'w');
+    }
+  };
+}
+
+groupPks.forEach(pk => connectGroupWS(pk));
 </script>
 {% endblock %}

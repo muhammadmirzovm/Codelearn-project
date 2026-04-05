@@ -166,7 +166,17 @@ select#id_status option[value=archived]  { color:#9ca3af; }
       <!-- Coin reward + Status side by side -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div class="inp-group">
-          <label class="inp-label">🪙 {% trans "Coin Reward" %}</label>
+          <label class="inp-label"><span aria-hidden="true">
+  <svg width="24" height="24" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="36" cy="70" rx="28" ry="5" fill="#BA7517" opacity=".2"/>
+    <circle cx="36" cy="36" r="34" fill="#EF9F27"/>
+    <circle cx="36" cy="36" r="34" fill="none" stroke="#BA7517" stroke-width="2.5"/>
+    <circle cx="36" cy="36" r="27" fill="#FAC775"/>
+    <circle cx="36" cy="36" r="27" fill="none" stroke="#D4820F" stroke-width="1.5"/>
+    <ellipse cx="26" cy="22" rx="10" ry="6" fill="#FFF6DC" opacity=".45" transform="rotate(-30 26 22)"/>
+    <text x="36" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="28" font-weight="700" fill="#854F0B">₡</text>
+  </svg>
+</span> {% trans "Coin Reward" %}</label>
           {{ form.coin_reward }}
           <p class="help-text">{% trans "Awarded once on first correct solve. Suggested: Easy=10 · Medium=25 · Hard=60" %}</p>
           {% if form.coin_reward.errors %}<p class="field-err">{{ form.coin_reward.errors.0 }}</p>{% endif %}

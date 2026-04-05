@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Delete Lesson" %} — {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<div style="max-width:480px;margin:0 auto;">
+  <div class="page-hero fade-up" style="margin-bottom:24px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost btn-sm">← {% trans "Journal" %}</a>
+    </div>
+    <h1 class="section-title" style="color:var(--danger);">{% trans "Delete Lesson" %}</h1>
+  </div>
+
+  <div class="card card-p fade-up-2" style="border-color:var(--danger-brd);">
+    <div style="text-align:center;padding:1rem 0 1.5rem;">
+      <div style="font-size:2.5rem;margin-bottom:1rem;">🗑</div>
+      <p style="font-size:.95rem;color:var(--text);margin-bottom:.5rem;">
+        {% trans "Are you sure you want to delete this lesson?" %}
+      </p>
+      <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:.4rem;">{{ lesson.title }}</p>
+      <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--text-muted);margin-bottom:1.5rem;">
+        {{ lesson.date|date:"d M Y" }} &nbsp;·&nbsp;
+        {% blocktrans with count=lesson.records.count %}{{ count }} student records{% endblocktrans %}
+      </p>
+      <div style="background:var(--danger-bg);border:1px solid var(--danger-brd);border-radius:var(--radius);padding:.75rem 1rem;font-size:.82rem;color:var(--danger);margin-bottom:1.5rem;">
+        ⚠ {% trans "This will permanently delete the lesson and all student grades for it." %}
+      </div>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div style="display:flex;gap:10px;">
+        <button type="submit" class="btn" style="flex:1;background:var(--danger);color:#fff;border-color:var(--danger);">
+          {% trans "Yes, Delete" %}
+        </button>
+        <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost" style="flex:1;text-align:center;">
+          {% trans "Cancel" %}
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

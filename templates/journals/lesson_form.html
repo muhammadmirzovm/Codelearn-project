@@ -1,15 +1,19 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% trans "New Lesson" %}{% endblock %}
+{% block title %}{% if editing %}{% trans "Edit Lesson" %}{% else %}{% trans "New Lesson" %}{% endif %}{% endblock %}
 
 {% block content %}
 <div style="max-width:520px;margin:0 auto;">
   <div class="page-hero fade-up" style="margin-bottom:24px;">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost btn-sm">← {% trans "Journal" %}</a>
+      <a href="{% url 'journals:detail' group_pk=group.pk %}" class="btn btn-ghost btn-sm">← {% trans "Journal" %}</a>
     </div>
-    <h1 class="section-title">{% trans "New Lesson" %}</h1>
-    <p class="section-sub">{% trans "Add a lesson to the group journal" %}</p>
+    <h1 class="section-title">
+      {% if editing %}{% trans "Edit Lesson" %}{% else %}{% trans "New Lesson" %}{% endif %}
+    </h1>
+    <p class="section-sub">
+      {% if editing %}{% trans "Update the lesson details below" %}{% else %}{% trans "Add a lesson to the group journal" %}{% endif %}
+    </p>
   </div>
 
   <div class="card card-p fade-up-2">
@@ -23,13 +27,13 @@
       {% csrf_token %}
 
       <div class="inp-group">
-        <label class="inp-label" for="{{ form.title.id_for_label }}">{% trans "Lesson Topic" %}</label>
+        <label class="inp-label" for="{{ form.title.id_for_label }}">{% trans "Lesson Title" %}</label>
         <input class="inp" type="text"
           id="{{ form.title.id_for_label }}"
           name="{{ form.title.html_name }}"
           value="{{ form.title.value|default_if_none:'' }}"
           placeholder="{% trans 'e.g. Introduction to Python' %}"
-          autofocus>
+          {% if not editing %}autofocus{% endif %}>
         {% if form.title.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;">{{ form.title.errors|join:" " }}</p>{% endif %}
       </div>
 
@@ -52,8 +56,13 @@
       </div>
 
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button type="submit" class="btn btn-primary" style="flex:1;">{% trans "Save Lesson" %} →</button>
-        <a href="{% url 'journals:detail' group_pk=view.kwargs.group_pk %}" class="btn btn-ghost">{% trans "Cancel" %}</a>
+        <button type="submit" class="btn btn-primary" style="flex:1;">
+          {% if editing %}{% trans "Save Changes" %}{% else %}{% trans "Save Lesson" %}{% endif %} →
+        </button>
+        {% if editing %}
+          <a href="{% url 'journals:lesson-delete' lesson_pk=lesson.pk %}" class="btn btn-ghost" style="color:var(--danger);border-color:var(--danger-brd);">🗑 {% trans "Delete" %}</a>
+        {% endif %}
+        <a href="{% url 'journals:detail' group_pk=group.pk %}" class="btn btn-ghost">{% trans "Cancel" %}</a>
       </div>
     </form>
   </div>

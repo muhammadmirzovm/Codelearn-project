@@ -7,35 +7,25 @@
 {% block extra_head %}
 <style>
 .form-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px 12px;
-  font-size: .88rem;
+  width: 100%; box-sizing: border-box;
+  padding: 8px 12px; font-size: .88rem;
   background: var(--bg2, var(--surface));
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  outline: none;
-  transition: border-color .15s, box-shadow .15s;
+  border-radius: var(--radius); color: var(--text);
+  outline: none; transition: border-color .15s, box-shadow .15s;
 }
-.form-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(13,148,136,.12);
-}
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
 textarea.form-input { resize: vertical; min-height: 80px; }
 select.form-input { cursor: pointer; }
 
 .vid-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
+  gap: 20px; margin-bottom: 32px;
 }
 .vid-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
   transition: border-color .15s, transform .15s, box-shadow .15s;
 }
 .vid-card:hover {
@@ -43,114 +33,89 @@ select.form-input { cursor: pointer; }
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0,0,0,.1);
 }
+.vid-thumb-wrap {
+  position: relative; padding-bottom: 56.25%;
+  height: 0; overflow: hidden; background: #000; cursor: pointer;
+}
+.vid-thumb-wrap img {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; object-fit: cover;
+  transition: opacity .2s;
+}
+.vid-thumb-wrap:hover img { opacity: .85; }
 .vid-iframe-wrap {
-  position: relative;
-  padding-bottom: 56.25%;
-  height: 0;
-  overflow: hidden;
-  background: #000;
+  position: relative; padding-bottom: 56.25%;
+  height: 0; overflow: hidden;
 }
 .vid-iframe-wrap iframe {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  border: none;
-}
-.vid-iframe-wrap img {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  cursor: pointer;
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%; border: none;
 }
 .vid-play-btn {
-  position: absolute;
-  top: 50%; left: 50%;
+  position: absolute; top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: 56px; height: 56px;
-  background: rgba(255,0,0,.85);
+  width: 60px; height: 60px;
+  background: rgba(255,0,0,.9);
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border: none; cursor: pointer;
   transition: transform .15s, background .15s;
-  border: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,.4);
 }
 .vid-play-btn:hover {
   transform: translate(-50%, -50%) scale(1.1);
   background: rgba(255,0,0,1);
 }
+.vid-yt-fallback {
+  position: absolute; bottom: 10px; right: 10px;
+  background: rgba(0,0,0,.75); color: #fff;
+  font-size: .72rem; font-family: var(--font-mono);
+  padding: 4px 10px; border-radius: 4px;
+  text-decoration: none; opacity: 0;
+  transition: opacity .2s;
+}
+.vid-thumb-wrap:hover .vid-yt-fallback { opacity: 1; }
 .vid-info { padding: 14px 16px; }
 .vid-title {
-  font-size: .92rem;
-  font-weight: 700;
-  color: var(--text);
+  font-size: .92rem; font-weight: 700; color: var(--text);
   margin-bottom: 6px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
 }
 .vid-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: .72rem;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap; font-size: .72rem;
+  color: var(--text-muted); font-family: var(--font-mono);
 }
 .vid-lang-pill {
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-weight: 700;
-  font-size: .68rem;
-  background: var(--accent-bg);
-  color: var(--accent);
+  padding: 2px 8px; border-radius: 99px;
+  font-weight: 700; font-size: .68rem;
+  background: var(--accent-bg); color: var(--accent);
   border: 1px solid rgba(13,148,136,.2);
 }
 .vid-cat-pill {
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-weight: 600;
-  font-size: .68rem;
-  background: var(--border);
-  color: var(--text-muted);
+  padding: 2px 8px; border-radius: 99px;
+  font-weight: 600; font-size: .68rem;
+  background: var(--border); color: var(--text-muted);
 }
 .lang-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 99px;
-  font-size: .78rem;
-  font-weight: 600;
-  background: var(--surface);
-  color: var(--text-muted);
-  cursor: pointer;
-  text-decoration: none;
-  transition: all .15s;
-  font-family: var(--font-mono);
-  white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border: 1.5px solid var(--border);
+  border-radius: 99px; font-size: .78rem; font-weight: 600;
+  background: var(--surface); color: var(--text-muted);
+  cursor: pointer; text-decoration: none;
+  transition: all .15s; font-family: var(--font-mono); white-space: nowrap;
 }
 .lang-tab:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
 .lang-tab.active { border-color: var(--accent); background: var(--accent); color: #fff; }
 .vid-empty {
-  grid-column: 1/-1;
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
+  grid-column: 1/-1; text-align: center;
+  padding: 60px 20px; color: var(--text-muted);
 }
 .delete-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text-muted);
-  font-size: .75rem;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: .75rem;
+  padding: 2px 6px; border-radius: var(--radius-sm);
   transition: color .15s;
 }
 .delete-btn:hover { color: var(--danger); }
@@ -230,81 +195,49 @@ select.form-input { cursor: pointer; }
       <h3 style="font-size:.95rem;font-weight:700;margin-bottom:16px;color:var(--text);">{% trans "Add a Video" %}</h3>
       <form method="post" action="{% url 'resources:video_add' %}{% if active_lang %}?lang={{ active_lang }}{% endif %}">
         {% csrf_token %}
-
         <div class="vid-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
           <div>
-            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">
-              {% trans "Title" %} *
-            </label>
+            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">{% trans "Title" %} *</label>
             {{ video_form.title }}
-            {% if video_form.title.errors %}
-            <p style="color:#ef4444;font-size:.75rem;margin-top:4px;">{{ video_form.title.errors.0 }}</p>
-            {% endif %}
+            {% if video_form.title.errors %}<p style="color:#ef4444;font-size:.75rem;margin-top:4px;">{{ video_form.title.errors.0 }}</p>{% endif %}
           </div>
           <div>
-            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">
-              {% trans "Language" %} *
-            </label>
+            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">{% trans "Language" %} *</label>
             {{ video_form.language }}
-            {% if video_form.language.errors %}
-            <p style="color:#ef4444;font-size:.75rem;margin-top:4px;">{{ video_form.language.errors.0 }}</p>
-            {% endif %}
+            {% if video_form.language.errors %}<p style="color:#ef4444;font-size:.75rem;margin-top:4px;">{{ video_form.language.errors.0 }}</p>{% endif %}
           </div>
         </div>
-
         <div style="margin-bottom:12px;">
-          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">
-            {% trans "YouTube URL or iframe" %} *
-          </label>
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">{% trans "YouTube URL or iframe" %} *</label>
           {{ video_form.url }}
-          {% if video_form.url.errors %}
-          <p style="color:#ef4444;font-size:.75rem;margin-top:4px;">{{ video_form.url.errors.0 }}</p>
-          {% endif %}
+          {% if video_form.url.errors %}<p style="color:#ef4444;font-size:.75rem;margin-top:4px;">{{ video_form.url.errors.0 }}</p>{% endif %}
         </div>
-
         <div class="vid-form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
           <div>
-            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">
-              {% trans "Category" %}
-            </label>
+            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">{% trans "Category" %}</label>
             {{ video_form.category }}
           </div>
           <div>
-            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">
-              {% trans "Or create new category" %}
-            </label>
+            <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">{% trans "Or create new category" %}</label>
             {{ video_form.new_category }}
             <datalist id="video-category-suggestions">
-              {% for cat in video_categories %}
-              <option value="{{ cat.name }}">
-              {% endfor %}
+              {% for cat in video_categories %}<option value="{{ cat.name }}">{% endfor %}
             </datalist>
-            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">
-              {% trans "Leave blank if you picked one above" %}
-            </p>
+            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">{% trans "Leave blank if you picked one above" %}</p>
           </div>
         </div>
-
         <div style="margin-bottom:16px;">
-          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">
-            {% trans "Description" %}
-          </label>
+          <label style="display:block;font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;">{% trans "Description" %}</label>
           {{ video_form.description }}
         </div>
-
         {% if video_form.non_field_errors %}
         <div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-left:3px solid #ef4444;border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;">
           <p style="color:#ef4444;font-size:.78rem;font-weight:600;">{{ video_form.non_field_errors.0 }}</p>
         </div>
         {% endif %}
-
         <div style="display:flex;gap:8px;">
-          <button type="submit" class="btn btn-primary btn-sm">
-            <i class="bi bi-send"></i> {% trans "Add Video" %}
-          </button>
-          <button type="button" class="btn btn-ghost btn-sm" onclick="toggleVideoForm()">
-            {% trans "Cancel" %}
-          </button>
+          <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-send"></i> {% trans "Add Video" %}</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="toggleVideoForm()">{% trans "Cancel" %}</button>
         </div>
       </form>
     </div>
@@ -314,25 +247,24 @@ select.form-input { cursor: pointer; }
   <div class="vid-grid" id="vid-grid">
     {% for video in videos %}
     <div class="vid-card"
-         data-title="{{ video.title|lower }}"
-         data-desc="{{ video.description|lower }}">
+         data-title="{{ video.title|lower|escapejs }}"
+         data-desc="{{ video.description|default:''|lower|escapejs }}"
+         data-video-url="{{ video.embed_url|escapejs }}">
 
       {% if video.embed_url %}
-      {% with video_id=video.embed_url|slice:"30:" %}
-      <div class="vid-iframe-wrap" id="wrap-{{ video.pk }}">
-        <img
-          src="https://img.youtube.com/vi/{{ video_id }}/hqdefault.jpg"
-          alt="{{ video.title }}"
-          onclick="loadVideo({{ video.pk }}, '{{ video.embed_url }}')"
-        >
-        <button class="vid-play-btn"
-                onclick="loadVideo({{ video.pk }}, '{{ video.embed_url }}')">
-          <svg viewBox="0 0 24 24" fill="white" width="24" height="24">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
+      <div id="thumb-{{ video.pk }}" class="vid-thumb-wrap">
+        <img id="thumb-img-{{ video.pk }}" alt="{{ video.title }}" loading="lazy">
+        <button class="vid-play-btn" type="button" onclick="loadVideo({{ video.pk }})">
+          <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M8 5v14l11-7z"/></svg>
         </button>
+        <a href="#" target="_blank" rel="noopener"
+           class="vid-yt-fallback"
+           id="watch-link-{{ video.pk }}"
+           onclick="event.stopPropagation()">
+          ▶ {% trans "Watch on YouTube" %}
+        </a>
       </div>
-      {% endwith %}
+      <div id="player-{{ video.pk }}" class="vid-iframe-wrap" style="display:none;"></div>
       {% endif %}
 
       <div class="vid-info">
@@ -344,21 +276,15 @@ select.form-input { cursor: pointer; }
         {% endif %}
         <div class="vid-meta">
           <span class="vid-lang-pill">
-            {% if video.language == 'uz' %}🇺🇿
-            {% elif video.language == 'ru' %}🇷🇺
-            {% elif video.language == 'en' %}🇬🇧
-            {% endif %}
+            {% if video.language == 'uz' %}🇺🇿{% elif video.language == 'ru' %}🇷🇺{% elif video.language == 'en' %}🇬🇧{% endif %}
             {{ video.get_language_display }}
           </span>
-          {% if video.category %}
-          <span class="vid-cat-pill">{{ video.category.name }}</span>
-          {% endif %}
+          {% if video.category %}<span class="vid-cat-pill">{{ video.category.name }}</span>{% endif %}
           <span>{{ video.added_by.get_full_name|default:video.added_by.username }}</span>
           {% if request.user == video.added_by or request.user.is_staff %}
           <form method="post" action="{% url 'resources:video_delete' video.pk %}" style="margin-left:auto;">
             {% csrf_token %}
-            <button type="submit" class="delete-btn"
-                    onclick="return confirm('{% trans "Delete this video?" %}')">
+            <button type="submit" class="delete-btn" onclick="return confirm('{% trans "Delete this video?" %}')">
               <i class="bi bi-trash"></i>
             </button>
           </form>
@@ -387,17 +313,89 @@ function toggleVideoForm() {
   if (isHidden) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function loadVideo(pk, embedUrl) {
-  const wrap = document.getElementById('wrap-' + pk);
-  wrap.innerHTML = `<iframe
-    src="${embedUrl}?autoplay=1"
-    allowfullscreen
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;">
-  </iframe>`;
+function extractYouTubeId(url) {
+  if (!url) return '';
+
+  // If URL already is an embed link
+  let match = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
+  if (match && match[1]) return match[1];
+
+  // Standard watch?v=
+  match = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+  if (match && match[1]) return match[1];
+
+  // Short youtu.be/ link
+  match = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+  if (match && match[1]) return match[1];
+
+  // Fallback: try last 11-char ID-like part
+  match = url.match(/([a-zA-Z0-9_-]{11})(?:\?|&|$)/);
+  if (match && match[1]) return match[1];
+
+  return '';
 }
 
-// Live search
+function getEmbedUrl(videoUrlOrEmbed) {
+  const videoId = extractYouTubeId(videoUrlOrEmbed);
+  if (!videoId) return '';
+  return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+}
+
+function getThumbUrl(videoUrlOrEmbed) {
+  const videoId = extractYouTubeId(videoUrlOrEmbed);
+  if (!videoId) return '';
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+}
+
+function loadVideo(pk) {
+  const card   = document.querySelector(`.vid-card[data-video-url] #thumb-${pk}`)?.closest('.vid-card');
+  const thumb  = document.getElementById('thumb-' + pk);
+  const player = document.getElementById('player-' + pk);
+
+  if (!card || !thumb || !player) return;
+
+  const videoUrl = card.dataset.videoUrl || '';
+  const embedUrl = getEmbedUrl(videoUrl);
+
+  if (!embedUrl) {
+    alert('Invalid YouTube URL');
+    return;
+  }
+
+  thumb.style.display  = 'none';
+  player.style.display  = 'block';
+  player.innerHTML = '';
+
+  const iframe = document.createElement('iframe');
+  iframe.src = embedUrl;
+  iframe.allowFullscreen = true;
+  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+  iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+  iframe.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;border:none;';
+  player.appendChild(iframe);
+}
+
+function initVideoThumbnails() {
+  document.querySelectorAll('.vid-card[data-video-url]').forEach(card => {
+    const videoUrl = card.dataset.videoUrl || '';
+    const thumbImg = card.querySelector('img[id^="thumb-img-"]');
+    const watchLink = card.querySelector('a[id^="watch-link-"]');
+    const videoId = extractYouTubeId(videoUrl);
+
+    if (thumbImg && videoId) {
+      thumbImg.src = getThumbUrl(videoUrl);
+    } else if (thumbImg) {
+      thumbImg.alt = 'Video thumbnail unavailable';
+    }
+
+    if (watchLink && videoId) {
+      watchLink.href = `https://www.youtube.com/watch?v=${videoId}`;
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initVideoThumbnails);
+
 document.getElementById('vid-search')?.addEventListener('input', function () {
   const q = this.value.toLowerCase().trim();
   document.querySelectorAll('.vid-card').forEach(card => {
