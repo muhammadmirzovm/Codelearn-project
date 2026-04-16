@@ -55,7 +55,7 @@
       <div class="ri {% if r.passed %}pass{% else %}fail{% endif %}">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
           <p style="font-weight:600;font-size:.875rem;">
-            {% if r.passed %}✅{% else %}❌{% endif %}
+            {% if r.passed %}<i class="bi bi-check-circle-fill" style="color:var(--success);"></i>{% else %}<i class="bi bi-x-circle-fill" style="color:var(--danger);"></i>{% endif %}
             {% blocktrans with num=forloop.counter %}Test {{ num }}{% endblocktrans %}
           </p>
           <span style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);">{{ r.time_used }}s</span>

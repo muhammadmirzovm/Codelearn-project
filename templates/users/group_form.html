@@ -17,7 +17,7 @@
       </div>
       <div class="inp-group">
         <label class="inp-label">{% trans "Add Students (optional)" %}</label>
-        <p class="inp-hint" style="margin-bottom:8px;">💡 {% trans "You can skip this — share the invite key instead" %}</p>
+        <p class="inp-hint" style="margin-bottom:8px;"><i class="bi bi-lightbulb-fill" style="color:#0d9488;"></i> {% trans "You can skip this — share the invite key instead" %}</p>
         <div style="max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:5px;background:var(--bg2);">
           {% for s in form.students %}
           <label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--radius-sm);cursor:pointer;font-size:.83rem;transition:background .12s;" onmouseover="this.style.background='var(--highlight)'" onmouseout="this.style.background=''">
@@ -27,10 +27,11 @@
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button type="submit" class="btn btn-primary" style="flex:1;">💾 {% trans "Save Group" %}</button>
+        <button type="submit" class="btn btn-primary" style="flex:1;"><i class="bi bi-floppy-fill"></i> {% trans "Save Group" %}</button>
         <a href="{% url 'users:group_list' %}" class="btn btn-ghost">{% trans "Cancel" %}</a>
       </div>
     </form>
   </div>
 </div>
 {% endblock %}
+ 

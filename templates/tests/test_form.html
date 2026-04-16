@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}{% if editing %}{% trans "Edit Test" %}{% else %}{% trans "New Test" %}{% endif %} – CodeLearn{% endblock %}
+ 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/tests.css' %}">
+{% endblock %}
+ 
+{% block content %}
+<div class="form-wrap">
+  <div class="fade-up" style="margin-bottom:1.5rem;">
+    <a href="{% url 'tests:list' %}" class="btn btn-ghost btn-sm" style="margin-bottom:.75rem;">← {% trans "Tests" %}</a>
+    <h1 class="section-title" style="margin-bottom:.3rem;">
+      {% if editing %}<i class="bi bi-pencil"></i> {% trans "Edit Test" %}{% else %}<i class="bi bi-flask"></i> {% trans "New Test Pack" %}{% endif %}
+    </h1>
+    <p class="section-sub">{% trans "Create the pack, then add questions" %}</p>
+  </div>
+ 
+  <div class="form-card fade-up-2">
+    <div class="form-card-header">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;display:inline-block;"></span>
+      <span style="font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);">{% trans "Test details" %}</span>
+    </div>
+    <div class="form-card-body">
+      <form method="post" novalidate id="test-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div style="background:var(--danger-bg);border:1px solid var(--danger-brd);border-radius:var(--radius);padding:.8rem 1rem;margin-bottom:1rem;font-size:.78rem;color:var(--danger);">
+          <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b"></i> {{ form.non_field_errors|join:", " }}
+        </div>
+        {% endif %}
+ 
+        <div class="inp-group">
+          <label class="inp-label" for="{{ form.title.id_for_label }}">{% trans "Title" %}</label>
+          {{ form.title }}
+          {% if form.title.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b"></i> {{ form.title.errors|join:" " }}</p>{% endif %}
+        </div>
+        <div class="field-divider"></div>
+        <div class="inp-group">
+          <label class="inp-label" for="{{ form.description.id_for_label }}">{% trans "Description (optional)" %}</label>
+          {{ form.description }}
+          {% if form.description.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b"></i> {{ form.description.errors|join:" " }}</p>{% endif %}
+        </div>
+        <div class="field-divider"></div>
+ 
+        <div class="inp-group">
+          <div class="inp-label">{% trans "Type" %}</div>
+          <div class="mode-grid">
+            <label class="mode-option">
+              <input type="radio" name="mode" value="session" id="mode-session"
+                {% if not form.mode.value or form.mode.value == 'session' %}checked{% endif %}
+                onchange="switchMode('session')">
+              <div class="mode-card">
+                <span class="mode-card-icon"><i class="bi bi-clipboard"></i></span>
+                <span class="mode-card-title">{% trans "For Sessions" %}</span>
+                <span class="mode-card-sub">{% trans "Teacher uses it in a live session" %}</span>
+              </div>
+            </label>
+            <label class="mode-option">
+              <input type="radio" name="mode" value="global" id="mode-global"
+                {% if form.mode.value == 'global' %}checked{% endif %}
+                onchange="switchMode('global')">
+              <div class="mode-card">
+                <span class="mode-card-icon"><i class="bi bi-globe2"></i></span>
+                <span class="mode-card-title">{% trans "Global" %}</span>
+                <span class="mode-card-sub">{% trans "Always available, earn coins" %}</span>
+              </div>
+            </label>
+          </div>
+          {% if form.mode.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b"></i> {{ form.mode.errors|join:" " }}</p>{% endif %}
+        </div>
+ 
+        <div id="global-fields" class="global-only {% if form.mode.value != 'global' %}hidden{% endif %}">
+          <div class="field-divider"></div>
+          <div style="background:var(--accent-bg);border:1px solid var(--accent-bgd);border-radius:var(--radius);padding:.75rem 1rem;margin-bottom:1rem;font-size:.78rem;color:var(--accent);">
+            <i class="bi bi-lightbulb-fill" style="color:#0d9488"></i> {% trans "Set a time limit and coin reward. Coins are awarded only for 100% correct answers." %}
+          </div>
+          <div class="inp-group">
+            <label class="inp-label" for="{{ form.duration_minutes.id_for_label }}"><i class="bi bi-clock"></i> {% trans "Time limit (minutes)" %}</label>
+            {{ form.duration_minutes }}
+            <p class="inp-hint">{% trans "0 = no time limit" %}</p>
+            {% if form.duration_minutes.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b"></i> {{ form.duration_minutes.errors|join:" " }}</p>{% endif %}
+          </div>
+          <div class="inp-group">
+            <label class="inp-label" for="{{ form.coin_reward.id_for_label }}"><i class="bi bi-coin"></i> {% trans "Coin reward (max 5)" %}</label>
+            {{ form.coin_reward }}
+            <p class="inp-hint">{% trans "Only awarded for 100% correct. Maximum 5." %}</p>
+            {% if form.coin_reward.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b"></i> {{ form.coin_reward.errors|join:" " }}</p>{% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="form-actions">
+      <button type="submit" form="test-form" class="btn btn-primary btn-lg" style="flex:1;">
+        {% if editing %}{% trans "Save" %} →{% else %}{% trans "Create & Add Questions" %} →{% endif %}
+      </button>
+      {% if editing %}
+        <a href="{% url 'tests:delete' pack.pk %}" class="btn btn-ghost btn-lg" style="color:var(--danger);"><i class="bi bi-trash"></i></a>
+      {% endif %}
+      <a href="{% url 'tests:list' %}" class="btn btn-ghost btn-lg">{% trans "Cancel" %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+ 
+{% block extra_js %}
+<script src="{% static 'js/pages/tests.js' %}" defer></script>
+{% endblock %}
+ 
+ 

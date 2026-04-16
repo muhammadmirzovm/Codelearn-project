@@ -287,7 +287,7 @@
           {% endfor %}
         {% else %}
         <div class="chat-empty">
-          <div class="chat-empty-icon">💬</div>
+          <div class="chat-empty-icon"><i class="bi bi-chat-dots-fill"></i></div>
           <p class="chat-empty-title">{% trans "No messages yet" %}</p>
           <p class="chat-empty-sub">{% blocktrans with name=group.name %}Be the first to say hello in {{ name }}!{% endblocktrans %}</p>
         </div>
@@ -312,14 +312,14 @@
     <aside class="chat-sidebar">
       <div class="sidebar-section" style="flex:0 0 auto;">
         <div class="sidebar-section-header">
-          <span class="sidebar-section-title">🟢 {% trans "Online" %}</span>
+          <span class="sidebar-section-title"><i class="bi bi-circle-fill" style="color:#22c55e;font-size:.5rem;"></i> {% trans "Online" %}</span>
           <span class="sidebar-count online" id="online-count">0</span>
         </div>
         <div class="member-list" id="online-list"></div>
       </div>
       <div class="sidebar-section" style="flex:1;overflow:hidden;">
         <div class="sidebar-section-header">
-          <span class="sidebar-section-title">👥 {% trans "Members" %}</span>
+          <span class="sidebar-section-title"><i class="bi bi-people-fill"></i> {% trans "Members" %}</span>
           <span class="sidebar-count offline" id="offline-count">{{ group.students.count|add:1 }}</span>
         </div>
         <div class="member-list" id="offline-list">
@@ -344,21 +344,21 @@
 <div class="members-drawer-overlay" id="members-overlay"></div>
 <div class="members-drawer" id="members-drawer" aria-label="{% trans 'Members' %}">
   <div class="members-drawer-header">
-    <span class="members-drawer-title">👥 {% trans "Members" %}</span>
+    <span class="members-drawer-title"><i class="bi bi-people-fill"></i> {% trans "Members" %}</span>
     <button class="members-drawer-close" id="members-drawer-close" aria-label="{% trans 'Close' %}">
       <i class="bi bi-x-lg"></i>
     </button>
   </div>
   <div style="padding:10px 14px 4px;border-bottom:1px solid var(--border);">
     <div class="sidebar-section-header" style="padding:0 0 8px;">
-      <span class="sidebar-section-title">🟢 {% trans "Online" %}</span>
+      <span class="sidebar-section-title"><i class="bi bi-circle-fill" style="color:#22c55e;font-size:.5rem;"></i> {% trans "Online" %}</span>
       <span class="sidebar-count online" id="m-online-count">0</span>
     </div>
     <div class="member-list" id="m-online-list" style="max-height:160px;"></div>
   </div>
   <div style="padding:10px 14px 4px;flex:1;overflow:hidden;display:flex;flex-direction:column;">
     <div class="sidebar-section-header" style="padding:0 0 8px;flex-shrink:0;">
-      <span class="sidebar-section-title">👥 {% trans "All members" %}</span>
+      <span class="sidebar-section-title"><i class="bi bi-people-fill"></i> {% trans "All members" %}</span>
       <span class="sidebar-count offline" id="m-offline-count">{{ group.students.count|add:1 }}</span>
     </div>
     <div class="member-list" id="m-offline-list" style="flex:1;max-height:none;">

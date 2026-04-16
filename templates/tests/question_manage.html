@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}{% trans "Questions" %} – {{ pack.title }}{% endblock %}
+ 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/tests.css' %}">
+{% endblock %}
+ 
+{% block content %}
+<div style="max-width:680px;margin:0 auto;">
+  <div class="fade-up" style="margin-bottom:1.25rem;">
+    <a href="{% url 'tests:list' %}" class="btn btn-ghost btn-sm" style="margin-bottom:.6rem;">← {% trans "Tests" %}</a>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h1 class="section-title" style="margin-bottom:.2rem;"><i class="bi bi-pencil-square"></i> {% trans "Questions" %}</h1>
+        <p class="section-sub">{{ pack.title }} · <span id="q-count">{{ pack.question_count }}</span> {% trans "questions" %}</p>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="{% url 'tests:detail' pack.pk %}" class="btn btn-ghost btn-sm"><i class="bi bi-eye-fill"></i> {% trans "Preview" %}</a>
+        {% if pack.question_count > 0 %}
+        <form method="post" action="{% url 'tests:activate' pack.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-success btn-sm">▶ {% trans "Start" %}</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+ 
+  <div id="questions-wrap"></div>
+  <button class="add-q-btn fade-up-2" onclick="addQuestion()">＋ {% trans "Add Question" %}</button>
+ 
+  <div class="save-bar">
+    <button onclick="saveAll()" class="btn btn-primary btn-lg" style="flex:1;" id="save-btn"><i class="bi bi-floppy-fill"></i> {% trans "Save" %}</button>
+    <a href="{% url 'tests:list' %}" class="btn btn-ghost btn-lg">{% trans "Cancel" %}</a>
+  </div>
+</div>
+ 
+{# ── Existing questions data ── #}
+<script type="application/json" id="existing-data">
+[{% for q in questions %}{"text":"{{ q.text|escapejs }}","choices":[{% for c in q.choices.all %}{"label":"{{ c.label }}","text":"{{ c.text|escapejs }}","is_correct":{{ c.is_correct|yesno:"true,false" }}}{% if not forloop.last %},{% endif %}{% endfor %}]}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+ 
+{# ── Config for tests.js ── #}
+<script type="application/json" id="question-manager-config">
+{
+  "saveUrl":   "{% url 'tests:questions' pack.pk %}",
+  "csrfToken": "{{ csrf_token }}",
+  "i18n": {
+    "question":           "{% trans 'Question' %}",
+    "remove":             "{% trans 'Remove' %}",
+    "questionPlaceholder":"{% trans 'Enter question text...' %}",
+    "choicePlaceholder":  "{% trans 'option' %}",
+    "correct":            "{% trans 'Correct' %}",
+    "markCorrect":        "{% trans 'Correct?' %}",
+    "emptyText":          "{% trans 'question text is empty!' %}",
+    "noCorrect":          "{% trans 'no correct answer marked!' %}",
+    "save":               "{% trans 'Save' %}",
+    "saving":             "{% trans 'Saving' %}",
+    "saved":              "{% trans 'Saved' %}",
+    "error":              "{% trans 'Error' %}"
+  }
+}
+</script>
+{% endblock %}
+ 
+{% block extra_js %}
+<script src="{% static 'js/pages/tests.js' %}" defer></script>
+{% endblock %}

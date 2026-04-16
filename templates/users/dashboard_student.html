@@ -1,67 +1,68 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 {% block title %}{% trans "Dashboard" %} – CodeLearn{% endblock %}
 
 {% block extra_head %}
-<style>
-.toast-msg{position:fixed;bottom:1.25rem;right:1.25rem;max-width:340px;padding:.8rem 1.1rem;border-radius:var(--radius);font-size:.82rem;font-family:var(--font-mono);font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;}
-.toast-msg.show{opacity:1;transform:translateY(0);}
-.toast-s{background:var(--success);color:#fff;}
-.toast-w{background:var(--warning);color:#fff;}
-.session-card-enter{animation:slideIn .35s cubic-bezier(.34,1.56,.64,1) both;}
-@keyframes slideIn{from{opacity:0;transform:translateY(-12px) scale(.97)}to{opacity:1;transform:none}}
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
-      <h1 class="section-title">{% blocktrans with name=user.get_full_name|default:user.username %}Hey, {{ name }}! 🚀{% endblocktrans %}</h1>
+      <h1 class="section-title">{% blocktrans with name=user.get_full_name|default:user.username %}Hey, {{ name }}!{% endblocktrans %}</h1>
       <p class="section-sub">{% trans "Ready to code today?" %}</p>
     </div>
-    <a href="{% url 'users:join_group' %}" class="btn btn-primary">🔑 {% trans "Join a Group" %}</a>
+    <a href="{% url 'users:join_group' %}" class="btn btn-primary"><i class="bi bi-key-fill"></i> {% trans "Join a Group" %}</a>
   </div>
 </div>
 
-<!-- Active sessions — updates in real-time -->
+<!-- Active sessions -->
 <div id="active-sessions-wrap" class="fade-up" style="margin-bottom:24px;">
   {% if active_sessions %}
-  <div id="active-sessions-inner" style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px 24px;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+  <div id="active-sessions-inner" class="active-sessions-banner">
+    <div class="active-sessions-header">
       <span class="live-dot pulse"></span>
-      <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">{% trans "Active Sessions — Join Now!" %}</span>
+      <span class="active-sessions-title">{% trans "Active Sessions — Join Now!" %}</span>
     </div>
-    <div id="sessions-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+    <div id="sessions-grid" class="sessions-grid">
       {% for s in active_sessions %}
-      <div id="session-card-{{ s.pk }}" style="background:var(--surface);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:18px;">
-        <p style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px;">{{ s.task.title }}</p>
-        <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">
-          {{ s.group.name }}{% if s.duration_minutes %} · ⏱ {% blocktrans with mins=s.duration_minutes %}{{ mins }} min{% endblocktrans %}{% endif %}
-        </p>
-        <div style="display:flex;gap:8px;">
+      <div id="session-card-{{ s.pk }}"
+           class="session-card"
+           data-session-pk="{{ s.pk }}"
+           {% if s.end_time %}data-session-end="{{ s.end_time.isoformat }}"{% endif %}>
+        <div class="session-card-top">
+          <span class="session-card-type">{% if s.is_quiz %}<i class="bi bi-flask"></i> Quiz{% else %}<i class="bi bi-lightning-charge-fill"></i> Algorithmic{% endif %}</span>
+          {% if s.duration_minutes %}
+          <span class="session-card-duration"><i class="bi bi-clock"></i> {{ s.duration_minutes }} min</span>
+          {% endif %}
+        </div>
+        <p class="session-card-title">{{ s.title }}</p>
+        <p class="session-card-group">{{ s.group.name }}</p>
+        <div class="session-card-actions">
           <a href="{% url 'sessions:join' s.pk %}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">▶ {% trans "Enter" %}</a>
-          <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm">🏆</a>
+          <a href="{% url 'sessions:leaderboard' s.pk %}" class="btn btn-ghost btn-sm"><i class="bi bi-trophy-fill"></i></a>
         </div>
       </div>
       {% endfor %}
     </div>
   </div>
   {% else %}
-  <div id="no-sessions-card" class="card card-p" style="text-align:center;">
-    <p style="font-size:2.5rem;margin-bottom:8px;">😴</p>
-    <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:4px;">{% trans "No active sessions right now" %}</p>
-    <p style="color:var(--text-muted);font-size:.875rem;">{% trans "Check back soon — your teacher will start a session!" %}</p>
+  <div id="no-sessions-card" class="card card-p no-sessions-card">
+    <p class="no-sessions-emoji"><i class="bi bi-moon-stars-fill"></i></p>
+    <p class="no-sessions-title">{% trans "No active sessions right now" %}</p>
+    <p class="no-sessions-sub">{% trans "Check back soon — your teacher will start a session!" %}</p>
   </div>
   {% endif %}
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;" class="fade-up-2">
+<div class="dashboard-grid fade-up-2">
 
   <div class="card">
     <div class="card-header">
       <span style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;">{% trans "My Groups" %}</span>
-      <a href="{% url 'users:join_group' %}" class="btn btn-accent-soft btn-sm">🔑 {% trans "Join" %}</a>
+      <a href="{% url 'users:join_group' %}" class="btn btn-accent-soft btn-sm"><i class="bi bi-key-fill"></i> {% trans "Join" %}</a>
     </div>
     {% with groups=user.student_groups.all %}
     {% if groups %}
@@ -75,26 +76,26 @@
             </span>
           </div>
           <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm" style="position:relative;display:inline-flex;align-items:center;gap:5px;">
-            💬 {% trans "Chat" %}
+            <i class="bi bi-chat-dots-fill"></i> {% trans "Chat" %}
             <span class="chat-unread-badge" data-group="{{ g.id }}" style="display:none;"></span>
           </a>
         </div>
         <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:8px;">
           {% trans "Teacher" %}: {{ g.teacher.get_full_name|default:g.teacher.username }}
         </p>
-        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+        <div class="member-avatars">
           {% for s in g.students.all|slice:":8" %}
-          <div title="{{ s.get_full_name|default:s.username }}" class="ac-{{ forloop.counter0 }}" style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;border:2px solid var(--surface);">{{ s.username|first|upper }}</div>
+          <div title="{{ s.get_full_name|default:s.username }}" class="member-avatar-sm ac-{{ forloop.counter0 }}">{{ s.username|first|upper }}</div>
           {% endfor %}
           {% if g.students.count > 8 %}
-          <div style="width:26px;height:26px;border-radius:50%;background:var(--bg2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--text-muted);">+{{ g.students.count|add:"-8" }}</div>
+          <div class="member-avatar-overflow">+{{ g.students.count|add:"-8" }}</div>
           {% endif %}
         </div>
       </div>
       {% endfor %}
     {% else %}
     <div style="padding:36px 20px;text-align:center;">
-      <p style="font-size:2rem;margin-bottom:8px;">🎒</p>
+      <p style="font-size:2rem;margin-bottom:8px;"><i class="bi bi-backpack-fill"></i></p>
       <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:14px;">{% trans "You're not in any group yet" %}</p>
       <a href="{% url 'users:join_group' %}" class="btn btn-primary btn-sm">{% trans "Join with invite key" %}</a>
     </div>
@@ -109,7 +110,7 @@
     {% if upcoming_sessions %}
       {% for s in upcoming_sessions %}
       <div style="padding:14px 20px;{% if not forloop.last %}border-bottom:1px solid var(--border);{% endif %}">
-        <p style="font-weight:600;font-size:.9rem;">{{ s.task.title }}</p>
+        <p style="font-weight:600;font-size:.9rem;">{{ s.title }}</p>
         <p style="font-size:.78rem;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">{{ s.group.name }} · {{ s.start_time|date:"M j, H:i" }}</p>
       </div>
       {% endfor %}
@@ -139,117 +140,27 @@
 
 </div>
 
-<!-- Toast -->
 <div id="toast-el" class="toast-msg"></div>
-
-<!-- Pass group PKs to JS -->
-<script type="application/json" id="dashboard-data">
-{
-  "group_pks": [{% for g in user.student_groups.all %}{{ g.pk }}{% if not forloop.last %},{% endif %}{% endfor %}]
-}
-</script>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-/* ── Unread badges ── */
-const unreadCounts = {{ unread_counts|default:"{}" }};
-document.querySelectorAll('.chat-unread-badge[data-group]').forEach(el => {
-  const cnt = unreadCounts[parseInt(el.dataset.group)];
-  if (cnt) { el.textContent = cnt; el.style.display = 'inline-flex'; }
-});
-
-/* ── Toast ── */
-let _toastTimer = null;
-function showToast(msg, type) {
-  const el = document.getElementById('toast-el');
-  el.textContent = msg; el.className = `toast-msg toast-${type} show`;
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
-}
-
-/* ── DOM helpers ── */
-function getGrid() { return document.getElementById('sessions-grid'); }
-
-function ensureActiveBanner() {
-  // If the "No active sessions" card is showing, replace it with the live banner
-  const noCard = document.getElementById('no-sessions-card');
-  if (noCard) {
-    const wrap = document.getElementById('active-sessions-wrap');
-    wrap.innerHTML = `
-      <div id="active-sessions-inner" style="background:var(--success-bg);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:20px 24px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-          <span class="live-dot pulse"></span>
-          <span style="font-weight:700;color:var(--success);font-size:.95rem;font-family:var(--font-mono);">{% trans "Active Sessions — Join Now!" %}</span>
-        </div>
-        <div id="sessions-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;"></div>
-      </div>`;
+{# ── Data for dashboard.js (i18n strings + group PKs) ── #}
+<script type="application/json" id="dashboard-config">
+{
+  "groupPks": [{% for g in user.student_groups.all %}{{ g.pk }}{% if not forloop.last %},{% endif %}{% endfor %}],
+  "i18n": {
+    "activeSessions": "{% trans 'Active Sessions — Join Now!' %}",
+    "noSessions":     "{% trans 'No active sessions right now' %}",
+    "noSessionsSub":  "{% trans 'Check back soon — your teacher will start a session!' %}",
+    "newSession":     "{% trans 'New session:' %}",
+    "sessionEnded":   "{% trans 'Session ended.' %}",
+    "enter":          "{% trans 'Enter' %}"
   }
 }
-
-function addSessionCard(data) {
-  ensureActiveBanner();
-  const grid = getGrid();
-  if (!grid || document.getElementById(`session-card-${data.session_pk}`)) return;
-  const card = document.createElement('div');
-  card.id = `session-card-${data.session_pk}`;
-  card.className = 'session-card-enter';
-  card.style.cssText = 'background:var(--surface);border:1.5px solid var(--success-brd);border-radius:var(--radius-lg);padding:18px;';
-  const duration = data.duration_minutes ? ` · ⏱ ${data.duration_minutes} min` : '';
-  card.innerHTML = `
-    <p style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:4px;">${data.task_title}</p>
-    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;font-family:var(--font-mono);">${data.group_name}${duration}</p>
-    <div style="display:flex;gap:8px;">
-      <a href="${data.join_url}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">▶ {% trans "Enter" %}</a>
-      <a href="${data.leaderboard_url}" class="btn btn-ghost btn-sm">🏆</a>
-    </div>`;
-  grid.appendChild(card);
-}
-
-function removeSessionCard(sessionPk) {
-  const card = document.getElementById(`session-card-${sessionPk}`);
-  if (card) {
-    card.style.transition = 'opacity .3s, transform .3s';
-    card.style.opacity = '0'; card.style.transform = 'scale(.95)';
-    setTimeout(() => {
-      card.remove();
-      // If grid is now empty, show the "no sessions" card
-      const grid = getGrid();
-      if (grid && grid.children.length === 0) {
-        document.getElementById('active-sessions-wrap').innerHTML = `
-          <div id="no-sessions-card" class="card card-p" style="text-align:center;">
-            <p style="font-size:2.5rem;margin-bottom:8px;">😴</p>
-            <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:4px;">{% trans "No active sessions right now" %}</p>
-            <p style="color:var(--text-muted);font-size:.875rem;">{% trans "Check back soon — your teacher will start a session!" %}</p>
-          </div>`;
-      }
-    }, 300);
-  }
-}
-
-/* ── WebSocket — one connection per group ── */
-const DATA      = JSON.parse(document.getElementById('dashboard-data').textContent);
-const groupPks  = DATA.group_pks;
-
-function connectGroupWS(groupPk) {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const ws = new WebSocket(`${proto}://${location.host}/ws/group/${groupPk}/session/`);
-
-  ws.onclose = () => setTimeout(() => connectGroupWS(groupPk), 3000);
-  ws.onerror = (e) => console.warn(`[WS group ${groupPk}]`, e);
-
-  ws.onmessage = e => {
-    const msg = JSON.parse(e.data);
-    if (msg.event === 'session_started') {
-      addSessionCard(msg.data);
-      showToast(`🚀 {% trans "New session started:" %} ${msg.data.task_title}`, 's');
-    } else if (msg.event === 'session_ended') {
-      removeSessionCard(msg.data.session_pk);
-      showToast(`{% trans "Session ended." %}`, 'w');
-    }
-  };
-}
-
-groupPks.forEach(pk => connectGroupWS(pk));
 </script>
+
+{# ── Unread chat counts ── #}
+<script type="application/json" id="unread-counts-data">{{ unread_counts|default:"{}" }}</script>
+
+<script src="{% static 'js/pages/dashboard.js' %}" defer></script>
 {% endblock %}

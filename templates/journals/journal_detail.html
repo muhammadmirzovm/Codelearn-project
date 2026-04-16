@@ -1,134 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 {% block title %}{% trans "Journal" %} — {{ journal.group.name }}{% endblock %}
 
 {% block extra_head %}
-<style>
-/* ── Hero ── */
-.journal-hero{background:var(--nav-bg);color:#fff;padding:2.5rem 1.25rem 2rem;position:relative;overflow:hidden;margin:-28px -20px 24px}
-.journal-hero::before{content:'JOURNAL';position:absolute;right:-1rem;top:50%;transform:translateY(-50%);font-family:var(--font-display);font-size:clamp(4rem,12vw,9rem);font-weight:700;color:rgba(255,255,255,.04);pointer-events:none;white-space:nowrap}
-.journal-hero::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-ll))}
-.journal-hero-inner{max-width:900px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;position:relative;z-index:1}
-.journal-hero-label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.35rem}
-.journal-hero-title{font-family:var(--font-display);font-size:clamp(1.5rem,4vw,2.5rem);font-weight:700;line-height:1.1;color:#fff}
-.journal-hero-meta{font-size:.78rem;color:rgba(255,255,255,.4);margin-top:.4rem;font-family:var(--font-mono)}
-
-/* ── Body ── */
-.journal-body{max-width:900px;margin:0 auto;padding:0 0 2rem}
-
-/* ── Stats bar ── */
-.j-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);background:var(--surface);margin-bottom:1.5rem;overflow:hidden;border-radius:var(--radius-lg);box-shadow:var(--shadow)}
-.j-stat{padding:1rem;border-right:1px solid var(--border);text-align:center}
-.j-stat:last-child{border-right:none}
-.j-stat-value{font-family:var(--font-display);font-size:clamp(1.4rem,4vw,2rem);font-weight:700;color:var(--text);line-height:1}
-.j-stat-label{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-top:.3rem}
-
-/* ── Section label ── */
-.j-section-label{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem}
-.j-section-label::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* ── Performance table wrapper ── */
-.perf-wrap{background:var(--surface);border:1px solid var(--border);margin-bottom:1.5rem;overflow:hidden;border-radius:var(--radius-lg);box-shadow:var(--shadow)}
-.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.perf-tbl{width:100%;min-width:540px;border-collapse:collapse;font-size:.82rem}
-.perf-tbl th{padding:.65rem 1rem;text-align:left;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg2);white-space:nowrap}
-.perf-tbl th.center{text-align:center}
-.perf-tbl td{padding:.75rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
-.perf-tbl tr:last-child td{border-bottom:none}
-.perf-tbl tr:hover td{background:var(--highlight)}
-.score-cell{text-align:center;font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--accent)}
-.attend-cell{text-align:center;font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted)}
-
-/* ── Join date editor ── */
-.join-cell{min-width:160px}
-.join-date-wrap{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
-.join-date-display{font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);white-space:nowrap}
-.btn-edit-join{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.15rem .4rem;font-size:.62rem;font-family:var(--font-mono);color:var(--text-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
-.btn-edit-join:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
-.join-date-form{display:none;align-items:center;gap:.35rem;flex-wrap:wrap;margin-top:.3rem}
-.join-date-form.visible{display:flex}
-.join-date-input{font-family:var(--font-mono);font-size:.72rem;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.2rem .45rem;background:var(--bg2);color:var(--text);outline:none;max-width:130px}
-.join-date-input:focus{border-color:var(--accent)}
-.btn-save-join{background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);padding:.2rem .55rem;font-size:.68rem;font-family:var(--font-mono);cursor:pointer}
-.btn-cancel-join{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:.2rem .45rem;font-size:.68rem;font-family:var(--font-mono);color:var(--text-muted);cursor:pointer}
-.join-meta{font-family:var(--font-mono);font-size:.62rem;color:var(--text-muted);margin-top:.2rem;white-space:nowrap}
-
-/* ── Progress bar ── */
-.prog-wrap{display:flex;align-items:center;gap:.6rem;min-width:100px}
-.prog-bar{flex:1;height:6px;background:var(--border);overflow:hidden;border-radius:99px;min-width:40px}
-.prog-fill{height:100%;transition:width .4s;border-radius:99px}
-.prog-green{background:var(--success)}
-.prog-orange{background:var(--warning)}
-.prog-red{background:var(--danger)}
-.prog-pct{font-family:var(--font-mono);font-size:.72rem;font-weight:500;min-width:34px;color:var(--text-muted)}
-
-/* ── Lesson cards ── */
-.lesson-list{display:flex;flex-direction:column;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
-.lesson-card{background:var(--surface);border:1px solid var(--border);border-bottom:none}
-.lesson-card:last-child{border-bottom:1px solid var(--border)}
-.lesson-head{display:flex;align-items:center;gap:.6rem;padding:.9rem 1rem;cursor:pointer;user-select:none;transition:background .12s;flex-wrap:nowrap}
-.lesson-head:hover{background:var(--highlight)}
-.lesson-date{font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);white-space:nowrap;min-width:72px}
-.lesson-title-text{flex:1;font-weight:600;font-size:.88rem;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lesson-badge{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.06em;padding:.18rem .5rem;background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-bgd);border-radius:99px;white-space:nowrap;flex-shrink:0}
-.lesson-actions{display:flex;gap:.35rem;flex-shrink:0}
-.btn-evaluate{font-family:var(--font-mono);font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);text-decoration:none;padding:.28rem .55rem;border:1px solid var(--border);border-radius:var(--radius-sm);white-space:nowrap;transition:all .15s}
-.btn-evaluate:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-bg)}
-.btn-evaluate.danger{color:var(--danger)}
-.btn-evaluate.danger:hover{border-color:var(--danger);background:var(--danger-bg)}
-.lesson-toggle{width:16px;height:16px;color:var(--text-muted);transition:transform .25s;flex-shrink:0}
-.lesson-card.open .lesson-toggle{transform:rotate(180deg)}
-.lesson-body{display:none;border-top:1px solid var(--border)}
-.lesson-card.open .lesson-body{display:block}
-.lesson-topic{padding:.6rem 1rem;font-size:.8rem;color:var(--text-muted);border-bottom:1px solid var(--border);font-style:italic}
-
-/* ── Record table inside accordion ── */
-.rec-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.rec-tbl{width:100%;min-width:360px;border-collapse:collapse;font-size:.8rem}
-.rec-tbl th{padding:.55rem .85rem;text-align:left;font-family:var(--font-mono);font-size:.57rem;letter-spacing:.09em;text-transform:uppercase;color:var(--text-muted);background:var(--bg2);border-bottom:1px solid var(--border)}
-.rec-tbl td{padding:.65rem .85rem;border-bottom:1px solid var(--border);vertical-align:middle}
-.rec-tbl tr:last-child td{border-bottom:none}
-.rec-tbl tr:hover td{background:var(--highlight)}
-.att-dot{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--font-mono);font-size:.7rem}
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dot-present{background:var(--success)}
-.dot-absent{background:var(--danger)}
-.grade-circle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-family:var(--font-display);font-size:.9rem;font-weight:700}
-.no-val{color:var(--border2);font-family:var(--font-mono);font-size:.75rem}
-.comment-txt{font-size:.75rem;color:var(--text-muted);font-style:italic;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-
-/* ── Empty state ── */
-.j-empty{text-align:center;padding:3rem 1.5rem;border:1px dashed var(--border);background:var(--surface);border-radius:var(--radius-lg)}
-.j-empty-icon{font-size:2.5rem;margin-bottom:.75rem;opacity:.3}
-.j-empty h3{font-family:var(--font-display);font-size:1.2rem;color:var(--text-muted);margin-bottom:.4rem}
-.j-empty p{font-size:.82rem;color:var(--text-muted);margin-bottom:1.25rem}
-
-/* ── Toast ── */
-.toast{position:fixed;bottom:1.25rem;right:1.25rem;left:1.25rem;max-width:360px;margin:0 auto;padding:.7rem 1.1rem;border-radius:var(--radius);font-size:.8rem;font-family:var(--font-mono);z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;text-align:center}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast-success{background:var(--success);color:#fff}
-.toast-error{background:var(--danger);color:#fff}
-
-/* ── Mobile overrides ── */
-@media(max-width:600px){
-  .journal-hero{padding:1.75rem 1rem 1.5rem;margin:-16px -12px 16px}
-  .j-stats{grid-template-columns:repeat(3,1fr)}
-  .j-stat{padding:.75rem .5rem}
-  .j-stat-label{font-size:.52rem;letter-spacing:.06em}
-  .lesson-head{padding:.8rem .75rem;gap:.4rem}
-  .lesson-date{display:none}
-  .lesson-badge{display:none}
-  .lesson-actions{gap:.25rem}
-  .btn-evaluate{padding:.22rem .4rem;font-size:.55rem}
-  .perf-tbl{min-width:480px}
-  .join-cell{min-width:120px}
-  .toast{bottom:.75rem;right:.75rem;left:.75rem}
-}
-@media(max-width:400px){
-  .j-stats{grid-template-columns:1fr 1fr 1fr}
-  .j-stat-value{font-size:1.2rem}
-}
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/journals.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -144,17 +20,16 @@
       </div>
     </div>
     {% if is_teacher %}
-      <a href="{% url 'journals:lesson-add' group_pk=journal.group.pk %}" class="btn btn-primary" style="flex-shrink:0;">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M8 1v14M1 8h14"/></svg>
-        {% trans "New Lesson" %}
-      </a>
+    <a href="{% url 'journals:lesson-add' group_pk=journal.group.pk %}" class="btn btn-primary" style="flex-shrink:0;">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M8 1v14M1 8h14"/></svg>
+      {% trans "New Lesson" %}
+    </a>
     {% endif %}
   </div>
 </div>
 
 <div class="journal-body">
 
-  <!-- Stats bar -->
   <div class="j-stats">
     <div class="j-stat">
       <div class="j-stat-value">{{ lesson_count }}</div>
@@ -170,7 +45,6 @@
     </div>
   </div>
 
-  <!-- Student performance -->
   <div class="j-section-label">{% trans "Student Performance" %}</div>
   <div class="perf-wrap">
     <div class="tbl-scroll">
@@ -225,7 +99,6 @@
     </div>
   </div>
 
-  <!-- Lessons list -->
   {% if lessons %}
     <div class="j-section-label">{% trans "Lessons" %}</div>
     <div class="lesson-list">
@@ -296,7 +169,7 @@
     </div>
   {% else %}
     <div class="j-empty">
-      <div class="j-empty-icon">📋</div>
+      <div class="j-empty-icon"><i class="bi bi-clipboard"></i></div>
       <h3>{% trans "No lessons yet" %}</h3>
       <p>{% trans "Add the first lesson to start keeping the journal" %}</p>
       {% if is_teacher %}
@@ -311,24 +184,18 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-function toggleLesson(pk){document.getElementById('lesson-'+pk).classList.toggle('open')}
-function openJoinEdit(pk,d){document.getElementById('jd-form-'+pk).classList.add('visible');document.getElementById('jd-input-'+pk).value=d}
-function closeJoinEdit(pk){document.getElementById('jd-form-'+pk).classList.remove('visible')}
-function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast toast-'+type+' show';setTimeout(()=>t.classList.remove('show'),2800)}
-function saveJoinDate(pk){
-  const d=document.getElementById('jd-input-'+pk).value;
-  if(!d){showToast('{% trans "Please select a date." %}','error');return}
-  fetch(`{% url 'journals:membership-update' membership_pk=0 %}`.replace('0',pk),{
-    method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':'{{ csrf_token }}'},
-    body:JSON.stringify({joined_at:d})
-  }).then(r=>r.json()).then(data=>{
-    if(data.success){
-      const f=new Date(d+'T00:00:00');
-      document.getElementById('jd-display-'+pk).textContent=f.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();
-      closeJoinEdit(pk);showToast('{% trans "Saved. Reload to see updated scores." %}','success');
-    }else{showToast(data.error||'{% trans "Error." %}','error')}
-  }).catch(()=>showToast('{% trans "Network error." %}','error'))
+{# ── Config for journals.js (CSRF + URLs + i18n) ── #}
+<script type="application/json" id="journals-config">
+{
+  "csrfToken":     "{{ csrf_token }}",
+  "membershipUrl": "{% url 'journals:membership-update' membership_pk=0 %}",
+  "i18n": {
+    "selectDate":   "{% trans 'Please select a date.' %}",
+    "saved":        "{% trans 'Saved. Reload to see updated scores.' %}",
+    "error":        "{% trans 'Error.' %}",
+    "networkError": "{% trans 'Network error.' %}"
+  }
 }
 </script>
+<script src="{% static 'js/pages/journals.js' %}" defer></script>
 {% endblock %}

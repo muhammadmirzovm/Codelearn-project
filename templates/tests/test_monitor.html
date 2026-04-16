@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}{% trans "Monitor" %} – {{ pack.title }}{% endblock %}
+ 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/tests.css' %}">
+{% endblock %}
+ 
+{% block content %}
+<div class="page-hero fade-up">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div>
+        <h1 class="section-title"><i class="bi bi-broadcast"></i> {% trans "Live Monitor" %}</h1>
+        <p class="section-sub">{{ pack.title }} · {{ pack.group.name }}</p>
+      </div>
+      <div id="ws-indicator" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:var(--bg2);border:1px solid var(--border);">
+        <span id="ws-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-muted);"></span>
+        <span id="ws-label" style="font-size:.72rem;font-weight:600;color:var(--text-muted);font-family:var(--font-mono);">{% trans "Connecting" %}</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+      {% if pack.duration_minutes and pack.activated_at %}
+      <div class="cd-wrap cd-ok" id="cd-wrap">
+        <span><i class="bi bi-clock"></i></span>
+        <span id="countdown" style="font-family:var(--font-mono);font-size:1rem;">--:--</span>
+      </div>
+      {% endif %}
+      <form method="post" action="{% url 'tests:deactivate' pack.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-danger btn-sm" onclick="return confirm('{% trans "Close the test?" %}')">■ {% trans "Close" %}</button>
+      </form>
+      <a href="{% url 'tests:list' %}" class="btn btn-ghost btn-sm">← {% trans "Back" %}</a>
+    </div>
+  </div>
+</div>
+ 
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px;" class="fade-up-2">
+  <div class="stat-card" style="text-align:center;">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);">{{ student_data|length }}</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Students" %}</p>
+  </div>
+  <div class="stat-card" style="text-align:center;border-left:3px solid var(--success);">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--success);" id="s-finished">0</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Finished" %} ✓</p>
+  </div>
+  <div class="stat-card" style="text-align:center;border-left:3px solid var(--accent);">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-active">0</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "In Progress" %}</p>
+  </div>
+  <div class="stat-card" style="text-align:center;border-left:3px solid var(--border2);">
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--text-muted);" id="s-idle">{{ student_data|length }}</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Waiting" %}</p>
+  </div>
+</div>
+ 
+<div class="card fade-up-3" style="overflow:hidden;">
+  <div style="overflow-x:auto;">
+    <table class="tbl" style="min-width:600px;">
+      <thead>
+        <tr>
+          <th>{% trans "Student" %}</th>
+          <th>{% trans "Status" %}</th>
+          <th>{% trans "Progress" %}</th>
+          <th class="hide-sm">{% trans "Questions" %}</th>
+          <th class="hide-sm">{% trans "Joined at" %}</th>
+        </tr>
+      </thead>
+      <tbody id="monitor-body">
+        {% for item in student_data %}
+        <tr id="row-{{ item.student.pk }}">
+          <td>
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div class="av av-{{ forloop.counter0 }}">{{ item.student.username|first|upper }}</div>
+              <div>
+                <p style="font-weight:600;font-size:.9rem;">{{ item.student.get_full_name|default:item.student.username }}</p>
+                <p style="font-size:.73rem;color:var(--text-muted);font-family:var(--font-mono);">@{{ item.student.username }}</p>
+              </div>
+            </div>
+          </td>
+          <td id="status-{{ item.student.pk }}">
+            {% if item.session %}
+              {% if item.session.status == 'finished' %}
+                <span class="badge badge-passed">✓ {% trans "Finished" %}</span>
+              {% else %}
+                <span class="badge badge-active">▶ {% trans "In Progress" %}</span>
+              {% endif %}
+            {% else %}
+              <span class="badge badge-notstarted">{% trans "Waiting" %}</span>
+            {% endif %}
+          </td>
+          <td id="prog-cell-{{ item.student.pk }}" style="min-width:140px;">
+            <div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text-muted);">
+              <span id="ans-count-{{ item.student.pk }}">{% if item.session %}{{ item.session.answers.count }}{% else %}0{% endif %}</span>/{{ pack.question_count }}
+            </div>
+            <div class="prog-mini">
+              <div class="prog-mini-fill {% if item.session and item.session.status == 'finished' %}done{% endif %}"
+                   id="prog-fill-{{ item.student.pk }}"
+                   style="width:{% if item.session %}{% widthratio item.session.answers.count pack.question_count 100 %}{% else %}0{% endif %}%;"></div>
+            </div>
+          </td>
+          <td class="hide-sm" id="dots-{{ item.student.pk }}">
+            <div class="q-dots">
+              {% for i in pack.questions.all %}
+              <div class="q-dot" id="dot-{{ item.student.pk }}-{{ forloop.counter }}" title="{% trans 'Question' %} {{ forloop.counter }}"></div>
+              {% endfor %}
+            </div>
+          </td>
+          <td class="hide-sm" id="time-{{ item.student.pk }}" style="font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);">
+            {% if item.session %}{{ item.session.started_at|date:"H:i:s" }}{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+ 
+<div id="toast-el" class="toast-msg"></div>
+ 
+<script type="application/json" id="page-data">
+{
+  "test_pk":        {{ pack.pk }},
+  "total_questions": {{ pack.question_count }},
+  "total_students":  {{ student_data|length }},
+  "duration_secs":  {{ pack.duration_minutes|default:0 }},
+  "activated_at":   "{{ pack.activated_at.isoformat|default:'' }}"
+}
+</script>
+{% endblock %}
+ 
+{% block extra_js %}
+<script src="{% static 'js/pages/tests.js' %}" defer></script>
+{% endblock %}
+ 
+ 

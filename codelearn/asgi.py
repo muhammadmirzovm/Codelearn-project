@@ -9,15 +9,17 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'codelearn.settings')
 django_asgi_app = get_asgi_application()
 
 from apps.sessions_app import routing as session_routing
+from apps.tests_app import routing as test_routing
 from apps.users.consumers import GroupChatConsumer, PresenceConsumer
 
 application = ProtocolTypeRouter({
     'http': django_asgi_app,
     'websocket': AuthMiddlewareStack(
         URLRouter(
-            session_routing.websocket_urlpatterns + [
+            session_routing.websocket_urlpatterns +
+            test_routing.websocket_urlpatterns + [
                 path('ws/chat/<int:group_id>/', GroupChatConsumer.as_asgi()),
-                path('ws/presence/',            PresenceConsumer.as_asgi()),
+                path('ws/presence/', PresenceConsumer.as_asgi()),
             ]
         )
     ),

@@ -1,41 +1,33 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% trans "Resources" %} – CodeLearn{% endblock %}
 {% block codemirror %}{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/resources.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="page-hero fade-up">
-  <h1 class="section-title">{% trans "Resources" %} 📚</h1>
+  <h1 class="section-title"><i class="bi bi-book-fill"></i> {% trans "Resources" %}</h1>
   <p class="section-sub">{% trans "Everything you need to learn and grow" %}</p>
 </div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px;margin:0 auto;" class="fade-up-2">
+<div class="res-home-grid fade-up-2">
 
-  <a href="{% url 'resources:website_list' %}" style="text-decoration:none;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px 24px;text-align:center;transition:all .15s;cursor:pointer;"
-         onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
-         onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
-      <div style="font-size:3rem;margin-bottom:16px;">🌐</div>
-      <h2 style="font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px;">{% trans "Useful Websites" %}</h2>
-      <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">{% trans "Hand-picked websites to accelerate your learning" %}</p>
-      <span style="font-family:var(--font-mono);font-size:.75rem;background:var(--accent-bg);color:var(--accent);padding:3px 10px;border-radius:99px;border:1px solid rgba(13,148,136,.2);">
-        {{ website_count }} {% trans "websites" %}
-      </span>
-    </div>
+  <a href="{% url 'resources:website_list' %}" class="res-home-card">
+    <div class="res-home-card-icon"><i class="bi bi-globe2"></i></div>
+    <h2>{% trans "Useful Websites" %}</h2>
+    <p>{% trans "Hand-picked websites to accelerate your learning" %}</p>
+    <span class="res-home-badge">{{ website_count }} {% trans "websites" %}</span>
   </a>
 
-  <a href="{% url 'resources:video_list' %}" style="text-decoration:none;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px 24px;text-align:center;transition:all .15s;cursor:pointer;"
-         onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'"
-         onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
-      <div style="font-size:3rem;margin-bottom:16px;">🎬</div>
-      <h2 style="font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px;">{% trans "Video Resources" %}</h2>
-      <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px;">{% trans "YouTube videos organized by language and topic" %}</p>
-      <span style="font-family:var(--font-mono);font-size:.75rem;background:var(--accent-bg);color:var(--accent);padding:3px 10px;border-radius:99px;border:1px solid rgba(13,148,136,.2);">
-        {{ video_count }} {% trans "videos" %}
-      </span>
-    </div>
+  <a href="{% url 'resources:video_list' %}" class="res-home-card">
+    <div class="res-home-card-icon"><i class="bi bi-play-circle-fill"></i></div>
+    <h2>{% trans "Video Resources" %}</h2>
+    <p>{% trans "YouTube videos organized by language and topic" %}</p>
+    <span class="res-home-badge">{{ video_count }} {% trans "videos" %}</span>
   </a>
 
 </div>

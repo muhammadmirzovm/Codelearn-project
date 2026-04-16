@@ -18,7 +18,7 @@ from django.conf import settings
 
 from apps.tasks.models import Task, TestCase
 from apps.sessions_app.models import Session
-from apps.sessions_app.views import _broadcast_session_event
+from apps.sessions_app.views import _broadcast_session as _broadcast_session_event
 from .models import Submission
 from apps.runner.services import run_code_sync, _evaluate_submission_sync
 
@@ -179,18 +179,47 @@ def submission_status(request, pk):
 
 @login_required
 def leaderboard_data(request, session_pk):
-    """JSON leaderboard for a session, used by live polling."""
+    """JSON leaderboard for a session — supports both algorithmic and quiz."""
     session = get_object_or_404(Session, pk=session_pk)
     students = session.group.students.all()
     board = []
-    for student in students:
-        subs = Submission.objects.filter(student=student, session=session).order_by('created_at')
-        best = subs.filter(is_correct=True).first()
-        board.append({
-            'username': student.get_full_name() or student.username,
-            'attempts': subs.count(),
-            'passed': best is not None,
-            'submitted_at': best.created_at.isoformat() if best else None,
-        })
-    board.sort(key=lambda x: (not x['passed'], x['submitted_at'] or '9999'))
-    return JsonResponse({'board': board})
+
+    if session.is_quiz:
+        from apps.sessions_app.models import QuizAttempt
+        for student in students:
+            attempt = QuizAttempt.objects.filter(
+                session=session, student=student
+            ).first()
+            passed = attempt and attempt.status == QuizAttempt.STATUS_FINISHED
+            board.append({
+                'username':     student.get_full_name() or student.username,
+                'attempts':     1 if attempt else 0,
+                'passed':       passed,
+                'score':        attempt.score if attempt else 0,
+                'total':        attempt.total if attempt else 0,
+                'submitted_at': attempt.finished_at.isoformat() if attempt and attempt.finished_at else None,
+                'time_taken':   attempt.time_taken_seconds if attempt else None,
+            })
+        board.sort(key=lambda x: (
+            not x['passed'],
+            -x['score'],
+            x['submitted_at'] or '9999'
+        ))
+    else:
+        for student in students:
+            subs = Submission.objects.filter(
+                student=student, session=session
+            ).order_by('created_at')
+            best = subs.filter(is_correct=True).first()
+            board.append({
+                'username':     student.get_full_name() or student.username,
+                'attempts':     subs.count(),
+                'passed':       best is not None,
+                'score':        0,
+                'total':        0,
+                'submitted_at': best.created_at.isoformat() if best else None,
+                'time_taken':   None,
+            })
+        board.sort(key=lambda x: (not x['passed'], x['submitted_at'] or '9999'))
+
+    return JsonResponse({'board': board, 'is_quiz': session.is_quiz})

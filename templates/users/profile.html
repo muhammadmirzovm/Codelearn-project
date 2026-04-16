@@ -37,7 +37,7 @@
   {# ── Stats row ─────────────────────────────────────────────────────────── #}
   <div class="profile-stats">
     <div class="stat-card">
-      <span class="stat-icon">👥</span>
+      <span class="stat-icon"><i class="bi bi-people-fill"></i></span>
       <span class="stat-value">{{ groups_count }}</span>
       <span class="stat-label">
         {% if user.is_teacher %}{% trans "Groups taught" %}{% else %}{% trans "Groups joined" %}{% endif %}
@@ -45,19 +45,19 @@
     </div>
     {% if user.is_teacher %}
     <div class="stat-card">
-      <span class="stat-icon">🎓</span>
+      <span class="stat-icon"><i class="bi bi-mortarboard-fill"></i></span>
       <span class="stat-value">{{ students_count }}</span>
       <span class="stat-label">{% trans "Total students" %}</span>
     </div>
     {% else %}
     <div class="stat-card">
-      <span class="stat-icon">📝</span>
+      <span class="stat-icon"><i class="bi bi-pencil-square"></i></span>
       <span class="stat-value">{{ submissions_count|default:"0" }}</span>
       <span class="stat-label">{% trans "Submissions" %}</span>
     </div>
     {% endif %}
     <div class="stat-card">
-      <span class="stat-icon">🔔</span>
+      <span class="stat-icon"><i class="bi bi-bell-fill"></i></span>
       <span class="stat-value">{{ notifications_count }}</span>
       <span class="stat-label">{% trans "Notifications" %}</span>
       {% if unread_notif_count %}
@@ -68,7 +68,7 @@
 
   {# ── Academic Progress (students only) ────────────────────────────────── #}
   {% if journal_stats %}
-  <div class="profile-section-label">📊 {% trans "My Academic Progress" %}</div>
+  <div class="profile-section-label"><i class="bi bi-bar-chart-fill"></i> {% trans "My Academic Progress" %}</div>
 
   {% for js in journal_stats %}
   <div class="jstat-card">
@@ -116,7 +116,7 @@
 
       {# Line chart — scrollable #}
       <div class="chart-box chart-box-line">
-        <div class="chart-box-label">📈 {% trans "Grade per lesson" %}</div>
+        <div class="chart-box-label"><i class="bi bi-graph-up"></i> {% trans "Grade per lesson" %}</div>
         <div class="line-scroll-wrap" id="lineWrap{{ forloop.counter }}">
           <canvas id="lineChart{{ forloop.counter }}" height="160"></canvas>
         </div>
@@ -124,7 +124,7 @@
 
       {# Doughnut #}
       <div class="chart-box chart-box-donut">
-        <div class="chart-box-label">🎯 {% trans "Attendance" %}</div>
+        <div class="chart-box-label"><i class="bi bi-bullseye"></i> {% trans "Attendance" %}</div>
         <div class="donut-wrap">
           <canvas id="donutChart{{ forloop.counter }}" width="120" height="120"></canvas>
           <div class="donut-center">
@@ -269,15 +269,15 @@
   {% endfor %}
 
   {% elif not user.is_teacher %}
-  <div class="profile-section-label">📊 {% trans "My Academic Progress" %}</div>
+  <div class="profile-section-label"><i class="bi bi-bar-chart-fill"></i> {% trans "My Academic Progress" %}</div>
   <div class="jstat-empty">
-    <span style="font-size:2rem;">📋</span>
+    <span style="font-size:2rem;"><i class="bi bi-clipboard"></i></span>
     <p>{% trans "No journal records yet. Join a group to see your progress." %}</p>
   </div>
   {% endif %}
 
   {# ── Account Settings ──────────────────────────────────────────────────── #}
-  <div class="profile-section-label">⚙️ {% trans "Account Settings" %}</div>
+  <div class="profile-section-label"><i class="bi bi-gear-fill"></i> {% trans "Account Settings" %}</div>
   <div class="profile-grid">
 
     <div class="profile-card">

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}{{ test_pack.title }} – CodeLearn{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/sessions.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="test-wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:1.25rem;">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.3rem;">
+        <span class="badge badge-active"><span class="live-dot pulse" style="width:6px;height:6px;"></span> {{ session.group.name }}</span>
+        <span style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-mono);"><i class="bi bi-flask"></i> Quiz</span>
+      </div>
+      <h1 style="font-family:var(--font-display);font-size:1.3rem;font-weight:700;">{{ test_pack.title }}</h1>
+      <p style="font-size:.78rem;color:var(--text-muted);font-family:var(--font-mono);">
+        {{ test_pack.question_count }} {% trans "questions" %}
+      </p>
+    </div>
+    {% if session.duration_minutes %}
+    <div class="cd-wrap cd-ok" id="cd-wrap">
+      <span><i class="bi bi-clock"></i></span>
+      <span id="countdown" style="font-size:1.1rem;font-family:var(--font-mono);">--:--</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width:{% widthratio answered_ids|length test_pack.question_count 100 %}%"></div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <span style="font-size:.82rem;color:var(--text-muted);font-family:var(--font-mono);">
+      <span id="answered-count">{{ answered_ids|length }}</span>/{{ test_pack.question_count }} {% trans "answered" %}
+    </span>
+    <button id="finish-btn" onclick="finishTest()" class="btn btn-success btn-sm">✓ {% trans "Finish" %}</button>
+  </div>
+
+  {% for question in questions %}
+  <div class="q-card {% if question.pk in answered_ids %}answered{% endif %}" id="qcard-{{ question.pk }}">
+    <div class="q-num-badge">{{ forloop.counter }}</div>
+    <div class="q-text">{{ question.text }}</div>
+    <div>
+      {% for choice in question.choices.all %}
+      <button class="choice-btn" id="choice-{{ question.pk }}-{{ choice.pk }}"
+        onclick="selectAnswer({{ question.pk }}, {{ choice.pk }}, this)">
+        <span class="choice-letter">{{ choice.label }}</span>
+        <span>{{ choice.text }}</span>
+      </button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end;">
+    <button onclick="finishTest()" class="btn btn-primary btn-lg">✓ {% trans "Finish Test" %}</button>
+  </div>
+</div>
+
+<div class="time-up-overlay" id="time-up-overlay">
+  <div style="text-align:center;color:#fff;">
+    <p style="font-size:3rem;margin-bottom:1rem;"><i class="bi bi-alarm-fill"></i></p>
+    <p style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;margin-bottom:.5rem;">{% trans "Time's up!" %}</p>
+    <p style="color:rgba(255,255,255,.7);margin-bottom:1.5rem;">{% trans "Calculating results..." %}</p>
+    <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto;"></div>
+  </div>
+</div>
+
+<div id="toast-el" class="toast-msg"></div>
+
+<script type="application/json" id="page-data">
+{
+  "page":          "quiz_join",
+  "session_pk":    {{ session.pk }},
+  "total":         {{ test_pack.question_count }},
+  "duration_secs": {{ session.duration_minutes|default:0 }},
+  "activated_at":  "{{ activated_at_iso }}",
+  "answered_ids":  {{ answered_ids|safe }},
+  "csrfToken":     "{{ csrf_token }}",
+  "urlAnswer":     "{% url 'sessions:quiz_answer' session.pk %}",
+  "urlFinish":     "{% url 'sessions:quiz_finish' session.pk %}",
+  "urlResults":    "{% url 'sessions:quiz_results' session.pk %}",
+  "i18n": {
+    "unanswered":    "{% trans 'questions unanswered. Finish anyway?' %}",
+    "connectionError":"{% trans 'Connection error!' %}",
+    "error":         "{% trans 'Something went wrong!' %}",
+    "sessionClosed": "{% trans 'Session was closed by the teacher!' %}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/sessions.js' %}" defer></script>
+{% endblock %}

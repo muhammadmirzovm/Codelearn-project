@@ -1,15 +1,22 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n socialaccount %}
 {% block title %}{% trans "Register" %} – CodeLearn{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="min-height:72vh;display:flex;align-items:center;justify-content:center;">
-  <div style="width:100%;max-width:500px;" class="fade-up">
-    <div style="text-align:center;margin-bottom:28px;">
-      <div style="width:60px;height:60px;background:var(--success);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(5,150,105,.3);">🎓</div>
-      <h1 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;">{% trans "Create your account" %}</h1>
-      <p style="color:var(--text-muted);margin-top:4px;">{% trans "Join CodeLearn as a teacher or student" %}</p>
+<div class="auth-wrap">
+  <div class="auth-inner auth-inner-wide fade-up">
+
+    <div class="auth-header">
+      <div class="auth-icon auth-icon-success"><i class="bi bi-mortarboard-fill"></i></div>
+      <h1 class="auth-title">{% trans "Create your account" %}</h1>
+      <p class="auth-sub">{% trans "Join CodeLearn as a teacher or student" %}</p>
     </div>
+
     <div class="card card-p">
       <form method="post" novalidate>
         {% csrf_token %}
@@ -18,18 +25,15 @@
           <label class="inp-label">{{ field.label }}</label>
 
           {% if field.field.widget.input_type == 'radio' %}
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+          <div class="role-opt-grid">
             {% for choice in field %}
-            <label class="role-opt" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border:2px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:all .15s;background:var(--surface);">
+            <label class="role-opt">
               {{ choice.tag }}
               <div>
                 <p style="font-weight:600;font-size:.9rem;">{{ choice.choice_label }}</p>
                 <p style="font-size:.72rem;color:var(--text-muted);">
-                  {% if choice.choice_label == 'Teacher' %}
-                    {% trans "Create & manage groups" %}
-                  {% else %}
-                    {% trans "Join & solve tasks" %}
-                  {% endif %}
+                  {% if choice.choice_label == 'Teacher' %}{% trans "Create & manage groups" %}
+                  {% else %}{% trans "Join & solve tasks" %}{% endif %}
                 </p>
               </div>
             </label>
@@ -48,6 +52,8 @@
             <button type="button" class="pw-eye"
               onclick="togglePw('pw-{{ field.html_name }}', this)"
               tabindex="-1"
+              data-show-label="{% trans 'Show password' %}"
+              data-hide-label="{% trans 'Hide password' %}"
               title="{% trans 'Show password' %}">
               <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -69,48 +75,32 @@
           {% endif %}
 
           {% if field.help_text %}<p class="inp-hint">{{ field.help_text }}</p>{% endif %}
-          {% if field.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;font-weight:500;">⚠ {{ field.errors|join:" " }}</p>{% endif %}
+          {% if field.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;font-weight:500;"><i class="bi bi-exclamation-triangle-fill"></i> {{ field.errors|join:" " }}</p>{% endif %}
         </div>
         {% endfor %}
 
         <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:4px;">{% trans "Create Account" %} →</button>
 
-        <div style="display:flex;align-items:center;gap:12px;margin:20px 0 4px;">
-          <div style="flex:1;height:1px;background:var(--border);"></div>
-          <span style="color:var(--text-muted);font-size:.8rem;">{% trans "or" %}</span>
-          <div style="flex:1;height:1px;background:var(--border);"></div>
+        <div class="auth-divider">
+          <div class="auth-divider-line"></div>
+          <span class="auth-divider-text">{% trans "or" %}</span>
+          <div class="auth-divider-line"></div>
         </div>
 
-        <a href="{% provider_login_url 'google' %}" class="btn btn-full btn-lg" style="display:flex;align-items:center;justify-content:center;gap:10px;background:var(--surface);border:1.5px solid var(--border);color:var(--text);font-weight:600;text-decoration:none;margin-top:4px;transition:border-color .15s,background .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'">
-          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+        <a href="{% provider_login_url 'google' %}" class="google-btn">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
           {% trans "Sign up with Google" %}
         </a>
       </form>
     </div>
-    <p style="text-align:center;margin-top:18px;font-size:.875rem;color:var(--text-muted);">
-      {% trans "Already have an account?" %} <a href="{% url 'users:login' %}" style="color:var(--accent);font-weight:600;">{% trans "Sign in" %} →</a>
+
+    <p class="auth-footer">
+      {% trans "Already have an account?" %} <a href="{% url 'users:login' %}">{% trans "Sign in" %} →</a>
     </p>
   </div>
 </div>
+{% endblock %}
 
-<style>
-.role-opt:has(input:checked) { border-color:var(--accent) !important;background:var(--accent-bg) !important; }
-.pw-wrap { position:relative;display:flex;align-items:center; }
-.pw-inp { width:100%;padding-right:46px !important; }
-.pw-eye { position:absolute;right:11px;background:transparent;border:none;cursor:pointer;padding:5px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:color .15s,background .15s;outline:none;flex-shrink:0; }
-.pw-eye:hover { color:var(--accent);background:var(--accent-bg); }
-.pw-eye svg { width:18px;height:18px;display:block; }
-</style>
-
-<script>
-function togglePw(inputId, btn) {
-  const input   = document.getElementById(inputId);
-  const showing = input.type === 'text';
-  input.type = showing ? 'password' : 'text';
-  btn.querySelector('.eye-open').style.display   = showing ? 'block' : 'none';
-  btn.querySelector('.eye-closed').style.display = showing ? 'none'  : 'block';
-  btn.title = showing ? '{% trans "Show password" %}' : '{% trans "Hide password" %}';
-  input.focus();
-}
-</script>
+{% block extra_js %}
+<script src="{% static 'js/pages/auth.js' %}" defer></script>
 {% endblock %}

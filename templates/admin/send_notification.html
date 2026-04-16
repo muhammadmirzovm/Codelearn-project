@@ -4,7 +4,7 @@
 {% block title %}Send Notification to All Users{% endblock %}
 
 {% block content_title %}
-<h1>📢 Send Notification to Users</h1>
+<h1>Send Notification to Users</h1>
 {% endblock %}
 
 {% block content %}
@@ -73,9 +73,9 @@
       <div class="form-row">
         <label for="id_target" class="required">Send To:</label>
         <select id="id_target" name="target" style="min-width:180px;">
-          <option value="all">👥 All active users</option>
-          <option value="teachers">👨‍🏫 Teachers only</option>
-          <option value="students">🎓 Students only</option>
+          <option value="all">All active users</option>
+          <option value="teachers">Teachers only</option>
+          <option value="students">Students only</option>
         </select>
       </div>
     </fieldset>
@@ -89,7 +89,7 @@
         background:var(--darkened-bg,#f8f8f8);
         border:1px solid var(--border-color,#ddd);
         border-radius:4px;max-width:380px;">
-        <span id="preview-icon" style="font-size:1.2rem;flex-shrink:0;margin-top:2px;">💡</span>
+        <span id="preview-icon" style="font-size:1.2rem;flex-shrink:0;margin-top:2px;">i</span>
         <div>
           <p id="preview-title" style="font-weight:600;margin:0 0 4px;font-size:.9rem;"></p>
           <p id="preview-msg"   style="color:#666;font-size:.8rem;margin:0 0 6px;line-height:1.4;"></p>
@@ -101,7 +101,7 @@
     <div class="submit-row">
       <input
         type="submit"
-        value="📤 Send Notification"
+        value="Send Notification"
         class="default"
         id="submit-btn"
       >
@@ -123,13 +123,13 @@
   const pTitle    = document.getElementById('preview-title');
   const pMsg      = document.getElementById('preview-msg');
 
-  const ICONS = { info: '💡', success: '✅', warning: '⚠️', danger: '❌' };
+  const ICONS = { info: '[i]', success: '[✓]', warning: '[!]', danger: '[x]' };
 
   function updatePreview() {
     const t = titleEl.value.trim();
     if (!t) { preview.style.display = 'none'; return; }
     preview.style.display = '';
-    pIcon.textContent  = ICONS[typeEl.value] || '💡';
+    pIcon.textContent  = ICONS[typeEl.value] || '[i]';
     pTitle.textContent = t;
     pMsg.textContent   = msgEl.value.trim();
     pMsg.style.display = msgEl.value.trim() ? '' : 'none';
@@ -146,7 +146,7 @@
     if (!confirm(`Send "${title}" to: ${target}?\n\nThis cannot be undone.`)) {
       e.preventDefault();
     } else {
-      submitBtn.value    = '⏳ Sending…';
+      submitBtn.value    = 'Sending…';
       submitBtn.disabled = true;
     }
   });

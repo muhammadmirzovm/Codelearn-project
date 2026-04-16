@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}{% trans "Test Packs" %} – CodeLearn{% endblock %}
+ 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/tests.css' %}">
+{% endblock %}
+ 
+{% block content %}
+<div class="page-hero fade-up">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div>
+      <h1 class="section-title"><i class="bi bi-flask"></i> {% trans "Test Packs" %}</h1>
+      <p class="section-sub">{% if is_teacher %}{% trans "Manage your test packs" %}{% else %}{% trans "Solve global tests and earn coins" %}{% endif %}</p>
+    </div>
+    {% if is_teacher %}
+    <a href="{% url 'tests:create' %}" class="btn btn-primary">＋ {% trans "New Test Pack" %}</a>
+    {% endif %}
+  </div>
+</div>
+ 
+{% if is_teacher %}
+  {% if packs %}
+  <div class="card fade-up-2" style="overflow:hidden;">
+    <div style="overflow-x:auto;">
+      <table class="tbl" style="min-width:520px;">
+        <thead>
+          <tr>
+            <th>{% trans "Title" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Questions" %}</th>
+            <th>{% trans "Coins" %}</th>
+            <th style="text-align:right;">{% trans "Actions" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pack in packs %}
+          <tr>
+            <td style="font-weight:600;">{{ pack.title }}</td>
+            <td>
+              {% if pack.is_global %}
+                <span class="badge" style="background:var(--accent-bg);color:var(--accent);"><i class="bi bi-globe2"></i> {% trans "Global" %}</span>
+              {% else %}
+                <span class="badge" style="background:var(--bg2);color:var(--text-muted);"><i class="bi bi-clipboard"></i> {% trans "Session" %}</span>
+              {% endif %}
+            </td>
+            <td style="font-family:var(--font-mono);font-size:.82rem;">{{ pack.question_count }}</td>
+            <td style="font-family:var(--font-mono);font-size:.82rem;">
+              {% if pack.coin_reward %}<span style="color:#854F0B;">₡ {{ pack.coin_reward }}</span>{% else %}—{% endif %}
+            </td>
+            <td style="text-align:right;">
+              <div style="display:flex;gap:6px;justify-content:flex-end;">
+                <a href="{% url 'tests:questions' pack.pk %}" class="btn btn-ghost btn-sm"><i class="bi bi-pencil-square"></i> {% trans "Questions" %}</a>
+                <a href="{% url 'tests:edit' pack.pk %}" class="btn btn-ghost btn-sm"><i class="bi bi-pencil"></i></a>
+                <a href="{% url 'tests:delete' pack.pk %}" class="btn btn-ghost btn-sm" style="color:var(--danger);"><i class="bi bi-trash"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="card card-p fade-up" style="text-align:center;padding:64px;">
+    <p style="font-size:3rem;margin-bottom:12px;"><i class="bi bi-flask"></i></p>
+    <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">{% trans "No tests yet" %}</p>
+    <a href="{% url 'tests:create' %}" class="btn btn-primary btn-lg">＋ {% trans "Create Test" %}</a>
+  </div>
+  {% endif %}
+ 
+{% else %}
+  {% if test_data %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;" class="fade-up-2">
+    {% for item in test_data %}
+    <div class="card" style="overflow:hidden;">
+      <div style="padding:1.25rem 1.4rem;border-bottom:1px solid var(--border);">
+        <p style="font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;"><i class="bi bi-globe2"></i> {% trans "Global Test" %}</p>
+        <h3 style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:.4rem;">{{ item.pack.title }}</h3>
+        <p style="font-size:.78rem;color:var(--text-muted);">
+          {% blocktrans with count=item.pack.question_count %}{{ count }} questions{% endblocktrans %}
+          {% if item.pack.duration_minutes %} · <i class="bi bi-clock"></i> {{ item.pack.duration_minutes }} min{% endif %}
+          {% if item.pack.coin_reward %} · <span style="color:#854F0B;">₡ +{{ item.pack.coin_reward }}</span>{% endif %}
+        </p>
+      </div>
+      <div style="padding:1rem 1.4rem;">
+        {% if item.attempt and item.attempt.status == 'finished' %}
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+            <span style="font-size:.82rem;color:var(--text-muted);">{% trans "Score" %}: <strong style="color:var(--accent);">{{ item.attempt.score }}/{{ item.attempt.total }}</strong></span>
+            <span class="badge badge-passed">✓ {% trans "Completed" %}</span>
+          </div>
+          <a href="{% url 'tests:join' item.pack.pk %}" class="btn btn-ghost btn-sm" style="width:100%;text-align:center;"><i class="bi bi-arrow-clockwise"></i> {% trans "Try Again" %}</a>
+        {% else %}
+          <a href="{% url 'tests:join' item.pack.pk %}" class="btn btn-primary" style="width:100%;text-align:center;">▶ {% trans "Start" %}</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card card-p fade-up" style="text-align:center;padding:64px;">
+    <p style="font-size:3rem;margin-bottom:12px;"><i class="bi bi-flask"></i></p>
+    <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">{% trans "No global tests yet" %}</p>
+    <p style="color:var(--text-muted);">{% trans "Tests added by teachers will appear here" %}</p>
+  </div>
+  {% endif %}
+{% endif %}
+{% endblock %}

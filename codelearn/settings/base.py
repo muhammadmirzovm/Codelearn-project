@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'apps.journals',
     'apps.support',
     'apps.resources',
+    'apps.tests_app',
 ]
 
 MIDDLEWARE = [

@@ -1,31 +1,107 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
-{% block title %}{% trans "Schedule Session" %} – CodeLearn{% endblock %}
+{% block title %}{% trans "Create Session" %} – CodeLearn{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/sessions.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="max-width:540px;margin:0 auto;">
-  <div class="page-hero fade-up" style="margin-bottom:24px;">
-    <h1 class="section-title">▶ {% trans "Schedule Session" %}</h1>
-    <p class="section-sub">{% trans "Set a task, group, time and optional countdown for your students" %}</p>
+<div class="form-wrap">
+  <div class="fade-up" style="margin-bottom:1.5rem;">
+    <a href="{% url 'sessions:session_list' %}" class="btn btn-ghost btn-sm" style="margin-bottom:.75rem;">← {% trans "Sessions" %}</a>
+    <h1 class="section-title" style="margin-bottom:.3rem;">▶ {% trans "Create Session" %}</h1>
+    <p class="section-sub">{% trans "Start an algorithmic or quiz session for your group" %}</p>
   </div>
-  <div class="card card-p fade-up-2">
-    <form method="post">
-      {% csrf_token %}
-      {% for field in form %}
-      <div class="inp-group">
-        <label class="inp-label">{{ field.label }}</label>
-        {{ field }}
-        {% if field.help_text %}<p class="inp-hint">{{ field.help_text }}</p>{% endif %}
-        {% if field.errors %}<p style="color:var(--danger);font-size:.78rem;margin-top:4px;font-weight:500;">⚠ {{ field.errors|join:" " }}</p>{% endif %}
-      </div>
-      {% endfor %}
-      <div style="background:var(--accent-bg);border:1px solid var(--accent-bgd);border-radius:var(--radius);padding:12px 14px;margin-bottom:18px;font-size:.82rem;color:var(--accent);">
-        💡 <strong>{% trans "Tip:" %}</strong> {% trans "Duration = 0 means unlimited time. Otherwise the timer starts the moment you click Start Session." %}
-      </div>
-      <div style="display:flex;gap:10px;">
-        <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">{% trans "Schedule Session" %} →</button>
-        <a href="{% url 'sessions:session_list' %}" class="btn btn-ghost btn-lg">{% trans "Cancel" %}</a>
-      </div>
-    </form>
+
+  <div class="form-card fade-up-2">
+    <div class="form-card-header">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+      <span style="font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);">{% trans "Session details" %}</span>
+    </div>
+    <div class="form-card-body">
+      <form method="post" novalidate id="session-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div style="background:var(--danger-bg);border:1px solid var(--danger-brd);border-radius:var(--radius);padding:.8rem 1rem;margin-bottom:1rem;font-size:.78rem;color:var(--danger);">
+          <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {{ form.non_field_errors|join:", " }}
+        </div>
+        {% endif %}
+
+        <div class="inp-group">
+          <div class="inp-label">{% trans "Session type" %}</div>
+          <div class="type-selector">
+            <label class="type-option">
+              <input type="radio" name="session_type" value="algorithmic" id="type-algo"
+                {% if not form.session_type.value or form.session_type.value == 'algorithmic' %}checked{% endif %}
+                onchange="switchType('algorithmic')">
+              <div class="type-card">
+                <span class="type-card-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+                <span class="type-card-title">{% trans "Algorithmic" %}</span>
+                <span class="type-card-sub">{% trans "Code a solution to a problem" %}</span>
+              </div>
+            </label>
+            <label class="type-option">
+              <input type="radio" name="session_type" value="quiz" id="type-quiz"
+                {% if form.session_type.value == 'quiz' %}checked{% endif %}
+                onchange="switchType('quiz')">
+              <div class="type-card">
+                <span class="type-card-icon"><i class="bi bi-flask"></i></span>
+                <span class="type-card-title">Quiz</span>
+                <span class="type-card-sub">{% trans "Multiple choice questions (a/b/c/d)" %}</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="field-divider"></div>
+
+        <div class="inp-group">
+          <label class="inp-label" for="{{ form.group.id_for_label }}"><i class="bi bi-people-fill"></i> {% trans "Group" %}</label>
+          {{ form.group }}
+          {% if form.group.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {{ form.group.errors|join:" " }}</p>{% endif %}
+        </div>
+
+        <div class="field-divider"></div>
+
+        <div class="inp-group section-algorithmic" id="section-task">
+          <label class="inp-label" for="{{ form.task.id_for_label }}"><i class="bi bi-lightning-charge-fill"></i> {% trans "Task" %}</label>
+          {{ form.task }}
+          {% if form.task.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {{ form.task.errors|join:" " }}</p>{% endif %}
+        </div>
+
+        <div class="inp-group section-quiz section-hidden" id="section-testpack">
+          <label class="inp-label" for="{{ form.test_pack.id_for_label }}"><i class="bi bi-flask"></i> {% trans "Test Pack" %}</label>
+          {{ form.test_pack }}
+          {% if form.test_pack.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {{ form.test_pack.errors|join:" " }}</p>{% endif %}
+          <p class="inp-hint">{% trans "All teacher-created test packs are shown here" %}</p>
+        </div>
+
+        <div class="field-divider"></div>
+
+        <div class="inp-group">
+          <label class="inp-label" for="{{ form.start_time.id_for_label }}"><i class="bi bi-calendar-event"></i> {% trans "Start time" %}</label>
+          {{ form.start_time }}
+          {% if form.start_time.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {{ form.start_time.errors|join:" " }}</p>{% endif %}
+        </div>
+
+        <div class="inp-group">
+          <label class="inp-label" for="{{ form.duration_minutes.id_for_label }}"><i class="bi bi-clock"></i> {% trans "Duration (minutes)" %}</label>
+          {{ form.duration_minutes }}
+          <p class="inp-hint">{% trans "0 = no time limit. For quiz sessions you can override the test pack's default duration." %}</p>
+          {% if form.duration_minutes.errors %}<p class="inp-error"><i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {{ form.duration_minutes.errors|join:" " }}</p>{% endif %}
+        </div>
+      </form>
+    </div>
+    <div class="form-actions">
+      <button type="submit" form="session-form" class="btn btn-primary btn-lg" style="flex:1;">{% trans "Create Session" %} →</button>
+      <a href="{% url 'sessions:session_list' %}" class="btn btn-ghost btn-lg">{% trans "Cancel" %}</a>
+    </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/sessions.js' %}" defer></script>
 {% endblock %}

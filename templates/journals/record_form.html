@@ -1,47 +1,15 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 {% block title %}{% trans "Grade" %} — {{ lesson.title }}{% endblock %}
-
+ 
 {% block extra_head %}
-<style>
-.grade-row{display:flex;gap:.3rem;flex-wrap:wrap}
-.grade-btn{width:34px;height:34px;border:1.5px solid var(--border);background:transparent;font-family:var(--font-display);font-size:.95rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .15s;border-radius:var(--radius-sm);flex-shrink:0}
-.grade-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
-.grade-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff}
-.attend-label{display:flex;align-items:center;gap:.45rem;cursor:pointer;font-size:.83rem;user-select:none;white-space:nowrap}
-.attend-check{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
-.comment-input{width:100%;border:none;border-bottom:1.5px solid var(--border);background:transparent;font-family:var(--font-body);font-size:.83rem;padding:.25rem 0 .4rem;outline:none;color:var(--text);transition:border-color .15s}
-.comment-input:focus{border-bottom-color:var(--accent)}
-
-/* table scroll wrapper */
-.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.grade-tbl{width:100%;min-width:480px;border-collapse:collapse}
-.grade-tbl th{padding:.65rem 1rem;text-align:left;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg2);white-space:nowrap}
-.grade-tbl td{padding:.75rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
-.grade-tbl tr:last-child td{border-bottom:none}
-.grade-tbl tr:hover td{background:var(--highlight)}
-
-/* mobile card layout — each student becomes a card */
-.record-cards{display:none;flex-direction:column;gap:.75rem}
-.record-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem}
-.record-card-name{font-weight:600;font-size:.92rem;margin-bottom:.75rem;color:var(--text)}
-.record-card-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.65rem}
-.record-card-label{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);min-width:70px}
-.record-card-comment{margin-top:.5rem}
-.record-card-comment .comment-input{font-size:.83rem}
-
-@media(max-width:600px){
-  .tbl-scroll{display:none}
-  .record-cards{display:flex}
-  .form-footer{flex-direction:column;gap:.75rem}
-  .form-footer .btn{width:100%;text-align:center;justify-content:center}
-}
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/journals.css' %}">
 {% endblock %}
-
+ 
 {% block content %}
 <div style="max-width:860px;margin:0 auto;padding:0 .5rem;">
-
+ 
   <div class="page-hero fade-up" style="margin-bottom:20px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
       <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost btn-sm">← {% trans "Journal" %}</a>
@@ -50,11 +18,9 @@
     <p style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:.25rem;">{{ lesson.date|date:"d M Y" }}</p>
     <h1 class="section-title">{{ lesson.title }}</h1>
   </div>
-
+ 
   <form method="post">
     {% csrf_token %}
-
-    <!-- Desktop: table layout -->
     <div class="card fade-up-2" style="overflow:hidden;margin-bottom:16px;">
       <div class="tbl-scroll">
         <table class="grade-tbl">
@@ -69,74 +35,48 @@
           <tbody>
             {% for record in records %}
             <tr>
-              <td style="font-weight:600;white-space:nowrap;">{{ record.student.get_full_name|default:record.student.username }}</td>
+              <td style="font-weight:600;white-space:nowrap;">
+                {{ record.student.get_full_name|default:record.student.username }}
+              </td>
               <td>
-                <input type="hidden" name="grade_{{ record.pk }}" id="grade-hidden-{{ record.pk }}" value="{{ record.grade|default:'0' }}">
+                <input type="hidden"
+                       name="grade_{{ record.pk }}"
+                       id="grade-hidden-{{ record.pk }}"
+                       value="{{ record.grade|default:'0' }}">
                 <div class="grade-row">
                   {% for g in "012345" %}
-                    <button type="button"
-                      class="grade-btn {% if record.grade|stringformat:'s' == g %}selected{% endif %}"
-                      onclick="setGrade({{ record.pk }},'{{ g }}',this)">{{ g }}</button>
+                  <button type="button"
+                    class="grade-btn {% if record.grade|stringformat:'s' == g %}selected{% endif %}"
+                    onclick="setGrade({{ record.pk }},'{{ g }}',this)">{{ g }}</button>
                   {% endfor %}
                 </div>
               </td>
               <td>
                 <label class="attend-label">
-                  <input class="attend-check" type="checkbox" name="attended_{{ record.pk }}" {% if record.attended %}checked{% endif %}>
+                  <input class="attend-check" type="checkbox"
+                         name="attended_{{ record.pk }}"
+                         {% if record.attended %}checked{% endif %}>
                   {% trans "Present" %}
                 </label>
               </td>
               <td>
-                <input class="comment-input" type="text" name="comment_{{ record.pk }}" value="{{ record.comment }}" placeholder="{% trans 'Note...' %}">
+                <input class="comment-input" type="text"
+                       name="comment_{{ record.pk }}"
+                       value="{{ record.comment }}"
+                       placeholder="{% trans 'Note...' %}">
               </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="4" style="padding:2rem;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:.8rem;">{% trans "No students in this group" %}</td>
+              <td colspan="4" style="padding:2rem;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:.8rem;">
+                {% trans "No students in this group" %}
+              </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
-
-    <!-- Mobile: card layout -->
-    <div class="record-cards fade-up-2">
-      {% for record in records %}
-      <div class="record-card">
-        <div class="record-card-name">{{ record.student.get_full_name|default:record.student.username }}</div>
-
-        <div class="record-card-row">
-          <span class="record-card-label">{% trans "Grade" %}</span>
-          <input type="hidden" name="grade_{{ record.pk }}" id="grade-hidden-m-{{ record.pk }}" value="{{ record.grade|default:'0' }}">
-          <div class="grade-row">
-            {% for g in "012345" %}
-              <button type="button"
-                class="grade-btn {% if record.grade|stringformat:'s' == g %}selected{% endif %}"
-                onclick="setGradeMobile({{ record.pk }},'{{ g }}',this)">{{ g }}</button>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div class="record-card-row">
-          <span class="record-card-label">{% trans "Attendance" %}</span>
-          <label class="attend-label">
-            <input class="attend-check" type="checkbox" name="attended_{{ record.pk }}" {% if record.attended %}checked{% endif %}>
-            {% trans "Was present" %}
-          </label>
-        </div>
-
-        <div class="record-card-comment">
-          <input class="comment-input" type="text" name="comment_{{ record.pk }}" value="{{ record.comment }}" placeholder="{% trans 'Note...' %}">
-        </div>
-      </div>
-      {% empty %}
-      <div style="padding:2rem;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:.8rem;border:1px dashed var(--border);border-radius:var(--radius-lg);">
-        {% trans "No students in this group" %}
-      </div>
-      {% endfor %}
-    </div>
-
     <div style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;" class="form-footer">
       <a href="{% url 'journals:detail' group_pk=group_pk %}" class="btn btn-ghost">← {% trans "Cancel" %}</a>
       <button type="submit" class="btn btn-primary btn-lg">{% trans "Save Grades" %} →</button>
@@ -144,18 +84,7 @@
   </form>
 </div>
 {% endblock %}
-
+ 
 {% block extra_js %}
-<script>
-function setGrade(pk, grade, btn) {
-  btn.closest('.grade-row').querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  document.getElementById('grade-hidden-' + pk).value = grade;
-}
-function setGradeMobile(pk, grade, btn) {
-  btn.closest('.grade-row').querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  document.getElementById('grade-hidden-m-' + pk).value = grade;
-}
-</script>
+<script src="{% static 'js/pages/journals.js' %}" defer></script>
 {% endblock %}

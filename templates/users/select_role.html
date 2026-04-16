@@ -1,39 +1,40 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 {% block title %}{% trans "Choose Your Role" %} – CodeLearn{% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/auth.css' %}">
+{% endblock %}
+
 {% block content %}
-<div style="min-height:72vh;display:flex;align-items:center;justify-content:center;">
-  <div style="width:100%;max-width:500px;" class="fade-up">
-    <div style="text-align:center;margin-bottom:28px;">
-      <div style="width:60px;height:60px;background:var(--accent);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(99,102,241,.3);">🎓</div>
-      <h1 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;">{% trans "Who are you?" %}</h1>
-      <p style="color:var(--text-muted);margin-top:4px;">{% trans "Choose your role to get started" %}</p>
+<div class="auth-wrap">
+  <div class="auth-inner auth-inner-wide fade-up">
+
+    <div class="auth-header">
+      <div class="auth-icon auth-icon-primary"><i class="bi bi-mortarboard-fill"></i></div>
+      <h1 class="auth-title">{% trans "Who are you?" %}</h1>
+      <p class="auth-sub">{% trans "Choose your role to get started" %}</p>
     </div>
+
     <div class="card card-p">
       <form method="post">
         {% csrf_token %}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-          <label style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 16px;border:2px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:all .15s;background:var(--surface);text-align:center;" 
-                 onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'"
-                 onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"
-                 onclick="selectRole('teacher', this)">
+        <div class="role-card-grid">
+          <label class="role-card" onclick="selectRole('teacher', this)">
             <input type="radio" name="role" value="teacher" style="display:none;">
-            <span style="font-size:2.5rem;">👨‍🏫</span>
+            <span class="role-card-emoji"><i class="bi bi-person-workspace"></i></span>
             <div>
-              <p style="font-weight:700;font-size:1rem;">{% trans "Teacher" %}</p>
-              <p style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">{% trans "Create & manage groups" %}</p>
+              <p class="role-card-title">{% trans "Teacher" %}</p>
+              <p class="role-card-sub">{% trans "Create & manage groups" %}</p>
             </div>
           </label>
-          <label style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:24px 16px;border:2px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:all .15s;background:var(--surface);text-align:center;"
-                 onmouseover="this.style.borderColor='var(--accent)';this.style.background='var(--accent-bg)'"
-                 onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--surface)'"
-                 onclick="selectRole('student', this)">
+          <label class="role-card" onclick="selectRole('student', this)">
             <input type="radio" name="role" value="student" style="display:none;">
-            <span style="font-size:2.5rem;">🎓</span>
+            <span class="role-card-emoji"><i class="bi bi-mortarboard-fill"></i></span>
             <div>
-              <p style="font-weight:700;font-size:1rem;">{% trans "Student" %}</p>
-              <p style="font-size:.75rem;color:var(--text-muted);margin-top:4px;">{% trans "Join & solve tasks" %}</p>
+              <p class="role-card-title">{% trans "Student" %}</p>
+              <p class="role-card-sub">{% trans "Join & solve tasks" %}</p>
             </div>
           </label>
         </div>
@@ -42,22 +43,11 @@
         </button>
       </form>
     </div>
+
   </div>
 </div>
+{% endblock %}
 
-<script>
-function selectRole(role, el) {
-  document.querySelectorAll('label').forEach(l => {
-    l.style.borderColor = 'var(--border)';
-    l.style.background = 'var(--surface)';
-  });
-  el.style.borderColor = 'var(--accent)';
-  el.style.background = 'var(--accent-bg)';
-  el.querySelector('input').checked = true;
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = false;
-  btn.style.opacity = '1';
-  btn.style.cursor = 'pointer';
-}
-</script>
+{% block extra_js %}
+<script src="{% static 'js/pages/auth.js' %}" defer></script>
 {% endblock %}

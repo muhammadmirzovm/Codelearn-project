@@ -1,37 +1,24 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 {% block title %}{% trans "Monitor" %} – CodeLearn{% endblock %}
 
 {% block extra_head %}
-<style>
-/* countdown — shared with session_join */
-.cd-wrap { display:flex; align-items:center; gap:8px; padding:7px 14px; border-radius:var(--radius); font-weight:700; }
-.cd-ok   { background:var(--success-bg); border:1.5px solid var(--success-brd); color:var(--success); }
-.cd-warn { background:var(--warning-bg); border:1.5px solid var(--warning-brd); color:var(--warning); }
-.cd-crit { background:var(--danger-bg);  border:1.5px solid var(--danger-brd);  color:var(--danger); animation:blink .65s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.45} }
-@keyframes spin  { to{transform:rotate(360deg)} }
-/* toast */
-.toast-msg { position:fixed; bottom:1.25rem; right:1.25rem; padding:.7rem 1.15rem; border-radius:var(--radius); font-size:.82rem; font-family:var(--font-mono); font-weight:500; z-index:9999; opacity:0; transform:translateY(6px); transition:all .25s; pointer-events:none; }
-.toast-msg.show { opacity:1; transform:translateY(0); }
-.toast-s { background:var(--success); color:#fff; }
-.toast-w { background:var(--warning); color:#fff; }
-.toast-e { background:var(--danger);  color:#fff; }
-/* avatar colors */
-.av { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--font-mono); }
-.av-0{background:#7F77DD}.av-1{background:#1D9E75}.av-2{background:#D85A30}.av-3{background:#378ADD}
-.av-4{background:#D4537E}.av-5{background:#BA7517}.av-6{background:#533AB7}.av-7{background:#0F6E56}
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/sessions.css' %}">
 {% endblock %}
 
 {% block content %}
-
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <div>
-        <h1 class="section-title">📡 {% trans "Live Monitor" %}</h1>
-        <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
+        <h1 class="section-title"><i class="bi bi-broadcast"></i> {% trans "Live Monitor" %}</h1>
+        <p class="section-sub">
+          {{ session.group.name }} · {{ session.title }}
+          <span style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);">
+            {% if session.is_quiz %}<i class="bi bi-flask"></i> Quiz{% else %}<i class="bi bi-lightning-charge-fill"></i> Algorithmic{% endif %}
+          </span>
+        </p>
       </div>
       <div id="ws-indicator" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;background:var(--bg2);border:1px solid var(--border);">
         <span id="ws-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-muted);"></span>
@@ -41,53 +28,50 @@
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
       {% if session.duration_minutes and session.activated_at %}
       <div class="cd-wrap cd-ok" id="cd-wrap">
-        <span style="font-size:.75rem;">⏱</span>
-        <span class="mono" id="countdown">--:--</span>
+        <span><i class="bi bi-clock"></i></span>
+        <span id="countdown" style="font-family:var(--font-mono);font-size:1rem;">--:--</span>
       </div>
       {% endif %}
-      <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm">🏆 {% trans "Leaderboard" %}</a>
-      <form method="post" action="{% url 'sessions:deactivate' session.pk %}" style="display:inline;">
+      {% if not session.is_quiz %}
+      <a href="{% url 'sessions:leaderboard' session.pk %}" class="btn btn-ghost btn-sm"><i class="bi bi-trophy-fill"></i> {% trans "Leaderboard" %}</a>
+      {% endif %}
+      <form method="post" action="{% url 'sessions:deactivate' session.pk %}">
         {% csrf_token %}
-        <button class="btn btn-danger btn-sm" onclick="return confirm('{% trans "Close this session?" %}')">■ {% trans "Close Session" %}</button>
+        <button class="btn btn-danger btn-sm" onclick="return confirm('{% trans "Close the session?" %}')">■ {% trans "Close" %}</button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Stats bar -->
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:24px;" class="fade-up-2">
   <div class="stat-card" style="text-align:center;">
-    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-total">{{ student_data|length }}</p>
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);">{{ student_data|length }}</p>
     <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Students" %}</p>
   </div>
   <div class="stat-card" style="text-align:center;border-left:3px solid var(--success);">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--success);" id="s-passed">0</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Passed" %} ✓</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% if session.is_quiz %}{% trans "Finished" %}{% else %}{% trans "Passed" %} ✓{% endif %}</p>
   </div>
   <div class="stat-card" style="text-align:center;border-left:3px solid var(--accent);">
-    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-sub">0</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Submitted" %}</p>
-  </div>
-  <div class="stat-card" style="text-align:center;border-left:3px solid var(--warning);">
-    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--warning);" id="s-run">0</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Working" %}</p>
+    <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--accent);" id="s-active">0</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "In Progress" %}</p>
   </div>
   <div class="stat-card" style="text-align:center;border-left:3px solid var(--border2);">
     <p style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--text-muted);" id="s-idle">{{ student_data|length }}</p>
-    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Idle" %}</p>
+    <p style="font-size:.75rem;color:var(--text-muted);margin-top:2px;">{% trans "Waiting" %}</p>
   </div>
 </div>
 
-<!-- Student table -->
 <div class="card fade-up-3" style="overflow:hidden;">
-  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-    <table class="tbl" style="min-width:500px;">
+  <div style="overflow-x:auto;">
+    <table class="tbl" style="min-width:580px;">
       <thead>
         <tr>
           <th>{% trans "Student" %}</th>
           <th>{% trans "Status" %}</th>
-          <th class="hide-sm">{% trans "Score" %}</th>
-          <th class="hide-sm">{% trans "Last Activity" %}</th>
+          <th>{% trans "Progress" %}</th>
+          {% if session.is_quiz %}<th class="hide-sm">{% trans "Questions" %}</th>{% else %}<th class="hide-sm">{% trans "Score" %}</th>{% endif %}
+          <th class="hide-sm">{% trans "Time" %}</th>
         </tr>
       </thead>
       <tbody id="monitor-body">
@@ -95,7 +79,7 @@
         <tr id="row-{{ item.student.pk }}">
           <td>
             <div style="display:flex;align-items:center;gap:9px;">
-              <div class="av av-{{ forloop.counter0|divisibleby:8|yesno:'0,' }}{{ forloop.counter0 }}">{{ item.student.username|first|upper }}</div>
+              <div class="av av-{{ forloop.counter0 }}">{{ item.student.username|first|upper }}</div>
               <div>
                 <p style="font-weight:600;font-size:.9rem;">{{ item.student.get_full_name|default:item.student.username }}</p>
                 <p style="font-size:.73rem;color:var(--text-muted);font-family:var(--font-mono);">@{{ item.student.username }}</p>
@@ -103,18 +87,46 @@
             </div>
           </td>
           <td id="status-{{ item.student.pk }}">
-            {% if item.submission %}
-              <span class="badge badge-{{ item.submission.status }}">{{ item.submission.get_status_display }}</span>
+            {% if session.is_quiz %}
+              {% if item.attempt %}
+                {% if item.attempt.status == 'finished' %}<span class="badge badge-passed">✓ {% trans "Finished" %}</span>
+                {% else %}<span class="badge badge-active">▶ {% trans "In Progress" %}</span>{% endif %}
+              {% else %}<span class="badge badge-notstarted">{% trans "Waiting" %}</span>{% endif %}
             {% else %}
-              <span class="badge badge-notstarted">{% trans "Not started" %}</span>
+              {% if item.submission %}<span class="badge badge-{{ item.submission.status }}">{{ item.submission.get_status_display }}</span>
+              {% else %}<span class="badge badge-notstarted">{% trans "Not started" %}</span>{% endif %}
             {% endif %}
           </td>
-          <td class="hide-sm" id="score-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.875rem;font-family:var(--font-mono);">
-            {% if item.submission %}{{ item.submission.passed_count }}/{{ item.submission.total_count }}{% else %}—{% endif %}
+          <td id="prog-cell-{{ item.student.pk }}" style="min-width:120px;">
+            {% if session.is_quiz %}
+              <div style="font-family:var(--font-mono);font-size:.75rem;color:var(--text-muted);">
+                <span id="ans-count-{{ item.student.pk }}">{% if item.attempt %}{{ item.attempt.answers.count }}{% else %}0{% endif %}</span>/{{ session.test_pack.questions.count }}
+              </div>
+              <div class="prog-mini">
+                <div class="prog-mini-fill {% if item.attempt and item.attempt.status == 'finished' %}done{% endif %}"
+                     id="prog-fill-{{ item.student.pk }}"
+                     style="width:{% if item.attempt %}{% widthratio item.attempt.answers.count session.test_pack.questions.count 100 %}{% else %}0{% endif %}%;"></div>
+              </div>
+            {% else %}
+              <span style="font-family:var(--font-mono);font-size:.82rem;color:var(--text-muted);" id="score-{{ item.student.pk }}">
+                {% if item.submission %}{{ item.submission.passed_count }}/{{ item.submission.total_count }}{% else %}—{% endif %}
+              </span>
+            {% endif %}
           </td>
-          <td class="hide-sm" id="time-{{ item.student.pk }}" style="color:var(--text-muted);font-size:.78rem;font-family:var(--font-mono);">
-            {% if item.submission %}{{ item.submission.created_at|date:"H:i:s" }}{% else %}—{% endif %}
+          <td class="hide-sm" id="detail-{{ item.student.pk }}">
+            {% if session.is_quiz %}
+            <div class="q-dots" id="dots-{{ item.student.pk }}">
+              {% for q in session.test_pack.questions.all %}
+              <div class="q-dot" id="dot-{{ item.student.pk }}-{{ forloop.counter }}" title="{% trans 'Question' %} {{ forloop.counter }}"></div>
+              {% endfor %}
+            </div>
+            {% else %}
+              <span style="font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);" id="time-{{ item.student.pk }}">
+                {% if item.submission %}{{ item.submission.created_at|date:"H:i:s" }}{% else %}—{% endif %}
+              </span>
+            {% endif %}
           </td>
+          <td class="hide-sm" id="joined-{{ item.student.pk }}" style="font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);">—</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -122,130 +134,21 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast-el" class="toast-msg"></div>
 
 <script type="application/json" id="page-data">
 {
-  "session_pk":    {{ session.pk }},
-  "total":         {{ student_data|length }},
-  "duration_mins": {{ session.duration_minutes|default:0 }},
-  "activated_at":  "{{ session.activated_at.isoformat|default:'' }}",
-  "statuses": [{% for item in student_data %}"{{ item.submission.status|default:'none' }}"{% if not forloop.last %},{% endif %}{% endfor %}]
+  "page":            "monitor",
+  "session_pk":      {{ session.pk }},
+  "is_quiz":         {{ session.is_quiz|yesno:"true,false" }},
+  "total_students":  {{ student_data|length }},
+  "total_questions": {% if session.is_quiz %}{{ session.test_pack.questions.count }}{% else %}0{% endif %},
+  "duration_secs":   {{ session.duration_minutes|default:0 }},
+  "activated_at":    "{{ session.activated_at.isoformat|default:'' }}"
 }
 </script>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-const DATA          = JSON.parse(document.getElementById('page-data').textContent);
-const SESSION_PK    = DATA.session_pk;
-const DURATION_SECS = DATA.duration_mins * 60;
-const ACTIVATED_AT  = DATA.activated_at;
-const total         = DATA.total;
-
-const i18n = {
-  live:         "{% trans 'Live' %}",
-  reconnecting: "{% trans 'Reconnecting' %}",
-  running:      "{% trans '▶ Running…' %}",
-  evaluating:   "{% trans '⏳ Evaluating…' %}",
-  passed:       "{% trans '✓ Passed' %}",
-  failed:       "{% trans '✗ Failed' %}",
-  notStarted:   "{% trans 'Not started' %}",
-};
-
-/* ── Toast ── */
-let _toastTimer = null;
-function _toast(msg, type) {
-  const el = document.getElementById('toast-el');
-  el.textContent = msg;
-  el.className = `toast-msg toast-${type} show`;
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-/* ── Stats ── */
-let nPassed = DATA.statuses.filter(s => s === 'passed').length;
-let nSub    = DATA.statuses.filter(s => s !== 'none' && s !== 'passed').length;
-let nRun    = 0;
-updateStats();
-
-function updateStats() {
-  document.getElementById('s-passed').textContent = nPassed;
-  document.getElementById('s-sub').textContent    = nSub;
-  document.getElementById('s-run').textContent    = nRun;
-  document.getElementById('s-idle').textContent   = Math.max(0, total - nPassed - nSub - nRun);
-}
-
-/* ── Countdown ── */
-if (DURATION_SECS && ACTIVATED_AT) {
-  function updateCD() {
-    const elapsed = (Date.now() - new Date(ACTIVATED_AT).getTime()) / 1000;
-    const rem = Math.max(0, DURATION_SECS - elapsed);
-    const m = Math.floor(rem / 60), s = Math.floor(rem % 60);
-    const el = document.getElementById('countdown'); const wrap = document.getElementById('cd-wrap');
-    if (el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    if (wrap) wrap.className = 'cd-wrap ' + (rem > 120 ? 'cd-ok' : rem > 30 ? 'cd-warn' : 'cd-crit');
-  }
-  updateCD(); setInterval(updateCD, 500);
-}
-
-/* ── WS indicator ── */
-function setWS(ok) {
-  const dot = document.getElementById('ws-dot');
-  const lbl = document.getElementById('ws-label');
-  const ind = document.getElementById('ws-indicator');
-  if (ok) {
-    dot.style.background = 'var(--success)'; lbl.textContent = i18n.live; lbl.style.color = 'var(--success)';
-    ind.style.background = 'var(--success-bg)'; ind.style.borderColor = 'var(--success-brd)';
-  } else {
-    dot.style.background = 'var(--text-muted)'; lbl.textContent = i18n.reconnecting; lbl.style.color = 'var(--text-muted)';
-    ind.style.background = 'var(--bg2)'; ind.style.borderColor = 'var(--border)';
-  }
-}
-
-function nowStr() { return new Date().toTimeString().slice(0, 8); }
-
-function updateRow(sid, badge, flash) {
-  const s = document.getElementById(`status-${sid}`);
-  const t = document.getElementById(`time-${sid}`);
-  if (s) s.innerHTML = badge;
-  if (t) t.textContent = nowStr();
-  if (flash) {
-    const row = document.getElementById(`row-${sid}`);
-    if (row) { row.style.transition = 'background .15s'; row.style.background = flash; setTimeout(() => row.style.background = '', 1500); }
-  }
-}
-
-/* ── WebSocket with auto-reconnect ── */
-function connectWS() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  const ws = new WebSocket(`${proto}://${location.host}/ws/session/${SESSION_PK}/`);
-
-  ws.onopen  = () => setWS(true);
-  ws.onclose = () => { setWS(false); setTimeout(connectWS, 3000); };
-  ws.onerror = (e) => console.warn('[WS monitor] error', e);
-
-  ws.onmessage = e => {
-    const msg = JSON.parse(e.data); const d = msg.data; const sid = d.student_id;
-    if (msg.event === 'ran_example') {
-      nRun++; updateStats();
-      updateRow(sid, `<span class="badge badge-running">${i18n.running}</span>`, 'rgba(13,148,136,.07)');
-    } else if (msg.event === 'submitted') {
-      nRun = Math.max(0, nRun - 1); nSub++; updateStats();
-      updateRow(sid, `<span class="badge badge-pending">${i18n.evaluating}</span>`, 'rgba(13,148,136,.05)');
-    } else if (msg.event === 'submission_result') {
-      nSub = Math.max(0, nSub - 1);
-      if (d.is_correct) nPassed++;
-      updateStats();
-      const badge = d.is_correct
-        ? `<span class="badge badge-passed">${i18n.passed}</span>`
-        : `<span class="badge badge-failed">${i18n.failed}</span>`;
-      updateRow(sid, badge, d.is_correct ? 'rgba(5,150,105,.07)' : 'rgba(220,38,38,.06)');
-      if (d.is_correct) _toast(`✓ ${d.username || 'Student'} passed!`, 's');
-    }
-  };
-}
-connectWS();
-</script>
+<script src="{% static 'js/pages/sessions.js' %}" defer></script>
 {% endblock %}

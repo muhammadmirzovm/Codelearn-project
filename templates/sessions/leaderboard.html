@@ -1,120 +1,139 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 {% block title %}{% trans "Leaderboard" %} – CodeLearn{% endblock %}
-{% block content %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/sessions.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <div>
-      <h1 class="section-title">🏆 {% trans "Leaderboard" %}</h1>
-      <p class="section-sub">{{ session.group.name }} · {{ session.task.title }}</p>
+      <h1 class="section-title"><i class="bi bi-trophy-fill"></i> {% trans "Leaderboard" %}</h1>
+      <p class="section-sub">
+        {{ session.group.name }} · {{ session.title }}
+        <span style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);">
+          {% if session.is_quiz %}· <i class="bi bi-flask"></i> Quiz{% else %}· <i class="bi bi-lightning-charge-fill"></i> Algorithmic{% endif %}
+        </span>
+      </p>
     </div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      {% if session.is_active %}<span class="badge badge-active"><span class="live-dot pulse" style="width:6px;height:6px;margin-right:2px;"></span> {% trans "Live" %}</span>{% endif %}
-      {% if user.is_student and session.is_active %}<a href="{% url 'sessions:join' session.pk %}" class="btn btn-success btn-sm">▶ {% trans "Back to coding" %}</a>{% endif %}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      {% if session.is_active %}
+        <span class="badge badge-active">
+          <span class="live-dot pulse" style="width:6px;height:6px;margin-right:2px;"></span>
+          {% trans "Live" %}
+        </span>
+        {% if user.is_student %}
+          <a href="{% url 'sessions:join' session.pk %}" class="btn btn-success btn-sm">▶ {% trans "Back to session" %}</a>
+        {% endif %}
+      {% endif %}
+      <a href="{% url 'sessions:session_list' %}" class="btn btn-ghost btn-sm">← {% trans "Sessions" %}</a>
     </div>
   </div>
 </div>
 
 {% if board %}
 <div style="display:flex;justify-content:center;gap:12px;margin-bottom:28px;align-items:flex-end;flex-wrap:wrap;" class="fade-up-2">
-  {% for e in board|slice:":3" %}
-  {% if e.passed %}
-  <div style="text-align:center;">
-    <div style="font-size:{% if forloop.counter == 1 %}2.5{% else %}1.8{% endif %}rem;margin-bottom:6px;">{% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}</div>
-    <div style="background:var(--surface);border:{% if forloop.counter == 1 %}2.5px solid #fbbf24{% elif forloop.counter == 2 %}2px solid #94a3b8{% else %}2px solid #cd7c2f{% endif %};border-radius:var(--radius-lg);padding:12px 20px;min-width:120px;box-shadow:var(--shadow-md);">
-      <div class="ac-0" style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;margin:0 auto 8px;font-family:var(--font-mono);">{{ e.student.username|first|upper }}</div>
+  {% for e in board|slice:":3" %}{% if e.passed %}
+  <div style="animation-delay:{{ forloop.counter0 }}00ms;">
+    <div style="font-size:{% if forloop.counter == 1 %}2.5{% else %}1.8{% endif %}rem;margin-bottom:6px;text-align:center;">
+      {% if forloop.counter == 1 %}<i class="bi bi-trophy-fill" style="color:#d97706"></i>{% elif forloop.counter == 2 %}<i class="bi bi-trophy-fill" style="color:#94a3b8"></i>{% else %}<i class="bi bi-trophy-fill" style="color:#b45309"></i>{% endif %}
+    </div>
+    <div class="podium-card podium-{{ forloop.counter }}">
+      <div style="width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;margin:0 auto 8px;font-family:var(--font-mono);">
+        {{ e.student.username|first|upper }}
+      </div>
       <p style="font-weight:700;font-size:.85rem;">{{ e.student.get_full_name|default:e.student.username }}</p>
-      {% if e.submitted_at %}<p style="font-size:.72rem;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">{{ e.submitted_at|date:"H:i:s" }}</p>{% endif %}
+      {% if session.is_quiz and e.score is not None %}
+      <p style="font-size:.75rem;color:var(--accent);font-weight:600;margin-top:2px;">{{ e.score }}/{{ e.total }}</p>
+      {% endif %}
+      {% if e.submitted_at %}
+      <p style="font-size:.72rem;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">{{ e.submitted_at|date:"H:i:s" }}</p>
+      {% endif %}
     </div>
   </div>
-  {% endif %}
-  {% endfor %}
+  {% endif %}{% endfor %}
 </div>
 {% endif %}
 
 <div class="card fade-up-3" style="overflow:hidden;">
-  <table class="tbl" id="lb-table">
-    <thead>
-      <tr>
-        <th style="width:52px;text-align:center;">#</th>
-        <th>{% trans "Student" %}</th>
-        <th>{% trans "Status" %}</th>
-        <th class="hide-sm">{% trans "Attempts" %}</th>
-        <th class="hide-sm">{% trans "Time" %}</th>
-      </tr>
-    </thead>
-    <tbody id="lb-body">
-      {% for e in board %}
-      <tr style="{% if e.passed %}background:var(--success-bg);{% endif %}">
-        <td style="text-align:center;font-weight:700;font-family:var(--font-mono);color:{% if forloop.counter == 1 and e.passed %}#d97706{% elif forloop.counter == 2 and e.passed %}#64748b{% elif forloop.counter == 3 and e.passed %}#b45309{% else %}var(--text-muted){% endif %};">
-          {% if forloop.counter == 1 and e.passed %}🥇{% elif forloop.counter == 2 and e.passed %}🥈{% elif forloop.counter == 3 and e.passed %}🥉{% else %}{{ forloop.counter }}{% endif %}
-        </td>
-        <td>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="ac-0" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:var(--font-mono);">{{ e.student.username|first|upper }}</div>
-            <span style="font-weight:600;">{{ e.student.get_full_name|default:e.student.username }}</span>
-          </div>
-        </td>
-        <td>
-          {% if e.passed %}<span class="badge badge-passed">✓ {% trans "Passed" %}</span>
-          {% elif e.attempts %}<span class="badge badge-running">{% trans "Working…" %}</span>
-          {% else %}<span class="badge badge-notstarted">{% trans "Not started" %}</span>{% endif %}
-        </td>
-        <td class="hide-sm" style="color:var(--text-muted);font-family:var(--font-mono);">{{ e.attempts }}</td>
-        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">
-          {% if e.submitted_at %}{{ e.submitted_at|date:"H:i:s" }}{% else %}—{% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% if not board %}
-  <div style="text-align:center;padding:60px;color:var(--text-muted);">
-    <p style="font-size:2.5rem;margin-bottom:8px;">👀</p>
-    <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;">{% trans "No submissions yet" %}</p>
+  <div style="overflow-x:auto;">
+    <table class="tbl" style="min-width:400px;">
+      <thead>
+        <tr>
+          <th style="width:52px;text-align:center;">#</th>
+          <th>{% trans "Student" %}</th>
+          <th>{% trans "Status" %}</th>
+          {% if session.is_quiz %}<th class="hide-sm">{% trans "Score" %}</th>
+          {% else %}<th class="hide-sm">{% trans "Attempts" %}</th>{% endif %}
+          <th class="hide-sm">{% trans "Time" %}</th>
+        </tr>
+      </thead>
+      <tbody id="lb-body">
+        {% for e in board %}
+        <tr class="lb-row {% if e.passed %}passed{% endif %} {% if e.student == request.user %}me{% endif %}" id="lb-row-{{ e.student.pk }}">
+          <td style="text-align:center;font-weight:700;font-family:var(--font-mono);color:{% if forloop.counter == 1 and e.passed %}#d97706{% elif forloop.counter == 2 and e.passed %}#64748b{% elif forloop.counter == 3 and e.passed %}#b45309{% else %}var(--text-muted){% endif %};">
+            {% if forloop.counter == 1 and e.passed %}<i class="bi bi-trophy-fill" style="color:#d97706"></i>{% elif forloop.counter == 2 and e.passed %}<i class="bi bi-trophy-fill" style="color:#94a3b8"></i>{% elif forloop.counter == 3 and e.passed %}<i class="bi bi-trophy-fill" style="color:#b45309"></i>{% else %}{{ forloop.counter }}{% endif %}
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:var(--font-mono);flex-shrink:0;">{{ e.student.username|first|upper }}</div>
+              <span style="font-weight:600;">
+                {{ e.student.get_full_name|default:e.student.username }}
+                {% if e.student == request.user %}<span style="color:var(--accent);font-size:.72rem;">({% trans "you" %})</span>{% endif %}
+              </span>
+            </div>
+          </td>
+          <td>
+            {% if e.passed %}<span class="badge badge-passed">✓ {% trans "Passed" %}</span>
+            {% elif e.attempts %}<span class="badge badge-running">{% trans "Working…" %}</span>
+            {% else %}<span class="badge badge-notstarted">{% trans "Not started" %}</span>{% endif %}
+          </td>
+          <td class="hide-sm" style="color:var(--text-muted);font-family:var(--font-mono);">
+            {% if session.is_quiz %}{% if e.score is not None %}{{ e.score }}/{{ e.total }}{% else %}—{% endif %}
+            {% else %}{{ e.attempts }}{% endif %}
+          </td>
+          <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">
+            {% if e.submitted_at %}{{ e.submitted_at|date:"H:i:s" }}{% else %}—{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center;padding:60px;color:var(--text-muted);">
+            <p style="font-size:2.5rem;margin-bottom:8px;"><i class="bi bi-eye-fill"></i></p>
+            <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;">{% trans "No submissions yet" %}</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  {% endif %}
 </div>
+
+<div id="toast-el" class="toast-msg"></div>
+
+<script type="application/json" id="page-data">
+{
+  "page":        "leaderboard",
+  "session_pk":  {{ session.pk }},
+  "is_active":   {{ session.is_active|yesno:"true,false" }},
+  "is_quiz":     {{ session.is_quiz|yesno:"true,false" }},
+  "lang":        "/{{ LANGUAGE_CODE }}",
+  "my_username": "{{ request.user.username }}",
+  "i18n": {
+    "passed":      "{% trans 'Passed' %}",
+    "working":     "{% trans 'Working…' %}",
+    "notStarted":  "{% trans 'Not started' %}",
+    "you":         "{% trans 'you' %}",
+    "finished":    "{% trans 'finished' %}",
+    "sessionEnded":"{% trans 'Session ended — final results' %}"
+  }
+}
+</script>
 {% endblock %}
 
 {% block extra_js %}
-{% if session.is_active %}
-<script>
-const i18n = {
-  passed:     "{% trans 'Passed' %}",
-  working:    "{% trans 'Working…' %}",
-  notStarted: "{% trans 'Not started' %}",
-};
-
-async function refresh() {
-  try {
-    const r = await fetch('/api/leaderboard/{{ session.pk }}/');
-    if (!r.ok) return;
-    const d = await r.json();
-    const medals = ['🥇','🥈','🥉'];
-    const mColors = ['#d97706','#64748b','#b45309'];
-    document.getElementById('lb-body').innerHTML = d.board.map((e,i) => {
-      const medal  = (i<3&&e.passed) ? medals[i] : (i+1);
-      const mColor = (i<3&&e.passed) ? mColors[i] : 'var(--text-muted)';
-      const rowBg  = e.passed ? 'background:var(--success-bg);' : '';
-      const badge  = e.passed
-        ? `<span class="badge badge-passed">✓ ${i18n.passed}</span>`
-        : e.attempts
-          ? `<span class="badge badge-running">${i18n.working}</span>`
-          : `<span class="badge badge-notstarted">${i18n.notStarted}</span>`;
-      const time = e.submitted_at ? new Date(e.submitted_at).toTimeString().slice(0,8) : '—';
-      return `<tr style="${rowBg}">
-        <td style="text-align:center;font-weight:700;color:${mColor};font-family:var(--font-mono);">${medal}</td>
-        <td><div style="display:flex;align-items:center;gap:8px;"><div class="ac-0" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;">${e.username[0].toUpperCase()}</div><span style="font-weight:600;">${e.username}</span></div></td>
-        <td>${badge}</td>
-        <td class="hide-sm" style="color:var(--text-muted);font-family:var(--font-mono);">${e.attempts}</td>
-        <td class="hide-sm" style="font-size:.8rem;color:var(--text-muted);font-family:var(--font-mono);">${time}</td>
-      </tr>`;
-    }).join('');
-  } catch(e){}
-}
-setInterval(refresh, 4000);
-</script>
-{% endif %}
+<script src="{% static 'js/pages/sessions.js' %}" defer></script>
 {% endblock %}

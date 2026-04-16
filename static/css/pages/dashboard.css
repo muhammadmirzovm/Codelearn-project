@@ -1,0 +1,144 @@
+/* ═══════════════════════════════════════════════════════════════
+   dashboard.css — Student & Teacher Dashboard
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Custom dashboard toast (lighter than global toast) ──────── */
+.toast-msg {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  max-width: 340px;
+  padding: .8rem 1.1rem;
+  border-radius: var(--radius);
+  font-size: .82rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all .3s;
+  pointer-events: none;
+}
+.toast-msg.show { opacity: 1; transform: translateY(0); }
+.toast-msg.toast-s { background: var(--success); color: #fff; }
+.toast-msg.toast-w { background: var(--warning); color: #fff; }
+
+/* ── Session card entrance animation ─────────────────────────── */
+.session-card-enter { animation: slideIn .35s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-12px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── Active sessions banner ──────────────────────────────────── */
+.active-sessions-banner {
+  background: var(--success-bg);
+  border: 1.5px solid var(--success-brd);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+}
+.active-sessions-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.active-sessions-title {
+  font-weight: 700;
+  color: var(--success);
+  font-size: .95rem;
+  font-family: var(--font-mono);
+}
+.sessions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+/* ── Session card ────────────────────────────────────────────── */
+.session-card {
+  background: var(--surface);
+  border: 1.5px solid var(--success-brd);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+.session-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: .3rem;
+}
+.session-card-type {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  color: var(--text-muted);
+}
+.session-card-duration {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  color: var(--text-muted);
+}
+.session-card-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: .3rem;
+}
+.session-card-group {
+  font-size: .78rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+}
+.session-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── No sessions card ────────────────────────────────────────── */
+.no-sessions-card {
+  text-align: center;
+}
+.no-sessions-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+.no-sessions-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.no-sessions-sub { color: var(--text-muted); font-size: .875rem; }
+
+/* ── Dashboard cards grid ────────────────────────────────────── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* ── Group member avatars row ────────────────────────────────── */
+.member-avatars { display: flex; flex-wrap: wrap; gap: 4px; }
+.member-avatar-sm {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  border: 2px solid var(--surface);
+}
+.member-avatar-overflow {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}{% trans "Delete Test" %} – {{ pack.title }}{% endblock %}
+ 
+{% block content %}
+<div style="max-width:480px;margin:0 auto;">
+  <div class="page-hero fade-up" style="margin-bottom:24px;">
+    <a href="{% url 'tests:list' %}" class="btn btn-ghost btn-sm" style="margin-bottom:.75rem;">← {% trans "Tests" %}</a>
+    <h1 class="section-title" style="color:var(--danger);">{% trans "Delete Test" %}</h1>
+  </div>
+  <div class="card card-p fade-up-2" style="border-color:var(--danger-brd);text-align:center;">
+    <div style="font-size:2.5rem;margin-bottom:1rem;"><i class="bi bi-trash" style="color:var(--danger);"></i></div>
+    <p style="font-size:.95rem;margin-bottom:.5rem;">{% trans "Are you sure you want to delete this test?" %}</p>
+    <p style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;margin-bottom:.4rem;">{{ pack.title }}</p>
+    <p style="font-family:var(--font-mono);font-size:.75rem;color:var(--text-muted);margin-bottom:1.5rem;">
+      {{ pack.question_count }} {% trans "questions" %} · {{ pack.sessions.count }} {% trans "results will also be deleted" %}
+    </p>
+    <div style="background:var(--danger-bg);border:1px solid var(--danger-brd);border-radius:var(--radius);padding:.75rem 1rem;font-size:.8rem;color:var(--danger);margin-bottom:1.5rem;">
+      <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i> {% trans "This action cannot be undone!" %}
+    </div>
+    <form method="post" style="display:flex;gap:10px;">
+      {% csrf_token %}
+      <button type="submit" class="btn" style="flex:1;background:var(--danger);color:#fff;border-color:var(--danger);">{% trans "Yes, Delete" %}</button>
+      <a href="{% url 'tests:list' %}" class="btn btn-ghost" style="flex:1;text-align:center;">{% trans "Cancel" %}</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

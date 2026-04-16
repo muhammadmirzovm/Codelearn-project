@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}{% trans "Results" %} – {{ pack.title }}{% endblock %}
+ 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/tests.css' %}">
+{% endblock %}
+ 
+{% block content %}
+<div id="confetti-wrap"></div>
+<div style="max-width:680px;margin:0 auto;">
+ 
+  <div class="result-hero card" style="margin-bottom:1.5rem;">
+    <div class="rank-badge rank-{% if rank <= 3 %}{{ rank }}{% else %}other{% endif %}">
+      {% if rank == 1 %}<i class="bi bi-trophy-fill" style="color:#d97706;font-size:1.5rem;"></i>{% elif rank == 2 %}<i class="bi bi-trophy-fill" style="color:#94a3b8;font-size:1.5rem;"></i>{% elif rank == 3 %}<i class="bi bi-trophy-fill" style="color:#b45309;font-size:1.5rem;"></i>{% else %}#{{ rank }}{% endif %}
+    </div>
+    <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:700;margin-bottom:.4rem;">
+      {% if rank == 1 %}{% trans "Congratulations!" %} <i class="bi bi-stars" style="color:#0d9488;"></i>
+      {% elif rank <= 3 %}{% trans "Great result!" %} <i class="bi bi-hand-thumbs-up-fill" style="color:#0d9488;"></i>
+      {% else %}{% trans "Good effort!" %} <i class="bi bi-emoji-smile-fill" style="color:#0d9488;"></i>{% endif %}
+    </h1>
+    <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:1.5rem;">{{ pack.title }}</p>
+    <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;">
+      <div style="text-align:center;">
+        <p style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--accent);line-height:1;">{{ session.score }}/{{ session.total }}</p>
+        <p style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-mono);">{% trans "CORRECT ANSWERS" %}</p>
+      </div>
+      <div style="text-align:center;">
+        <p style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--success);line-height:1;">{{ session.percentage }}%</p>
+        <p style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-mono);">{% trans "SCORE" %}</p>
+      </div>
+      {% if session.time_taken_seconds %}
+      <div style="text-align:center;">
+        <p style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--text);line-height:1;">{{ session.time_taken_seconds }}s</p>
+        <p style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-mono);">{% trans "TIME" %}</p>
+      </div>
+      {% endif %}
+    </div>
+    {% if session.coins_awarded %}
+    <div style="margin-top:1.25rem;padding:.75rem 1.25rem;background:#FAEEDA;border-radius:var(--radius-lg);display:inline-flex;align-items:center;gap:.5rem;color:#633806;font-weight:600;font-size:.88rem;">
+      <svg width="20" height="20" viewBox="0 0 72 72"><circle cx="36" cy="36" r="34" fill="#EF9F27"/><circle cx="36" cy="36" r="27" fill="#FAC775"/><text x="36" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="28" font-weight="700" fill="#854F0B">₡</text></svg>
+      +{{ pack.coin_reward }} {% trans "coins added!" %}
+    </div>
+    {% endif %}
+  </div>
+ 
+  <div class="card fade-up-2" style="overflow:hidden;margin-bottom:1.5rem;">
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--bg2);">
+      <span style="font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);"><i class="bi bi-trophy-fill"></i> {% trans "Leaderboard" %}</span>
+    </div>
+    {% for s in sessions %}
+    <div class="leaderboard-row {% if s.student == request.user %}me{% endif %}" style="animation-delay:{{ forloop.counter0 }}00ms;">
+      <div class="rank-num">
+        {% if forloop.counter == 1 %}<i class="bi bi-trophy-fill" style="color:#d97706;"></i>{% elif forloop.counter == 2 %}<i class="bi bi-trophy-fill" style="color:#94a3b8;"></i>{% elif forloop.counter == 3 %}<i class="bi bi-trophy-fill" style="color:#b45309;"></i>{% else %}#{{ forloop.counter }}{% endif %}
+      </div>
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">
+        {{ s.student.username|first|upper }}
+      </div>
+      <div class="score-bar-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:600;font-size:.88rem;">
+            {{ s.student.get_full_name|default:s.student.username }}
+            {% if s.student == request.user %}<span style="color:var(--accent);font-size:.72rem;">({% trans "you" %})</span>{% endif %}
+          </span>
+          <span style="font-family:var(--font-mono);font-size:.82rem;color:var(--accent);font-weight:700;">{{ s.score }}/{{ s.total }}</span>
+        </div>
+        <div class="score-bar">
+          <div class="score-bar-fill" style="width:{{ s.percentage }}%;background:{% if forloop.counter == 1 %}#EF9F27{% elif forloop.counter == 2 %}#B4B2A9{% elif forloop.counter == 3 %}#D85A30{% else %}var(--accent){% endif %};"></div>
+        </div>
+      </div>
+      {% if s.time_taken_seconds %}
+      <span style="font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);white-space:nowrap;">{{ s.time_taken_seconds }}s</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+ 
+  <div class="fade-up-3">
+    <div style="font-family:var(--font-mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.75rem;"><i class="bi bi-clipboard"></i> {% trans "Question Review" %}</div>
+    {% for item in question_results %}
+    <div class="q-review-card {% if not item.answer %}skipped{% elif item.is_correct %}correct{% else %}wrong{% endif %}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:.6rem;">
+        <p style="font-weight:600;font-size:.88rem;line-height:1.4;">{{ forloop.counter }}. {{ item.question.text }}</p>
+        {% if not item.answer %}
+          <span style="color:var(--text-muted);font-size:.75rem;flex-shrink:0;">{% trans "Not answered" %}</span>
+        {% elif item.is_correct %}
+          <span style="color:var(--success);font-size:1.2rem;flex-shrink:0;"><i class="bi bi-check-circle-fill"></i></span>
+        {% else %}
+          <span style="color:var(--danger);font-size:1.2rem;flex-shrink:0;"><i class="bi bi-x-circle-fill"></i></span>
+        {% endif %}
+      </div>
+      {% for choice in item.question.choices.all %}
+      <div class="choice-result
+        {% if choice.is_correct %}correct-ans
+        {% elif item.chosen_choice and item.chosen_choice.pk == choice.pk %}wrong-ans
+        {% else %}normal{% endif %}">
+        <span style="font-weight:700;font-family:var(--font-mono);">{{ choice.label }}</span>
+        <span>{{ choice.text }}</span>
+        {% if choice.is_correct %}
+          <span style="margin-left:auto;">✓ {% trans "Correct answer" %}</span>
+        {% elif item.chosen_choice and item.chosen_choice.pk == choice.pk %}
+          <span style="margin-left:auto;font-size:.72rem;">← {% trans "Your answer" %}</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+ 
+  <div style="display:flex;gap:10px;margin-top:1.5rem;flex-wrap:wrap;">
+    <a href="{% url 'tests:list' %}" class="btn btn-primary" style="flex:1;text-align:center;">← {% trans "Back to Tests" %}</a>
+  </div>
+</div>
+ 
+{# rank data for confetti ── #}
+<span id="result-rank" data-rank="{{ rank }}" hidden></span>
+{% endblock %}
+ 
+{% block extra_js %}
+<script src="{% static 'js/pages/tests.js' %}" defer></script>
+{% endblock %}

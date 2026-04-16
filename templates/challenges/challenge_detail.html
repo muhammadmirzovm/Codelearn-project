@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load i18n %}
-
 {% block title %}{{ task.title }} — {% trans 'CodeLearn' %}{% endblock %}
 
 {% block codemirror %}
@@ -15,166 +15,21 @@
 {% endblock %}
 
 {% block extra_head %}
-<style>
-/* ── Layout ─────────────────────────────────────────────────────────────── */
-.challenge-wrap {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
-}
-@media (max-width: 900px) {
-  .challenge-wrap { grid-template-columns: 1fr; }
-}
-
-/* ── Panel shared ────────────────────────────────────────────────────────── */
-.panel {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); overflow: hidden;
-}
-.panel-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 18px; border-bottom: 1px solid var(--border);
-  background: var(--bg2); gap: 10px; flex-wrap: wrap;
-}
-.panel-title { font-size: .82rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 7px; }
-.panel-body  { padding: 18px; }
-
-/* ── Breadcrumb + title ──────────────────────────────────────────────────── */
-.bc { font-size: .78rem; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
-.bc a { color: var(--accent); text-decoration: none; }
-.bc a:hover { text-decoration: underline; }
-.task-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
-.task-main-title { font-size: 1.3rem; font-weight: 700; color: var(--text); }
-
-.badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 99px; font-size: .68rem; font-weight: 700; font-family: var(--font-mono); }
-.badge-easy   { background: rgba(34,197,94,.12);  color: #16a34a; border: 1px solid rgba(34,197,94,.25); }
-.badge-medium { background: rgba(234,179,8,.12);  color: #b45309; border: 1px solid rgba(234,179,8,.25); }
-.badge-hard   { background: rgba(239,68,68,.12);  color: #dc2626; border: 1px solid rgba(239,68,68,.25); }
-.badge-coin   { background: rgba(250,204,21,.15); color: #92400e; border: 1px solid rgba(250,204,21,.3); gap: 4px; }
-.badge-solved { background: rgba(34,197,94,.12);  color: #16a34a; border: 1px solid rgba(34,197,94,.25); }
-
-/* ── Problem description ─────────────────────────────────────────────────── */
-.prose { font-size: .88rem; line-height: 1.7; color: var(--text); }
-.prose pre {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 10px 14px; overflow-x: auto;
-  font-family: var(--font-mono); font-size: .82rem; margin: 10px 0;
-}
-.prose code {
-  background: var(--bg2); border-radius: 4px;
-  padding: 2px 6px; font-family: var(--font-mono); font-size: .83em;
-}
-
-.example-box {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--radius); margin: 12px 0;
-}
-.example-label {
-  padding: 6px 12px; font-size: .7rem; font-weight: 700;
-  font-family: var(--font-mono); letter-spacing: .08em; text-transform: uppercase;
-  color: var(--text-muted); border-bottom: 1px solid var(--border);
-}
-.example-data { padding: 10px 12px; font-family: var(--font-mono); font-size: .82rem; color: var(--text); white-space: pre-wrap; }
-
-/* ── Code editor ─────────────────────────────────────────────────────────── */
-.lang-select {
-  padding: 5px 10px; border: 1.5px solid var(--border);
-  border-radius: var(--radius); background: var(--surface);
-  color: var(--text); font-size: .8rem; font-family: var(--font-mono);
-  cursor: pointer; outline: none;
-}
-.lang-select:focus { border-color: var(--accent); }
-.CodeMirror { height: 360px !important; font-size: .85rem !important; border-radius: 0 0 var(--radius) var(--radius); }
-
-.editor-actions {
-  display: flex; gap: 8px; padding: 12px 16px;
-  border-top: 1px solid var(--border); background: var(--bg2);
-  flex-wrap: wrap; align-items: center; justify-content: space-between;
-}
-.btn-run {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: var(--radius);
-  border: 1.5px solid var(--border); background: var(--surface);
-  color: var(--text); font-size: .83rem; font-weight: 600;
-  cursor: pointer; transition: all .15s;
-}
-.btn-run:hover { border-color: var(--accent); color: var(--accent); }
-.btn-submit {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 20px; border-radius: var(--radius);
-  background: var(--accent); border: none; color: #fff;
-  font-size: .83rem; font-weight: 700; cursor: pointer; transition: all .15s;
-}
-.btn-submit:hover   { opacity: .88; }
-.btn-submit:disabled, .btn-run:disabled { opacity: .5; cursor: not-allowed; }
-
-/* ── Results ─────────────────────────────────────────────────────────────── */
-#results-panel { display: none; }
-.result-row {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 10px 14px; border-bottom: 1px solid var(--border);
-  font-size: .82rem;
-}
-.result-row:last-child { border-bottom: none; }
-.result-status { font-weight: 700; flex-shrink: 0; width: 20px; text-align: center; }
-.result-pass { color: #22c55e; }
-.result-fail { color: #ef4444; }
-.result-data { font-family: var(--font-mono); font-size: .78rem; color: var(--text-muted); flex: 1; }
-.result-data span { display: block; }
-
-.verdict-banner {
-  padding: 14px 18px; border-radius: var(--radius);
-  font-size: .9rem; font-weight: 700; margin-bottom: 14px;
-  display: flex; align-items: center; gap: 10px;
-}
-.verdict-pass { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: #16a34a; }
-.verdict-fail { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25); color: #dc2626; }
-
-.spinner {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,.4);
-  border-top-color: #fff; border-radius: 50%;
-  animation: spin .6s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Previous submissions ────────────────────────────────────────────────── */
-.sub-row {
-  display: flex; align-items: center; gap: 10px; padding: 8px 14px;
-  border-bottom: 1px solid var(--border); font-size: .8rem;
-}
-.sub-row:last-child { border-bottom: none; }
-.sub-status { font-family: var(--font-mono); font-weight: 700; font-size: .72rem; padding: 2px 7px; border-radius: 99px; }
-.s-passed { background: rgba(34,197,94,.12); color: #16a34a; }
-.s-failed { background: rgba(239,68,68,.1);  color: #dc2626; }
-.s-pending, .s-running { background: rgba(234,179,8,.1); color: #b45309; }
-.s-error  { background: rgba(107,114,128,.12); color: var(--text-muted); }
-.sub-meta { color: var(--text-muted); }
-
-.solved-banner {
-  padding: 12px 16px; border-radius: var(--radius);
-  background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.25);
-  color: #16a34a; font-size: .85rem; font-weight: 600;
-  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
-}
-</style>
+<link rel="stylesheet" href="{% static 'css/pages/challenges.css' %}">
 {% endblock %}
 
 {% block content %}
-{# Breadcrumb #}
 <nav class="bc">
-  <a href="{% url 'tasks:challenge_list' %}">🏆 {% trans 'Challenges' %}</a>
+  <a href="{% url 'tasks:challenge_list' %}"><i class="bi bi-trophy-fill"></i> {% trans 'Challenges' %}</a>
   <span>›</span>
   <span>{{ task.title }}</span>
 </nav>
 
-{# Title row #}
 <div class="task-title-row">
   <span class="task-main-title">{{ task.title }}</span>
   <span class="badge badge-{{ task.difficulty }}">{{ task.get_difficulty_display }}</span>
   {% if task.coin_reward %}
-  <span class="badge badge-coin">🪙 {{ task.coin_reward }} {% trans 'coins' %}</span>
+  <span class="badge badge-coin"><i class="bi bi-coin" style="color:#854F0B;"></i> {{ task.coin_reward }} {% trans 'coins' %}</span>
   {% endif %}
   {% if solve_record %}
   <span class="badge badge-solved">✓ {% trans 'Solved' %}</span>
@@ -183,19 +38,19 @@
 
 {% if solve_record %}
 <div class="solved-banner">
-  ✅ {% blocktrans with coins=solve_record.coins_awarded %}You already solved this and earned {{ coins }} coins!{% endblocktrans %}
+  <i class="bi bi-check-circle-fill" style="color:#16a34a;"></i> {% blocktrans with coins=solve_record.coins_awarded %}You already solved this and earned {{ coins }} coins!{% endblocktrans %}
 </div>
 {% endif %}
 
 <div class="challenge-wrap">
 
-  {# ── Left panel: problem description ─────────────────────────────────── #}
+  {# ── Left: problem ─────────────────────────────────────────── #}
   <div style="display:flex;flex-direction:column;gap:16px;">
     <div class="panel">
       <div class="panel-head">
         <span class="panel-title"><i class="bi bi-file-text"></i> {% trans 'Problem' %}</span>
         <span style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-mono);">
-          ⏱ {{ task.time_limit }}s &nbsp;|&nbsp; 💾 {{ task.memory_limit }}
+          <i class="bi bi-clock"></i> {{ task.time_limit }}s &nbsp;|&nbsp; <i class="bi bi-device-ssd"></i> {{ task.memory_limit }}
         </span>
       </div>
       <div class="panel-body prose">
@@ -230,7 +85,6 @@
     </div>
     {% endif %}
 
-    {# Previous submissions #}
     {% if prev_submissions %}
     <div class="panel">
       <div class="panel-head">
@@ -248,7 +102,7 @@
     {% endif %}
   </div>
 
-  {# ── Right panel: code editor ─────────────────────────────────────────── #}
+  {# ── Right: editor ─────────────────────────────────────────── #}
   <div style="display:flex;flex-direction:column;gap:16px;">
     <div class="panel">
       <div class="panel-head">
@@ -273,7 +127,6 @@
       </div>
     </div>
 
-    {# Results panel #}
     <div class="panel" id="results-panel">
       <div class="panel-head">
         <span class="panel-title" id="results-title"><i class="bi bi-check2-circle"></i> {% trans 'Results' %}</span>
@@ -283,165 +136,41 @@
   </div>
 
 </div>
+
+{# ── Config for challenges.js ── #}
+<script type="application/json" id="challenge-config">
+{
+  "csrfToken": "{{ csrf_token }}",
+  "runUrl":    "{% url 'tasks:challenge_run' task.pk %}",
+  "submitUrl": "{% url 'tasks:challenge_submit' task.pk %}",
+  "i18n": {
+    "writeCodeFirst":  "{% trans 'Please write some code first.' %}",
+    "running":         "{% trans 'Running...' %}",
+    "evaluating":      "{% trans 'Evaluating...' %}",
+    "run":             "{% trans 'Run' %}",
+    "submit":          "{% trans 'Submit' %}",
+    "noResults":       "{% trans 'No results returned.' %}",
+    "test":            "{% trans 'Test' %}",
+    "input":           "{% trans 'Input' %}",
+    "expected":        "{% trans 'Expected' %}",
+    "output":          "{% trans 'Output' %}",
+    "error":           "{% trans 'Error' %}",
+    "exampleCases":    "{% trans 'Example cases' %}",
+    "passed":          "{% trans 'passed' %}",
+    "runResults":      "{% trans 'Run results' %}",
+    "runningAllTests": "{% trans 'Running against all test cases…' %}",
+    "submission":      "{% trans 'Submission' %}",
+    "accepted":        "{% trans 'Accepted' %}",
+    "wrongAnswer":     "{% trans 'Wrong answer' %}",
+    "testCasesPassed": "{% trans 'test cases passed' %}",
+    "coinsEarned":     "{% trans 'coins earned!' %}",
+    "submissionResult":"{% trans 'Submission result' %}",
+    "networkError":    "{% trans 'Network error. Please try again.' %}"
+  }
+}
+</script>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-// ── CodeMirror setup ──────────────────────────────────────────────────────
-const modeMap = {
-  python:     'python',
-  javascript: 'javascript',
-  cpp:        'text/x-c++src',
-  c:          'text/x-csrc',
-};
-const editor = CodeMirror.fromTextArea(document.getElementById('code-editor'), {
-  theme:            'nord',
-  lineNumbers:       true,
-  autoCloseBrackets: true,
-  matchBrackets:     true,
-  mode:             'python',
-  indentUnit:        4,
-  tabSize:           4,
-  indentWithTabs:    false,
-});
-
-document.getElementById('lang-select').addEventListener('change', function () {
-  editor.setOption('mode', modeMap[this.value] || 'python');
-});
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-const CSRF     = getCookie('csrftoken');
-const RUN_URL  = "{% url 'tasks:challenge_run' task.pk %}";
-const SUB_URL  = "{% url 'tasks:challenge_submit' task.pk %}";
-
-const btnRun    = document.getElementById('btn-run');
-const btnSubmit = document.getElementById('btn-submit');
-const panel     = document.getElementById('results-panel');
-const body      = document.getElementById('results-body');
-const titleEl   = document.getElementById('results-title');
-
-function setLoading(loading) {
-  btnRun.disabled    = loading;
-  btnSubmit.disabled = loading;
-}
-
-function showPanel(html, titleHtml) {
-  panel.style.display = 'block';
-  body.innerHTML      = html;
-  if (titleHtml) titleEl.innerHTML = titleHtml;
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function renderResults(results) {
-  if (!results || !results.length) return '<p style="color:var(--text-muted);font-size:.85rem;">{% trans "No results returned." %}</p>';
-  return results.map((r, i) => `
-    <div class="result-row">
-      <span class="result-status ${r.passed ? 'result-pass' : 'result-fail'}">
-        ${r.passed ? '✓' : '✗'}
-      </span>
-      <div class="result-data">
-        <span><strong>{% trans "Test" %} ${i + 1}</strong>
-          ${r.time_used != null ? `<span style="color:var(--text-sub);margin-left:8px;">${r.time_used}s</span>` : ''}
-          ${r.error ? `<span style="color:#ef4444;margin-left:6px;">${r.error}</span>` : ''}
-        </span>
-        ${r.input && r.input !== '(hidden)' ? `<span>{% trans "Input" %}: <code>${escHtml(r.input)}</code></span>` : ''}
-        ${r.expected && r.expected !== '(hidden)' ? `<span>{% trans "Expected" %}: <code>${escHtml(r.expected)}</code></span>` : ''}
-        ${r.stdout ? `<span>{% trans "Output" %}: <code>${escHtml(r.stdout.slice(0, 200))}</code></span>` : ''}
-        ${r.stderr ? `<span style="color:#ef4444;">{% trans "Error" %}: <code>${escHtml(r.stderr.slice(0, 200))}</code></span>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ── Run against example cases ─────────────────────────────────────────────
-btnRun.addEventListener('click', async () => {
-  const code     = editor.getValue();
-  const language = document.getElementById('lang-select').value;
-  if (!code.trim()) { _toast('{% trans "Please write some code first." %}', 'w'); return; }
-  setLoading(true);
-  btnRun.innerHTML = '<span class="spinner"></span> {% trans "Running..." %}';
-
-  try {
-    const fd = new FormData();
-    fd.append('code', code);
-    fd.append('language', language);
-    const res  = await fetch(RUN_URL, { method: 'POST', headers: {'X-CSRFToken': CSRF}, body: fd });
-    const data = await res.json();
-    if (data.error) { _toast(data.error, 'e'); return; }
-    const all    = data.results || [];
-    const passed = all.filter(r => r.passed).length;
-    const html   = `
-      <div class="verdict-banner ${passed === all.length ? 'verdict-pass' : 'verdict-fail'}">
-        ${passed === all.length ? '✅' : '❌'}
-        {% trans "Example cases" %}: ${passed}/${all.length} {% trans "passed" %}
-      </div>
-      ${renderResults(all)}
-    `;
-    showPanel(html, `<i class="bi bi-play-circle"></i> {% trans "Run results" %}`);
-  } catch (e) {
-    _toast('{% trans "Network error. Please try again." %}', 'e');
-  } finally {
-    setLoading(false);
-    btnRun.innerHTML = '<i class="bi bi-play"></i> {% trans "Run" %}';
-  }
-});
-
-// ── Submit & get result immediately (sync evaluation, no polling) ─────────
-btnSubmit.addEventListener('click', async () => {
-  const code     = editor.getValue();
-  const language = document.getElementById('lang-select').value;
-  if (!code.trim()) { _toast('{% trans "Please write some code first." %}', 'w'); return; }
-  setLoading(true);
-  btnSubmit.innerHTML = '<span class="spinner"></span> {% trans "Evaluating..." %}';
-
-  showPanel(
-    `<div style="text-align:center;padding:24px;color:var(--text-muted);">
-       <span class="spinner" style="border-color:rgba(0,0,0,.2);border-top-color:var(--accent);width:22px;height:22px;border-width:3px;"></span>
-       <p style="margin-top:12px;font-size:.85rem;">{% trans "Running against all test cases…" %}</p>
-     </div>`,
-    `<i class="bi bi-send"></i> {% trans "Submission" %}`
-  );
-
-  try {
-    const fd = new FormData();
-    fd.append('code', code);
-    fd.append('language', language);
-    const res  = await fetch(SUB_URL, { method: 'POST', headers: {'X-CSRFToken': CSRF}, body: fd });
-    const data = await res.json();
-
-    if (data.error) {
-      _toast(data.error, 'e');
-      showPanel(`<p style="color:var(--danger);padding:14px;">${data.error}</p>`);
-      return;
-    }
-
-    const passed = data.passed ?? 0;
-    const total  = data.total  ?? 0;
-    let verdict  = '';
-
-    if (data.is_correct) {
-      const coinMsg = data.coins_earned
-        ? `<span style="font-size:.85rem;font-weight:400;"> — 🪙 +${data.coins_earned} {% trans "coins earned!" %}</span>`
-        : '';
-      verdict = `<div class="verdict-banner verdict-pass">✅ {% trans "Accepted" %} (${passed}/${total})${coinMsg}</div>`;
-      if (data.coins_earned) _toast(`🪙 +${data.coins_earned} {% trans "coins earned!" %}`, 's');
-    } else {
-      verdict = `<div class="verdict-banner verdict-fail">❌ {% trans "Wrong answer" %} — ${passed}/${total} {% trans "test cases passed" %}</div>`;
-    }
-
-    showPanel(verdict + renderResults(data.results || []),
-      `<i class="bi bi-check2-circle"></i> {% trans "Submission result" %}`);
-
-  } catch (e) {
-    _toast('{% trans "Network error. Please try again." %}', 'e');
-  } finally {
-    setLoading(false);
-    btnSubmit.innerHTML = '<i class="bi bi-send"></i> {% trans "Submit" %}';
-  }
-});
-</script>
+<script src="{% static 'js/pages/challenges.js' %}" defer></script>
 {% endblock %}

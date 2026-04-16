@@ -53,4 +53,5 @@ urlpatterns += i18n_patterns(
     path('journals/', include('apps.journals.urls')),
     path('support/', include('apps.support.urls')),
     path('resources/', include('apps.resources.urls', namespace='resources')),
+    path('tests/', include('apps.tests_app.urls')),
 )

@@ -46,8 +46,8 @@
         <td class="hide-sm" style="font-size:.82rem;color:var(--text-muted);font-family:var(--font-mono);">{{ t.created_at|date:"M j, Y" }}</td>
         <td style="text-align:right;">
           {% if user.is_teacher %}
-          <a href="{% url 'tasks:task_edit' t.pk %}" class="btn btn-accent-soft btn-sm">✏️ {% trans "Edit" %}</a>
-          <a href="{% url 'tasks:task_delete' t.pk %}" class="btn btn-red-soft btn-sm" style="margin-left:6px;">🗑</a>
+          <a href="{% url 'tasks:task_edit' t.pk %}" class="btn btn-accent-soft btn-sm"><i class="bi bi-pencil"></i> {% trans "Edit" %}</a>
+          <a href="{% url 'tasks:task_delete' t.pk %}" class="btn btn-red-soft btn-sm" style="margin-left:6px;"><i class="bi bi-trash"></i></a>
           {% endif %}
         </td>
       </tr>
@@ -58,7 +58,7 @@
 
 {% else %}
 <div class="card card-p fade-up" style="text-align:center;padding:64px;">
-  <p style="font-size:3.5rem;margin-bottom:12px;">📝</p>
+  <p style="font-size:3.5rem;margin-bottom:12px;"><i class="bi bi-pencil-square"></i></p>
   <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">{% trans "No tasks yet" %}</p>
   <p style="color:var(--text-muted);margin-bottom:20px;">{% trans "Create coding problems with hidden test cases for your sessions" %}</p>
   {% if user.is_teacher %}

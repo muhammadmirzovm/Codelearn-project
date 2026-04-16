@@ -1,24 +1,26 @@
 {% extends "base.html" %}
+{% load static %}
 {% load i18n %}
 {% block title %}{% trans "Groups" %} – CodeLearn{% endblock %}
-{% block content %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="page-hero fade-up">
   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
     <div>
       <h1 class="section-title">{% trans "My Groups" %}</h1>
       <p class="section-sub">
-        {% if user.is_teacher %}
-          {% trans "Share the invite key — students join instantly" %}
-        {% else %}
-          {% trans "Groups you're a member of" %}
-        {% endif %}
+        {% if user.is_teacher %}{% trans "Share the invite key — students join instantly" %}
+        {% else %}{% trans "Groups you're a member of" %}{% endif %}
       </p>
     </div>
     {% if user.is_teacher %}
     <a href="{% url 'users:group_create' %}" class="btn btn-primary">＋ {% trans "Create Group" %}</a>
     {% else %}
-    <a href="{% url 'users:join_group' %}" class="btn btn-primary">🔑 {% trans "Join Group" %}</a>
+    <a href="{% url 'users:join_group' %}" class="btn btn-primary"><i class="bi bi-key-fill"></i> {% trans "Join Group" %}</a>
     {% endif %}
   </div>
 </div>
@@ -27,7 +29,6 @@
 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;" class="fade-up-2">
   {% for g in groups %}
   <div class="card" style="overflow:hidden;">
-
     <div style="padding:18px 20px;border-bottom:1px solid var(--border);border-top:3px solid var(--accent);">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
@@ -50,12 +51,12 @@
       {% if g.students.all %}
       <div style="margin-bottom:16px;">
         <p style="font-size:.68rem;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;font-family:var(--font-mono);">{% trans "Members" %}</p>
-        <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        <div class="member-avatars">
           {% for s in g.students.all|slice:":10" %}
-          <div title="{{ s.get_full_name|default:s.username }}" class="ac-{{ forloop.counter0 }}" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;border:2px solid var(--surface);box-shadow:var(--shadow);">{{ s.username|first|upper }}</div>
+          <div title="{{ s.get_full_name|default:s.username }}" class="member-avatar-sm ac-{{ forloop.counter0 }}">{{ s.username|first|upper }}</div>
           {% endfor %}
           {% if g.students.count > 10 %}
-          <div style="width:30px;height:30px;border-radius:50%;background:var(--bg2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--text-muted);">+{{ g.students.count|add:"-10" }}</div>
+          <div class="member-avatar-overflow">+{{ g.students.count|add:"-10" }}</div>
           {% endif %}
         </div>
       </div>
@@ -63,7 +64,7 @@
 
       <div style="display:flex;gap:8px;margin-bottom:{% if user.is_teacher %}12px{% else %}0{% endif %};">
         <a href="{% url 'users:group_detail' g.id %}" class="btn btn-accent-soft btn-sm" style="position:relative;display:inline-flex;align-items:center;gap:5px;">
-          💬 {% trans "Chat" %}
+          <i class="bi bi-chat-dots-fill"></i> {% trans "Chat" %}
           <span class="chat-unread-badge" data-group="{{ g.id }}" style="display:none;"></span>
         </a>
         {% if user.is_teacher %}
@@ -75,13 +76,13 @@
       {% if user.is_teacher %}
       <div style="background:var(--bg2);border:1.5px dashed var(--border2);border-radius:var(--radius);padding:12px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:.68rem;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);">🔑 {% trans "Invite Key" %}</span>
+          <span style="font-size:.68rem;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);"><i class="bi bi-key-fill"></i> {% trans "Invite Key" %}</span>
           <div style="display:flex;gap:6px;">
-            <button onclick="copyText('{{ g.invite_key }}',this)" class="btn btn-accent-soft btn-sm" style="font-size:.72rem;">📋 {% trans "Copy" %}</button>
+            <button onclick="copyText('{{ g.invite_key }}',this)" class="btn btn-accent-soft btn-sm" style="font-size:.72rem;"><i class="bi bi-clipboard"></i> {% trans "Copy" %}</button>
             <form method="post" action="{% url 'users:group_regenerate_key' g.pk %}" style="display:inline;">
               {% csrf_token %}
               <button type="submit" class="btn btn-ghost btn-sm" style="font-size:.72rem;"
-                onclick="return confirm('{% trans "Regenerate? Old key stops working." %}')">🔄</button>
+                onclick="return confirm('{% trans "Regenerate? Old key stops working." %}')"><i class="bi bi-arrow-clockwise"></i></button>
             </form>
           </div>
         </div>
@@ -89,30 +90,26 @@
       </div>
       {% endif %}
     </div>
-
   </div>
   {% endfor %}
 </div>
 
 {% else %}
 <div class="card card-p" style="text-align:center;padding:64px;">
-  <p style="font-size:4rem;margin-bottom:12px;">{% if user.is_teacher %}📁{% else %}🎒{% endif %}</p>
+  <p style="font-size:4rem;margin-bottom:12px;">{% if user.is_teacher %}<i class="bi bi-folder-fill"></i>{% else %}<i class="bi bi-backpack-fill"></i>{% endif %}</p>
   <p style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">{% trans "No groups yet" %}</p>
   {% if user.is_teacher %}
   <p style="color:var(--text-muted);margin-bottom:20px;">{% trans "Create a group, share the invite key with your students" %}</p>
   <a href="{% url 'users:group_create' %}" class="btn btn-primary btn-lg">{% trans "Create first group" %}</a>
   {% else %}
   <p style="color:var(--text-muted);margin-bottom:20px;">{% trans "Ask your teacher for an invite key to join a group" %}</p>
-  <a href="{% url 'users:join_group' %}" class="btn btn-primary btn-lg">🔑 {% trans "Join with invite key" %}</a>
+  <a href="{% url 'users:join_group' %}" class="btn btn-primary btn-lg"><i class="bi bi-key-fill"></i> {% trans "Join with invite key" %}</a>
   {% endif %}
 </div>
 {% endif %}
+{% endblock %}
 
-<script>
-const unreadCounts = {{ unread_counts|default:"{}" }};
-document.querySelectorAll('.chat-unread-badge[data-group]').forEach(el => {
-  const cnt = unreadCounts[parseInt(el.dataset.group)];
-  if (cnt) { el.textContent = cnt; el.style.display = 'inline-flex'; }
-});
-</script>
+{% block extra_js %}
+<script type="application/json" id="unread-counts-data">{{ unread_counts|default:"{}" }}</script>
+<script src="{% static 'js/pages/profile.js' %}" defer></script>
 {% endblock %}
