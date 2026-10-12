@@ -401,3 +401,16 @@ If Redis/WebSockets are unavailable, the leaderboard page polls `/api/leaderboar
 
 Go to http://localhost:8000/admin/ → Tasks → TestCases.
 Set `is_example=False` for hidden test cases.
+
+
+## Render + Neon deployment
+
+1. Create a Neon project on the Free plan. Copy its PostgreSQL connection string with `sslmode=require`.
+2. In Render, create a Blueprint from this repository to use `render.yaml`, or create a Docker Web Service on the Free plan.
+3. Set `DATABASE_URL`, `DJANGO_SETTINGS_MODULE=codelearn.settings.production`, `GOOGLE_CLIENT_ID`, and `GOOGLE_CLIENT_SECRET`. The Blueprint generates `SECRET_KEY`; for a manually created service, add a unique random `SECRET_KEY` yourself.
+4. Deploy. The Docker image collects static files; startup applies migrations and launches Daphne on Render's `PORT`.
+5. Add `https://<actual-service-host>/accounts/google/login/callback/` to the Google OAuth client's authorized redirect URIs. Use the hostname Render assigns, which may differ from `codelearn.onrender.com`.
+
+Production code execution is disabled until submissions run in an isolated service. Browsing tasks, accounts, and other pages remains available. Redis is optional for this single-process deployment; add `REDIS_URL` before scaling to multiple processes.
+
+Render's free web service sleeps after inactivity. Uploaded question images are stored on its temporary filesystem and do not survive restarts; configure external media storage before relying on image uploads. Neon starts as a fresh database: existing local users and content are not copied automatically.

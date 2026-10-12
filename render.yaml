@@ -1,0 +1,23 @@
+# Render.com Blueprint — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: codelearn
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: codelearn.settings.production
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: USE_DOCKER_SANDBOX
+        value: "False"
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+

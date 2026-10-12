@@ -79,6 +79,15 @@ def _run_single(code: str, stdin_data: str, time_limit: int,
 
 def _run_in_subprocess(code: str, stdin_data: str, time_limit: int,
                        language: str = 'python') -> dict:
+    if not getattr(settings, 'CODE_EXECUTION_ENABLED', True):
+        return {
+            'stdout': '',
+            'stderr': 'Code execution is temporarily disabled on this deployment.',
+            'exit_code': -1,
+            'time_used': 0,
+            'error': 'Code execution disabled',
+        }
+
     cfg = LANG_CONFIG.get(language, LANG_CONFIG['python'])
 
     with tempfile.TemporaryDirectory() as tmpdir:

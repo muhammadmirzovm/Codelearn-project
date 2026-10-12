@@ -1,4 +1,14 @@
-fly.toml
 .git/
+.env
+.env.*
+!.env.example
 *.sqlite3
-.venv
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+staticfiles/
+media/
+node_modules/
+.DS_Store
+*.log
