@@ -2,6 +2,7 @@
 Views for user registration, login, and group management.
 """
 from django.contrib.auth import login
+from django.db import IntegrityError, transaction
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.shortcuts import render, redirect, get_object_or_404
@@ -26,10 +27,23 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, f'Welcome, {user.username}!')
-            return redirect('dashboard:home')
+            username = form.cleaned_data['username']
+            try:
+                with transaction.atomic():
+                    user = form.save()
+            except IntegrityError:
+                # Another request can claim the username after form validation.
+                # Query only after the failed transaction has rolled back.
+                if not User.objects.filter(username=username).exists():
+                    raise
+                form.add_error(
+                    'username',
+                    User().unique_error_message(User, ['username']),
+                )
+            else:
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                messages.success(request, f'Welcome, {user.username}!')
+                return redirect('dashboard:home')
     else:
         form = RegisterForm()
     return render(request, 'users/register.html', {'form': form})
